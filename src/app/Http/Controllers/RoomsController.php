@@ -13,6 +13,6 @@ class RoomsController extends Controller
 
     public function index()
     {
-        return view('rooms');
+        return view('rooms.index');
     }
 }
