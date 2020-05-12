@@ -8,6 +8,8 @@ Discordのすごろく開発チャンネルにやりたいIssueの番号とURL�
 
 2. ソースコードをローカルに持ってくる。
 `git clone https://github.com/lachelier/sugoroku.git`
+※clone後、以下を参考に環境を整えてみてください！
+・既存のLaravelプロジェクトをcloneする手順(https://php-junkie.net/framework/laravel/laravel-clone/)
 
 3. ブランチを切る。
 `git checkout -b ブランチ名`
@@ -29,4 +31,4 @@ Discordのすごろく開発チャンネルにやりたいIssueの番号とURL�
 8. GitHub上でプルリクエストを送る。
 レビュアーにむちょこさんを設定していただければと。
 
-補足：原則、1人1Issue(プルリクエスト送った段階でレビュー待ち状態なら他のIssueに手をつけても良い)
+補足：分からないことなどあれば随時Discordのすごろくチャンネルで聞いていただければと。。。
