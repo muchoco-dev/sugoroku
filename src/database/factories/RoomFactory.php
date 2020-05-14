@@ -7,6 +7,5 @@ use Faker\Generator as Faker;
 
 $factory->define(Room::class, function (Faker $faker) {
     return [
-        //
     ];
 });

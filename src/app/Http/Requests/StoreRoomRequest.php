@@ -2,18 +2,18 @@
 
 namespace App\Http\Requests;
 
+use App\Repositories\RoomRepository;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreRoom extends FormRequest
+class StoreRoomRequest extends FormRequest
 {
     /**
-     * ユーザはオープン中の部屋を1つしか持てない
-     *
      * @return bool
      */
     public function authorize()
     {
-        return false;
+        return true;
     }
 
     /**
@@ -24,7 +24,7 @@ class StoreRoom extends FormRequest
     public function rules()
     {
         return [
-            //
+            'name'  => 'required|max:255'
         ];
     }
 }
