@@ -7,11 +7,10 @@ jobs:
       - image: circleci/mysql:8.0.19
         command: mysqld --default-authentication-plugin=mysql_native_password
     environment:
-        MYSQL_ALLOW_EMPTY_PASSWORD: yes
-        MYSQL_DATABASE: circleci
-        APP_DEBUG: true
-        APP_ENV: local
-        APP_KEY: base64:EC2n7HUxnNgxOg6SJTXC6+SaAc5bxrVLSFN1fcBOvIU=
+      - APP_DEBUG: true
+      - APP_ENV: local
+      - APP_KEY: base64:EC2n7HUxnNgxOg6SJTXC6+SaAc5bxrVLSFN1fcBOvIU=
+      - DB_CONNECTION: circleci
     working_directory: ~/repo
     steps:
       - checkout
