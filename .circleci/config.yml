@@ -35,5 +35,5 @@ jobs:
           key: node-v1-{{ checksum "src/package.json" }}
           paths:
             - node_modules
-      - run: php artisan migrate --working-dir=./src
+      - run: php artisan migrate
       - run: ./vendor/bin/phpunit
