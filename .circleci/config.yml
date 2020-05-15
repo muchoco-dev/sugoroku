@@ -9,10 +9,10 @@ jobs:
     environment:
         MYSQL_ALLOW_EMPTY_PASSWORD: yes
         MYSQL_DATABASE: circleci
-      - APP_DEBUG: true
-      - APP_ENV: local
-      - APP_KEY: base64:EC2n7HUxnNgxOg6SJTXC6+SaAc5bxrVLSFN1fcBOvIU=
-      - DB_CONNECTION: laravel
+     - APP_DEBUG: true
+     - APP_ENV: local
+     - APP_KEY: base64:EC2n7HUxnNgxOg6SJTXC6+SaAc5bxrVLSFN1fcBOvIU=
+     - DB_CONNECTION: laravel
     working_directory: ~/repo
     steps:
       - checkout
