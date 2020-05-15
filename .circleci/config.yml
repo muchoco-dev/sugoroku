@@ -21,7 +21,9 @@ jobs:
           keys:
             - v1-dependencies-{{ checksum "src/composer.json" }}
             - v1-dependencies-
-      - run: composer install -n --prefer-dist --working-dir=./src
+      - run: 
+        command: composer install -n --prefer-dist
+        working_directory: ./src
       - save_cache:
           key: v1-dependencies-{{ checksum "src/composer.json" }}
           paths:
@@ -35,5 +37,7 @@ jobs:
           key: node-v1-{{ checksum "src/package.json" }}
           paths:
             - node_modules
-      - run: php artisan migrate
+      - run:
+        command: php artisan migrate
+        working_directory: ./src
       - run: ./vendor/bin/phpunit
