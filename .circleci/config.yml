@@ -1,0 +1,49 @@
+version: 2
+
+jobs:
+  build:
+    docker:
+      - image: circleci/php:7.4-node-browsers
+        environment:
+          - APP_DEBUG: true
+          - APP_ENV: testing
+          - APP_KEY: base64:EC2n7HUxnNgxOg6SJTXC6+SaAc5bxrVLSFN1fcBOvIU=
+          - DB_CONNECTION: mysql
+          - DB_DATABASE: circleci
+          - DB_USERNAME: root
+      - image: circleci/mysql:8.0.19
+        environment:
+          - MYSQL_ALLOW_EMPTY_PASSWORD: true
+          - MYSQL_DATABASE: circleci
+        command: mysqld --default-authentication-plugin=mysql_native_password
+    steps:
+      - checkout
+      - run: sudo apt update
+      - run: sudo docker-php-ext-install zip pdo_mysql
+      - run: sudo composer self-update
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "src/composer.json" }}
+            - v1-dependencies-
+      - run: 
+         command: composer install -n --prefer-dist
+         working_directory: ./src
+      - save_cache:
+          key: v1-dependencies-{{ checksum "src/composer.json" }}
+          paths:
+            - vendor
+      - restore_cache:
+          keys:
+            - node-v1-{{ checksum "src/package.json" }}
+            - node-v1-
+      - run: yarn install
+      - save_cache:
+          key: node-v1-{{ checksum "src/package.json" }}
+          paths:
+            - node_modules
+      - run:
+         command: php artisan migrate
+         working_directory: ./src
+      - run:
+         command: ./vendor/bin/phpunit
+         working_directory: ./src
