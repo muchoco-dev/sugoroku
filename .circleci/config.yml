@@ -4,14 +4,18 @@ jobs:
   build:
     docker:
       - image: circleci/php:7.4-node-browsers
+        environment:
+          - APP_DEBUG: true
+          - APP_ENV: testing
+          - APP_KEY: base64:EC2n7HUxnNgxOg6SJTXC6+SaAc5bxrVLSFN1fcBOvIU=
+          - DB_CONNECTION: mysql
+          - DB_DATABASE: circleci
+          - DB_USERNAME: root
       - image: circleci/mysql:8.0.19
+        environment:
+          - MYSQL_ALLOW_EMPTY_PASSWORD: true
+          - MYSQL_DATABASE: circleci
         command: mysqld --default-authentication-plugin=mysql_native_password
-    environment:
-      - APP_DEBUG: true
-      - APP_ENV: local
-      - APP_KEY: base64:EC2n7HUxnNgxOg6SJTXC6+SaAc5bxrVLSFN1fcBOvIU=
-      - DB_CONNECTION: circleci
-    working_directory: ~/repo
     steps:
       - checkout
       - run: sudo apt update

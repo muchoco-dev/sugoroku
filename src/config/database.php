@@ -103,7 +103,7 @@ return [
             'prefix' => '',
             'prefix_indexes' => true,
             'strict' => true,
-            'engine' => 'InnoDB ROW_FORMAT=DYNAMIC',
+            'engine' => 'null',
         ],
 
     ],
