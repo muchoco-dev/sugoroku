@@ -10,7 +10,7 @@ jobs:
       - APP_DEBUG: true
       - APP_ENV: testing
       - APP_KEY: base64:EC2n7HUxnNgxOg6SJTXC6+SaAc5bxrVLSFN1fcBOvIU=
-      - DB_CONNECTION: circle_test
+      - DB_CONNECTION: circleci
     working_directory: ~/repo
     steps:
       - checkout
