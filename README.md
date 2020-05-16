@@ -1,10 +1,13 @@
 # sugoroku
 
+#環境
+PHP: v7.4.5
+Laravel: v6.18.13
+MySQL: v8.0.19
 
 # 開発の流れ(開発入る前に以下一読お願いします)
 
-1. やりたいIssueを選択
-Discordのすごろく開発チャンネルにやりたいIssueの番号とURLを貼り付けてやりたいですと一言言っていただければアサインします！
+1. やりたいIssueを選択(各自で自分にアサインする)
 
 2. ソースコードをローカルに持ってくる。
 `git clone https://github.com/lachelier/sugoroku.git`

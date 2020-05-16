@@ -70,8 +70,6 @@ class RoomTest extends TestCase
 
     /**
      * 既にユーザが作ったオープン中の部屋がある場合、新しく部屋を作ることはできない
-     *
-     * @expectesException Illuminate\Auth\Access\AuthorizationException
      */
     public function testUserCannotCreateRooms()
     {
