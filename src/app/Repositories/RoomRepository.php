@@ -45,8 +45,7 @@ class RoomRepository
     public function getOpenRooms()
     {
         return $this->model::where([
-            'status'     => config('const.room_status_open'),
-            'deleted_at' => NULL
+            'status'     => config('const.room_status_open')
         ])->get();
     }
 
