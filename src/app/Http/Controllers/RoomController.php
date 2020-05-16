@@ -16,7 +16,11 @@ class RoomController extends Controller
 
     public function index()
     {
-        return view('room.index');
+        $repository = new RoomRepository();
+
+        $rooms = $repository->getOpenRooms();
+
+        return view('room.index', compact('rooms'));
     }
 
     public function store(StoreRoomRequest $request)
