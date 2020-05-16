@@ -24,6 +24,16 @@ class RoomTest extends TestCase
         return $board;
     }
 
+    private function createBoardB()
+    {
+        $board = factory(Board::class)->create([
+            'id'            => 2,
+            'goal_position' => 10
+        ]);
+        return $board;
+    }
+
+
     /**
      * ユーザが作成した部屋を取得
      */
@@ -102,6 +112,51 @@ class RoomTest extends TestCase
             'status'    => config('const.room_status_open')
         ]);
 
+    }
+
+    /**
+     * オープン中の部屋全てを表示
+     */
+    public function testGetOpenRooms()
+    {
+        $userA = factory(User::class)->create();
+        $userB = factory(User::class)->create();
+        $boardA = $this->createBoard();
+        $boardB = $this->createBoardB();
+
+        factory(Room::class)->create([
+            'uname'     => uniqid(),
+            'name'      => 'first room',
+            'owner_id'  => $userA->id,
+            'board_id'  => $boardA->id,
+            'max_member_count'  => 10,
+            'member_count'      => 0,
+            'status'    => config('const.room_status_open')
+        ]);
+
+        factory(Room::class)->create([
+            'uname'     => uniqid(),
+            'name'      => 'second room',
+            'owner_id'  => $userB->id,
+            'board_id'  => $boardB->id,
+            'max_member_count'  => 10,
+            'member_count'      => 0,
+            'status'    => config('const.room_status_open')
+        ]);
+
+        $repository = new RoomRepository();
+        $rooms = $repository->getOpenRooms();
+
+        $count = 0;
+
+        foreach($rooms as $room) {
+            if ($count == 0) {
+                $this->assertEquals($room['name'], 'first room');
+            } else {
+                $this->assertEquals($room['name'], 'second room');
+            }
+            $count++;
+        }
     }
 
 }
