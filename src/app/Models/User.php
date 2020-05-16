@@ -36,4 +36,12 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    /**
+     * ユーザーが所有するボードを取得
+     */
+    public function boards()
+    {
+        return $this->belongsToMany('App\Models\Board');
+    }
 }
