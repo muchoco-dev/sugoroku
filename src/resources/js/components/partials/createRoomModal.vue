@@ -7,7 +7,7 @@
               <div class="modal-body">
                 <slot name="body">
                 <p>部屋名を入力してください</p>
-                <div>名前<input v-model="message"></div>
+                <div>名前<input v-model="name"></div>
                 <button @click="doSend">送信</button>
                 </slot>
               </div>
@@ -33,7 +33,13 @@ export default {
   },
   methods: {
     doSend() {
-        alert('送ったことにするーあとでつくるー');
+      const res = axios.post('/api/room/create', {
+        name: this.name
+      }).then(function (response){
+
+      }).catch(function (error) {
+        alert(error);
+      });
     }
   }
 }
