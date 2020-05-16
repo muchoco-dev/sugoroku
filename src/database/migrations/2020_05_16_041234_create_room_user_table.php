@@ -20,7 +20,6 @@ class CreateRoomUserTable extends Migration
             $table->unsignedTinyInteger('go');
             $table->unsignedTinyInteger('status');
             $table->unsignedTinyInteger('position');
-            $table->softDeletes();
 
             $table->foreign('room_id')->references('id')->on('rooms');
             $table->foreign('user_id')->references('id')->on('users');
