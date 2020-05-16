@@ -24,16 +24,6 @@ class RoomTest extends TestCase
         return $board;
     }
 
-    private function createBoardB()
-    {
-        $board = factory(Board::class)->create([
-            'id'            => 2,
-            'goal_position' => 10
-        ]);
-        return $board;
-    }
-
-
     /**
      * ユーザが作成した部屋を取得
      */
@@ -119,44 +109,70 @@ class RoomTest extends TestCase
      */
     public function testGetOpenRooms()
     {
-        $userA = factory(User::class)->create();
-        $userB = factory(User::class)->create();
-        $boardA = $this->createBoard();
-        $boardB = $this->createBoardB();
-
-        factory(Room::class)->create([
-            'uname'     => uniqid(),
-            'name'      => 'first room',
-            'owner_id'  => $userA->id,
-            'board_id'  => $boardA->id,
-            'max_member_count'  => 10,
-            'member_count'      => 0,
-            'status'    => config('const.room_status_open')
+        $users = factory(User::class, 2)->create();
+        $uname = ['first room', 'second room'];
+        $boards = factory(Board::class, 2)->create([
+            'goal_position' => 10
         ]);
 
-        factory(Room::class)->create([
-            'uname'     => uniqid(),
-            'name'      => 'second room',
-            'owner_id'  => $userB->id,
-            'board_id'  => $boardB->id,
-            'max_member_count'  => 10,
-            'member_count'      => 0,
-            'status'    => config('const.room_status_open')
-        ]);
+        $boardIds = [];
+
+        foreach ($boards as $board) {
+            $boardIds[] = $board['id'];
+        }
+
+        $roomCreateCount = 0;
+
+        foreach ($users as $user) {
+            factory(Room::class)->create([
+                'uname'     => uniqid(),
+                'name'      => $uname[$roomCreateCount],
+                'owner_id'  => $user->id,
+                'board_id'  => $boardIds[$roomCreateCount],
+                'max_member_count'  => 10,
+                'member_count'      => 0,
+                'status'    => config('const.room_status_open')
+            ]);
+            $roomCreateCount++;
+        }
 
         $repository = new RoomRepository();
         $rooms = $repository->getOpenRooms();
 
-        $count = 0;
+        $roomCheckCount = 0;
 
         foreach($rooms as $room) {
-            if ($count == 0) {
+            if ($roomCheckCount == 0) {
                 $this->assertEquals($room['name'], 'first room');
             } else {
                 $this->assertEquals($room['name'], 'second room');
             }
-            $count++;
+            $roomCheckCount++;
         }
+    }
+
+    /**
+     * deleted_atがNULLでない部屋は取得されない
+     */
+    public function testUserCannotGetRoomsAtDeletedAtIsNotNull()
+    {
+        $user = factory(User::class)->create();
+        $board = $this->createBoard();
+
+        factory(Room::class)->create([
+            'uname'     => uniqid(),
+            'name'      => 'first room',
+            'owner_id'  => $user->id,
+            'board_id'  => $board->id,
+            'max_member_count'  => 10,
+            'member_count'      => 0,
+            'status'    => config('const.room_status_open'),
+            'deleted_at' => '2020-05-06 12:00:00'
+        ]);
+
+        $repository = new RoomRepository();
+        $rooms = $repository->getOpenRooms();
+        $this->assertEmpty($rooms);
     }
 
 }
