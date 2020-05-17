@@ -8,6 +8,7 @@ use App\Models\Board;
 use App\Repositories\RoomRepository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Laravel\Passport\Passport;
 use Tests\TestCase;
 
 class RoomTest extends TestCase
@@ -56,11 +57,14 @@ class RoomTest extends TestCase
         $board = $this->createBoard();
 
         $name = 'new room';
-        $response = $this->actingAs($user)->post('/api/room/create', [
+
+        Passport::actingAs($user);
+        $response = $this->post('/api/room/create', [
             'name' => $name
         ])->assertJson([
             'status'  => 'success'
         ]);
+
         $this->assertDatabaseHas('rooms', [
             'owner_id'  => $user->id,
             'name'      => $name,
@@ -87,7 +91,8 @@ class RoomTest extends TestCase
         ]);
 
         $name = 'second room';
-        $response = $this->actingAs($user)->post('/api/room/create', [
+        Passport::actingAs($user);
+        $response = $this->post('/api/room/create', [
             'name' => $name
         ])->assertJson([
             'status'    => 'error',
