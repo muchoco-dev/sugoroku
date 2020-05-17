@@ -32,4 +32,5 @@ class Room extends Model
                 'status',
                 'position'
             ]);
+    }
 }
