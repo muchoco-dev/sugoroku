@@ -17,5 +17,19 @@ class Room extends Model
     public function board()
     {
         return $this->belongsTo('App\Models\Board');
+
     }
+  
+    /**
+     * この部屋にいるユーザー
+     */
+    public function users()
+    {
+        return $this->belongsToMany('App\Models\User')
+            ->using('App\Models\RoomUser')
+            ->withPivot([
+                'go',
+                'status',
+                'position'
+            ]);
 }
