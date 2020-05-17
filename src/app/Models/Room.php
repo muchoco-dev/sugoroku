@@ -8,4 +8,14 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Room extends Model
 {
     use SoftDeletes;
+
+    public function owner()
+    {
+        return $this->belongsTo('App\Models\User', 'owner_id');
+    }
+
+    public function board()
+    {
+        return $this->belongsTo('App\Models\Board');
+    }
 }

@@ -12,6 +12,7 @@ class BoardsTableSeeder extends Seeder
     public function run()
     {
         DB::table('boards')->insert([
+            'id'            => 1,
             'goal_position' => 30
         ]);
     }
