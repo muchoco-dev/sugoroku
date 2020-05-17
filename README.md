@@ -16,6 +16,8 @@ MySQL: v8.0.19
 
 php artisan passport:install
 
+php artisan passport:keys
+
 3. ブランチを切る。
 `git checkout -b ブランチ名`
 ※ブランチ名はそのIssueの修正にひもづく名前にしてください
