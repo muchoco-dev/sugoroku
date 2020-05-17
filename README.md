@@ -14,6 +14,10 @@ MySQL: v8.0.19
 ※clone後、以下を参考に環境を整えてみてください！
 ・既存のLaravelプロジェクトをcloneする手順(https://php-junkie.net/framework/laravel/laravel-clone/)
 
+php artisan passport:install
+
+php artisan passport:keys
+
 3. ブランチを切る。
 `git checkout -b ブランチ名`
 ※ブランチ名はそのIssueの修正にひもづく名前にしてください

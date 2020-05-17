@@ -41,7 +41,14 @@ class RoomRepository
     }
 
     public function findByUname($uname){}
-    public function getOpenRooms(){}
+
+    public function getOpenRooms()
+    {
+        return $this->model::where([
+            'status'     => config('const.room_status_open')
+        ])->get();
+    }
+
     public function changeStatus($id, $status){}
 }
 
