@@ -10,10 +10,10 @@ class Board extends Model
     const UPDATED_AT = null;
 
     /**
-     * ボードを所有するユーザーを取得
+     * ボードが所有する部屋を取得
      */
-    public function users()
+    public function rooms()
     {
-        return $this->belongsToMany('App\Models\User');
+        return $this->hasMany('App\Models\Room');
     }
 }

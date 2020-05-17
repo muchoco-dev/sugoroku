@@ -5,10 +5,11 @@ namespace App\Models;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Passport\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use Notifiable;
+    use HasApiTokens, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -38,10 +39,10 @@ class User extends Authenticatable
     ];
 
     /**
-     * ユーザーが所有するボードを取得
+     * ユーザーが所有する部屋を取得
      */
-    public function boards()
+    public function rooms()
     {
-        return $this->belongsToMany('App\Models\Board');
+        return $this->hasMany('App\Models\Room', 'owner_id');
     }
 }

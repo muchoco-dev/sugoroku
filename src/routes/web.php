@@ -14,6 +14,6 @@
 Auth::routes();
 
 Route::get('/', 'HomeController@index');
-Route::get('/home', 'HomeController@index')->name('home');
 
-Route::get('/rooms', 'RoomController@index')->name('rooms');
+Route::middleware('auth')->get('/home', 'HomeController@index')->name('home');
+Route::middleware('auth')->get('/rooms', 'RoomController@index')->name('rooms');

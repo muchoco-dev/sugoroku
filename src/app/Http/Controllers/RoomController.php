@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Repositories\UserRepository;
 use App\Repositories\RoomRepository;
 use App\Http\Requests\StoreRoomRequest;
 
@@ -16,11 +17,14 @@ class RoomController extends Controller
 
     public function index()
     {
-        $repository = new RoomRepository();
+        $roomRepository = new RoomRepository();
+        $userRepository = new UserRepository();
 
-        $rooms = $repository->getOpenRooms();
 
-        return view('room.index', compact('rooms'));
+        $rooms = $roomRepository->getOpenRooms();
+        $token = $userRepository->getPersonalAccessToken();
+
+        return view('room.index', compact('rooms', 'token'));
     }
 
     public function store(StoreRoomRequest $request)

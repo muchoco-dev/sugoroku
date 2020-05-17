@@ -7,7 +7,7 @@
               <div class="modal-body">
                 <slot name="body">
                 <p>部屋名を入力してください</p>
-                <div>名前<input v-model="message"></div>
+                <div>名前<input v-model="name"></div>
                 <button @click="doSend">送信</button>
                 </slot>
               </div>
@@ -26,6 +26,9 @@
 </template>
 <script>
 export default {
+  props: {
+      token: String
+  },
   data() {
     return {
       name: ''
@@ -33,7 +36,25 @@ export default {
   },
   methods: {
     doSend() {
-        alert('送ったことにするーあとでつくるー');
+      axios.defaults.headers.common['Authorization'] = "Bearer " + this.token;
+      axios.post(
+        '/api/room/create',
+        {
+          headers: {
+            "Content-Type": "application/json"
+          },
+          'name': this.name
+      }).then(function(response) {
+        if (response.data.status === 'success') {
+            console.log('部屋を作成できました。');
+        } else {
+            console.log(response.data.message);
+        }
+      }).catch(function(error) {
+        console.log(error);
+      });
+
+      this.$emit('close');
     }
   }
 }
