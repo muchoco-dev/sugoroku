@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\User;
 use App\Models\Room;
 use App\Models\Board;
+use App\Models\RoomUser;
 use App\Repositories\RoomRepository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
@@ -176,6 +177,92 @@ class RoomTest extends TestCase
         $repository = new RoomRepository();
         $rooms = $repository->getOpenRooms();
         $this->assertEmpty($rooms);
+    }
+
+    /**
+     * member_countがmax_member_count以上ならfalseが返ってくる
+     */
+    public function testReturnFalseWhenMemberCountIsGreaterThanMaxMemberCount()
+    {
+        $user = factory(User::class)->create();
+        $board = $this->createBoard();
+
+        $room = factory(Room::class)->create([
+            'uname'     => uniqid(),
+            'name'      => 'first room',
+            'owner_id'  => $user->id,
+            'board_id'  => $board->id,
+            'max_member_count'  => 10,
+            'member_count'      => 12,
+            'status'    => config('const.room_status_open'),
+        ]);
+
+        $repository = new RoomRepository();
+        $result = $repository->IsCheckedEnteredRoom($room->owner_id, $room->id);
+        $this->assertFalse($result);
+    }
+
+    /**
+     * room_userテーブルに既に同じユーザと同じ部屋のペアで保存されているとfalseが返ってくる
+     */
+    public function testReturnFalseWhenRoomUserTableIsAlreadyStoredWithTheSameUserAndRoomPair()
+    {
+        $user = factory(User::class)->create();
+        $board = $this->createBoard();
+
+        $room = factory(Room::class)->create([
+            'uname'     => uniqid(),
+            'name'      => 'first room',
+            'owner_id'  => $user->id,
+            'board_id'  => $board->id,
+            'max_member_count'  => 10,
+            'member_count'      => 0,
+            'status'    => config('const.room_status_open'),
+        ]);
+
+        // 中間(room_user)テーブルの作成
+        $roomUser = $room->users()->attach($user->id, [
+            'go' => 0,
+            'status' => config('const.piece_status_health'),
+            'position' => 1
+        ]);
+
+        $repository = new RoomRepository();
+        $result = $repository->IsCheckedEnteredRoom($user->id, $room->id);
+        $this->assertFalse($result);
+    }
+
+    /**
+     * room_userテーブルに新しいデータが保存され、部屋のmember_countが1増え、trueが返ってくる。
+     */
+    public function testReturnTrueAndRoomUserTableIsStoredWithNewDataAndMemberCountOfTheRoomHasIncreasedBy1()
+    {
+        $user = factory(User::class)->create();
+        $board = $this->createBoard();
+
+        $room = factory(Room::class)->create([
+            'uname'     => uniqid(),
+            'name'      => 'first room',
+            'owner_id'  => $user->id,
+            'board_id'  => $board->id,
+            'max_member_count'  => 10,
+            'member_count'      => 0,
+            'status'    => config('const.room_status_open'),
+        ]);
+
+        $repository = new RoomRepository();
+
+        // returnでtrueが返されてるか確認
+        $result = $repository->IsCheckedEnteredRoom($user->id, $room->id);
+        $this->assertTrue($result);
+
+        // room_userテーブルに新しいデータが保存されてるか確認
+        $roomUser = $repository->getRoomUser($user->id, $room->id);
+        $this->assertNotEquals($roomUser, null);
+
+        // 部屋のmember_countが1増えてるかの確認
+        $memberCount = $repository->getMemberCount($room->id);
+        $this->assertEquals($memberCount, 1);
     }
 
 }
