@@ -40,7 +40,12 @@ class RoomRepository
 
     }
 
-    public function findByUname($uname){}
+    public function findByUname($uname)
+    {
+        return $this->model::where([
+            'uname' => $uname
+        ])->first();
+    }
 
     public function getOpenRooms()
     {
