@@ -198,7 +198,7 @@ class RoomTest extends TestCase
         ]);
 
         $repository = new RoomRepository();
-        $result = $repository->IsCheckedEnteredRoom($room->owner_id, $room->id);
+        $result = $repository->isMember($room->owner_id, $room->id);
         $this->assertFalse($result);
     }
 
@@ -228,7 +228,7 @@ class RoomTest extends TestCase
         ]);
 
         $repository = new RoomRepository();
-        $result = $repository->IsCheckedEnteredRoom($user->id, $room->id);
+        $result = $repository->isMember($user->id, $room->id);
         $this->assertFalse($result);
     }
 
@@ -252,17 +252,17 @@ class RoomTest extends TestCase
 
         $repository = new RoomRepository();
 
-        // returnでtrueが返されてるか確認
-        $result = $repository->IsCheckedEnteredRoom($user->id, $room->id);
+        $result = $repository->isMember($user->id, $room->id);
         $this->assertTrue($result);
 
-        // room_userテーブルに新しいデータが保存されてるか確認
-        $roomUser = $repository->getRoomUser($user->id, $room->id);
-        $this->assertNotEquals($roomUser, null);
+        // room_userテーブルに新しいデータが保存されているかチェックする。
+        $roomUserSearchResult = ($room->users()->find($user->id));
+        $checkResult = $repository->isUserAlreadyEnteredTheRoom($roomUserSearchResult, $user->id, $room->id);
+        $this->assertTrue($checkResult);
 
-        // 部屋のmember_countが1増えてるかの確認
-        $memberCount = $repository->getMemberCount($room->id);
-        $this->assertEquals($memberCount, 1);
+        // 部屋のmember_coountが1増えてる。
+        $member_count = $room['member_count'] + 1;
+        $this->assertEquals($member_count, 1);
     }
 
 }

@@ -52,32 +52,26 @@ class RoomRepository
     public function changeStatus($id, $status){}
 
     /**
-     * 部屋に入室済みかどうかチェック
+     * 入室処理
      */
-    public function IsCheckedEnteredRoom($userId, $roomId)
+    public function isMember($userId, $roomId)
     {
         $room = $this->model::where([
             'id' => $roomId
         ])->first();
 
-        // 部屋のmember_countがmax_member_count以上ならfalseを返す。
-        if ($room['member_count'] > $room['max_member_count']) {
+        if ($this->isMemberExceededMaxMember($room)) {
             return false;
         }
 
-        // また、room_userテーブルに既に同じユーザと同じ部屋のペアで保存されていてもfalseを返す。
-        // room_userテーブルの検索(検索ワード：user_id)
         $roomUserSearchResult = $room->users()->find($userId);
         if ($roomUserSearchResult != null) {
-            if (
-                $roomUserSearchResult->pivot['user_id'] == $userId
-                && $roomUserSearchResult->pivot['room_id'] == $roomId
-            ) {
+            if ($this->isUserAlreadyEnteredTheRoom($roomUserSearchResult, $userId, $roomId)) {
                 return false;
             }
         }
 
-        $roomUser = $room->users()->attach($userId,[
+        $room->users()->attach($userId,[
             'go' => 0,
             'status' => config('const.piece_status_health'),
             'position' => 1
@@ -91,23 +85,25 @@ class RoomRepository
 
     }
 
-    // room_userテーブルの取得
-    public function getRoomUser($userId, $roomId)
+    // メンバー数が最大メンバー数を超えているかチェックする
+    public function isMemberExceededMaxMember($room)
     {
-        $room = $this->model::where([
-            'id' => $roomId
-        ])->first();
-
-        return $room->users()->find($userId);
+        if ($room['member_count'] > $room['max_member_count']) {
+            return true;
+        }
+        return false;
     }
 
-    // member_countの取得
-    public function getMemberCount($roomId)
+    // 入室済みかどうかをチェックする
+    public function isUserAlreadyEnteredTheRoom($roomUserSearchResult, $userId, $roomId)
     {
-        $room = $this->model::where([
-            'id' => $roomId
-        ])->first();
-        return $room->member_count;
+        if (
+            $roomUserSearchResult->pivot['user_id'] == $userId
+            && $roomUserSearchResult->pivot['room_id'] == $roomId
+        ) {
+            return true;
+        }
+        return false;
     }
 }
 
