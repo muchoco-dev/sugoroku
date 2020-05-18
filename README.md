@@ -1,6 +1,6 @@
 # sugoroku
 
-#環境
+## 環境
 
 PHP: v7.4.5
 
@@ -8,7 +8,7 @@ Laravel: v6.18.13
 
 MySQL: v8.0.19
 
-# 環境構築
+## 環境構築
 
 1. ソースコードをローカルに持ってくる。
 `git clone https://github.com/lachelier/sugoroku.git`
@@ -19,7 +19,7 @@ php artisan passport:install
 
 php artisan passport:keys
 
-# 開発の流れ(環境構築実施済みであるのが前提)
+## 開発の流れ(環境構築実施済みであるのが前提)
 
 1. やりたいIssueを選択(各自で自分にアサインする)
 
@@ -55,3 +55,7 @@ package.jsonが更新されてた時は'npm install'を実行。composer.jsonが
 レビュアーにむちょこさんを設定していただければと。
 
 補足1：分からないことなどあれば随時Discordのすごろくチャンネルで聞いていただければと。。。
+
+## Issueの難易度
+
+🔰 < 🍒 < 無印 < 👑
