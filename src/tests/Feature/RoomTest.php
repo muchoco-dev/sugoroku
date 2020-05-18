@@ -178,4 +178,51 @@ class RoomTest extends TestCase
         $this->assertEmpty($rooms);
     }
 
+    /**
+     * roomsテーブルのunameカラムと一致するデータを取得
+     */
+    public function testGetAMatchWithTheUnameColumnInTheRoomTable()
+    {
+        $user = factory(User::class)->create();
+        $board = $this->createBoard();
+
+        $room = factory(Room::class)->create([
+            'uname'     => uniqid(),
+            'name'      => 'first room',
+            'owner_id'  => $user->id,
+            'board_id'  => $board->id,
+            'max_member_count'  => 10,
+            'member_count'      => 0,
+            'status'    => config('const.room_status_open'),
+        ]);
+
+        $repository = new RoomRepository();
+        $roomObject = $repository->findByUname($room->uname);
+        $this->assertEquals($room->uname, $roomObject['uname']);
+    }
+
+    /**
+     * deleted_atがNULLでない部屋は取得されない(findByUname)
+     */
+    public function testUserCannotGetRoomsAtDeletedAtIsNotNullEvenIfFindByUname()
+    {
+        $user = factory(User::class)->create();
+        $board = $this->createBoard();
+
+        $room = factory(Room::class)->create([
+            'uname'     => uniqid(),
+            'name'      => 'first room',
+            'owner_id'  => $user->id,
+            'board_id'  => $board->id,
+            'max_member_count'  => 10,
+            'member_count'      => 0,
+            'status'    => config('const.room_status_open'),
+            'deleted_at' => '2020-05-06 12:00:00'
+        ]);
+
+        $repository = new RoomRepository();
+        $roomObject = $repository->findByUname($room->uname);
+        $this->assertEmpty($roomObject);
+    }
+
 }
