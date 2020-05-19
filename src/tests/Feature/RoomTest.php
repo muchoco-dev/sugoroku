@@ -180,6 +180,54 @@ class RoomTest extends TestCase
     }
 
     /**
+     * roomsテーブルのunameカラムと一致するデータを取得
+     */
+    public function testGetAMatchWithTheUnameColumnInTheRoomTable()
+    {
+        $user = factory(User::class)->create();
+        $board = $this->createBoard();
+
+        $room = factory(Room::class)->create([
+            'uname'     => uniqid(),
+            'name'      => 'first room',
+            'owner_id'  => $user->id,
+            'board_id'  => $board->id,
+            'max_member_count'  => 10,
+            'member_count'      => 0,
+            'status'    => config('const.room_status_open'),
+        ]);
+
+        $repository = new RoomRepository();
+        $roomObject = $repository->findByUname($room->uname);
+        $this->assertEquals($room->uname, $roomObject['uname']);
+    }
+
+    /**
+     * deleted_atがNULLでない部屋は取得されない(findByUname)
+     */
+    public function testUserCannotGetRoomsAtDeletedAtIsNotNullEvenIfFindByUname()
+    {
+        $user = factory(User::class)->create();
+        $board = $this->createBoard();
+
+        $room = factory(Room::class)->create([
+            'uname'     => uniqid(),
+            'name'      => 'first room',
+            'owner_id'  => $user->id,
+            'board_id'  => $board->id,
+            'max_member_count'  => 10,
+            'member_count'      => 0,
+            'status'    => config('const.room_status_open'),
+            'deleted_at' => '2020-05-06 12:00:00'
+        ]);
+
+        $repository = new RoomRepository();
+        $roomObject = $repository->findByUname($room->uname);
+        $this->assertEmpty($roomObject);
+    }
+
+
+    /**
      * member_countがmax_member_count以上ならfalseが返ってくる
      */
     public function testReturnFalseWhenMemberCountIsGreaterThanMaxMemberCount()
@@ -203,9 +251,9 @@ class RoomTest extends TestCase
     }
 
     /**
-     * room_userテーブルに既に同じユーザと同じ部屋のペアで保存されているとfalseが返ってくる
+     * ユーザーが既に入室済かどうかを確認
      */
-    public function testReturnFalseWhenRoomUserTableIsAlreadyStoredWithTheSameUserAndRoomPair()
+    public function testReturnFalseWhenUserIsAlreadyMember()
     {
         $user = factory(User::class)->create();
         $board = $this->createBoard();
@@ -233,9 +281,9 @@ class RoomTest extends TestCase
     }
 
     /**
-     * room_userテーブルに新しいデータが保存され、部屋のmember_countが1増え、trueが返ってくる。
+     * ユーザーが入室に成功したかどうかを確認
      */
-    public function testReturnTrueAndRoomUserTableIsStoredWithNewDataAndMemberCountOfTheRoomHasIncreasedBy1()
+    public function testUserIsAddedMember()
     {
         $user = factory(User::class)->create();
         $board = $this->createBoard();
@@ -256,8 +304,7 @@ class RoomTest extends TestCase
         $this->assertTrue($result);
 
         // room_userテーブルに新しいデータが保存されているかチェックする。
-        $roomUserSearchResult = ($room->users()->find($user->id));
-        $checkResult = $repository->isMember($roomUserSearchResult, $user->id, $room->id);
+        $checkResult = $repository->isMember($room, $user->id, $room->id);
         $this->assertTrue($checkResult);
 
         // 部屋のmember_coountが1増えてる。

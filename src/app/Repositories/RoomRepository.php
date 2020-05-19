@@ -40,7 +40,12 @@ class RoomRepository
 
     }
 
-    public function findByUname($uname){}
+    public function findByUname($uname)
+    {
+        return $this->model::where([
+            'uname' => $uname
+        ])->first();
+    }
 
     public function getOpenRooms()
     {
@@ -64,11 +69,8 @@ class RoomRepository
             return false;
         }
 
-        $roomUserSearchResult = $room->users()->find($userId);
-        if ($roomUserSearchResult != null) {
-            if ($this->isMember($roomUserSearchResult, $userId, $roomId)) {
-                return false;
-            }
+        if ($this->isMember($room, $userId, $roomId)) {
+            return false;
         }
 
         $room->users()->attach($userId,[
@@ -95,13 +97,16 @@ class RoomRepository
     }
 
     // 入室済みかどうかをチェックする
-    public function isMember($roomUserSearchResult, $userId, $roomId)
+    public function isMember($room, $userId, $roomId)
     {
-        if (
-            $roomUserSearchResult->pivot['user_id'] == $userId
-            && $roomUserSearchResult->pivot['room_id'] == $roomId
-        ) {
-            return true;
+        $roomUserSearchResult = $room->users()->find($userId);
+        if ($roomUserSearchResult != null) {
+            if (
+                $roomUserSearchResult->pivot['user_id'] == $userId
+                && $roomUserSearchResult->pivot['room_id'] == $roomId
+            ) {
+                return true;
+            }
         }
         return false;
     }
