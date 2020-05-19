@@ -54,7 +54,7 @@ class RoomRepository
     /**
      * 入室処理
      */
-    public function isMember($userId, $roomId)
+    public function addMember($userId, $roomId)
     {
         $room = $this->model::where([
             'id' => $roomId
@@ -66,7 +66,7 @@ class RoomRepository
 
         $roomUserSearchResult = $room->users()->find($userId);
         if ($roomUserSearchResult != null) {
-            if ($this->isUserAlreadyEnteredTheRoom($roomUserSearchResult, $userId, $roomId)) {
+            if ($this->isMember($roomUserSearchResult, $userId, $roomId)) {
                 return false;
             }
         }
@@ -95,7 +95,7 @@ class RoomRepository
     }
 
     // 入室済みかどうかをチェックする
-    public function isUserAlreadyEnteredTheRoom($roomUserSearchResult, $userId, $roomId)
+    public function isMember($roomUserSearchResult, $userId, $roomId)
     {
         if (
             $roomUserSearchResult->pivot['user_id'] == $userId
