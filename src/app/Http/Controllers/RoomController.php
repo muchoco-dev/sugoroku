@@ -57,9 +57,13 @@ class RoomController extends Controller
     public function show($uname) {
         $repository = new RoomRepository();
         $room = $repository->findByUname($uname);
-        if ($room == null) {
+        if ($room === null) {
             return abort(404);
         }
+        if ($repository->isMember($room, Auth::id(), $room->id)) {
+            return abort(404);
+        }
+
         return view('room.show', $room);
     }
 }
