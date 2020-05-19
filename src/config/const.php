@@ -4,5 +4,6 @@ return [
     'room_status_busy'      => 2,
     'piece_status_health'   => 1,
     'piece_status_sick'     => 2,
-    'piece_status_finished' => 3
+    'piece_status_finished' => 3,
+    'max_member_count'      => 5
 ];
