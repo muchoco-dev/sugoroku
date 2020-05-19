@@ -312,4 +312,55 @@ class RoomTest extends TestCase
         $this->assertEquals($member_count, 1);
     }
 
+    /**
+     * unameに該当する部屋が存在しない場合は404
+     */
+    public function testNotExistRoomFromUnameTo404() {
+        $user = factory(User::class)->create();
+        $response = $this->actingAs($user)->get('/room/囲碁')->assertStatus(404);
+    }
+
+    /**
+     * unameに該当する部屋が存在するかつ
+     * 入室していない場合は404
+     */
+    public function testExistRoomFromUnameNotMemberTo404() {
+        $user = factory(User::class)->create();
+        $board = $this->createBoard();
+
+        $room = factory(Room::class)->create([
+            'uname'     => uniqid(),
+            'name'      => 'exist room',
+            'owner_id'  => $user->id,
+            'board_id'  => $board->id,
+            'max_member_count'  => 10,
+            'member_count'      => 0,
+            'status'    => config('const.room_status_open'),
+        ]);
+
+        $response = $this->actingAs($user)->get('/room/'.$room->uname)->assertStatus(404);
+    }
+
+    /**
+     * unameに該当する部屋が存在するかつ
+     * 入室している場合は正常確認（ステータス:200）
+     */
+    public function testExistRoomFromUnameMemberTo200() {
+        $user = factory(User::class)->create();
+        $board = $this->createBoard();
+
+        $room = factory(Room::class)->create([
+            'uname'     => uniqid(),
+            'name'      => 'exist room',
+            'owner_id'  => $user->id,
+            'board_id'  => $board->id,
+            'max_member_count'  => 10,
+            'member_count'      => 0,
+            'status'    => config('const.room_status_open'),
+        ]);
+
+        $repository = new RoomRepository();
+        $result = $repository->addMember($user->id, $room->id);
+        $response = $this->actingAs($user)->get('/room/'.$room->uname)->assertStatus(200);
+    }
 }
