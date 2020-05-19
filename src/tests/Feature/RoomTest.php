@@ -5,7 +5,6 @@ namespace Tests\Feature;
 use App\Models\User;
 use App\Models\Room;
 use App\Models\Board;
-use App\Models\RoomUser;
 use App\Repositories\RoomRepository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
@@ -310,6 +309,107 @@ class RoomTest extends TestCase
         // 部屋のmember_coountが1増えてる。
         $member_count = $room['member_count'] + 1;
         $this->assertEquals($member_count, 1);
+    }
+
+    /**
+     * 現在の有効な部屋数を返せるかどうかを確認
+     */
+    public function testgetCurrentActiveRoomsCount()
+    {
+        $user = factory(User::class)->create();
+        $board = $this->createBoard();
+
+        $room = factory(Room::class)->create([
+            'uname'     => uniqid(),
+            'name'      => 'first room',
+            'owner_id'  => $user->id,
+            'board_id'  => $board->id,
+            'max_member_count'  => 10,
+            'member_count'      => 0,
+            'status'    => config('const.room_status_open'),
+        ]);
+
+        $repository = new RoomRepository();
+
+        $count = $repository->getCurrentActiveRoomsCount();
+        $this->assertEquals($count, 1);
+    }
+
+    /**
+     * 現在の有効な部屋数が有効な部屋数以上ならば、新しく部屋を作ることはできない
+     */
+    public function testUserCannotCreateRoomWhenCurrentActivityRoomsIsGreaterThanMaxActivityRooms()
+    {
+        $users = factory(User::class, 20)->create();
+        $uname = [
+            '部屋1',
+            '部屋2',
+            '部屋3',
+            '部屋4',
+            '部屋5',
+            '部屋6',
+            '部屋7',
+            '部屋8',
+            '部屋9',
+            '部屋10',
+            '部屋11',
+            '部屋12',
+            '部屋13',
+            '部屋14',
+            '部屋15',
+            '部屋16',
+            '部屋17',
+            '部屋18',
+            '部屋19',
+            '部屋20',
+        ];
+        $boards = factory(Board::class, 20)->create([
+            'goal_position' => 10
+        ]);
+
+        $boardIds = [];
+
+        foreach ($boards as $board) {
+            $boardIds[] = $board['id'];
+        }
+
+        $roomCreateCount = 0;
+
+        foreach ($users as $user) {
+            factory(Room::class)->create([
+                'uname'     => uniqid(),
+                'name'      => $uname[$roomCreateCount],
+                'owner_id'  => $user->id,
+                'board_id'  => $boardIds[$roomCreateCount],
+                'max_member_count'  => 10,
+                'member_count'      => 0,
+                'status'    => config('const.room_status_open')
+            ]);
+            $roomCreateCount++;
+        }
+
+        $user = factory(User::class)->create();
+        $board = factory(Board::class)->create([
+            'goal_position' => 10
+        ]);
+
+        $repository = new RoomRepository();
+
+        $uname = '部屋21';
+
+        Passport::actingAs($user);
+        $response = $this->post('/api/room/create', [
+            'name' => $uname
+        ])->assertJson([
+            'status'    => 'error',
+            'message'   => '現在の有効部屋数が有効部屋数を超えているようです'
+        ]);
+
+        $this->assertDatabaseMissing('rooms', [
+            'owner_id'  => $user->id,
+            'name'      => $uname,
+            'status'    => config('const.room_status_open')
+        ]);
     }
 
 }
