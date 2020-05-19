@@ -17,4 +17,4 @@ Route::get('/', 'HomeController@index');
 
 Route::middleware('auth')->get('/home', 'HomeController@index')->name('home');
 Route::middleware('auth')->get('/rooms', 'RoomController@index')->name('rooms');
-Route::middleware('auth')->Route::get('/room/{uname}', 'RoomController@show');
+Route::middleware('auth')->get('/room/{uname}', 'RoomController@show');
