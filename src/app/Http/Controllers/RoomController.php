@@ -60,7 +60,7 @@ class RoomController extends Controller
         if ($room === null) {
             return abort(404);
         }
-        if ($repository->isMember($room, Auth::id(), $room->id)) {
+        if (!$repository->isMember($room, Auth::id(), $room->id)) {
             return abort(404);
         }
 

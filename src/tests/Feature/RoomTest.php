@@ -315,29 +315,16 @@ class RoomTest extends TestCase
     /**
      * unameに該当する部屋が存在しない場合は404
      */
-    public function testNotExistRoomFromUnameTo404Page() 
-    {
+    public function testNotExistRoomFromUnameTo404() {
         $user = factory(User::class)->create();
-        $board = $this->createBoard();
-
-        $room = factory(Room::class)->create([
-            'uname'     => uniqid(),
-            'name'      => 'first room',
-            'owner_id'  => $user->id,
-            'board_id'  => $board->id,
-            'max_member_count'  => 10,
-            'member_count'      => 0,
-            'status'    => config('const.room_status_open'),
-        ]);        
-        $response = $this->get('/room/囲碁')->assertStatus(404);
+        $response = $this->actingAs($user)->get('/room/囲碁')->assertStatus(404);
     }
 
     /**
      * unameに該当する部屋が存在するかつ
-     * 入室していない場合はshowにリダイレクトする
+     * 入室していない場合は404
      */
-    public function testExistRoomFromUnameNotMemberToRedirectShow() 
-    {
+    public function testExistRoomFromUnameNotMemberTo404() {
         $user = factory(User::class)->create();
         $board = $this->createBoard();
 
@@ -351,14 +338,14 @@ class RoomTest extends TestCase
             'status'    => config('const.room_status_open'),
         ]);
 
-        $response = $this->get('/room/'.uniqid())->assertViewIs('room.show');
+        $response = $this->actingAs($user)->get('/room/'.$room->uname)->assertStatus(404);
     }
 
     /**
      * unameに該当する部屋が存在するかつ
-     * 入室している場合は404にリダイレクト
+     * 入室している場合は正常確認（ステータス:200）
      */
-    public function testExistRoomFromUnameMemberToRedirectShow() {
+    public function testExistRoomFromUnameMemberTo200() {
         $user = factory(User::class)->create();
         $board = $this->createBoard();
 
@@ -372,14 +359,8 @@ class RoomTest extends TestCase
             'status'    => config('const.room_status_open'),
         ]);
 
-        $roomUser = factory(RoomUser::class)->create([
-            'room_id'   => $room->id,
-            'user_id'   => $user->id,
-            'go'        => 0,
-            'status'    => config('const.room_status_open'),
-            'position'  => 0,
-        ]);
-
-        $response = $this->get('/room/'.uniqid())->assertStatus(404);
+        $repository = new RoomRepository();
+        $result = $repository->addMember($user->id, $room->id);
+        $response = $this->actingAs($user)->get('/room/'.$room->uname)->assertStatus(200);
     }
 }
