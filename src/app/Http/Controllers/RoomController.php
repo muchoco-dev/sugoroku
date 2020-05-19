@@ -66,4 +66,27 @@ class RoomController extends Controller
 
         return view('room.show', $room);
     }
+
+    public function join($uname) {
+        $repository = new RoomRepository();
+        $room = $repository->findByUname($uname);
+
+        if ($room->deleted_at !== null) {
+            abort(404);
+        }
+
+        if ($repository->isMember($room, Auth::id(), $room->id)) {
+            return redirect('/room/'.$uname);
+        }
+
+        if($repository->addMember(Auth::id(), $room->id)) {
+            return redirect('/room/'.$uname);
+
+        } else {
+            return response()->json([
+                'status'    => 'error',
+                'message'   => '入室できませんでした'
+            ]);
+        }
+    }
 }
