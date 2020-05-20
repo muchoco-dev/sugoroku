@@ -47,7 +47,10 @@ class RoomController extends Controller
             'owner_id'  => Auth::id(),
             'board_id'  => 1
         ];
-        $repository->create($data);
+        $roomId = $repository->create($data);
+
+        // 入室処理
+        $repository->addMember(Auth::id(), $roomId);
 
         return response()->json([
             'status'     => 'success'

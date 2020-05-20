@@ -363,4 +363,53 @@ class RoomTest extends TestCase
         $result = $repository->addMember($user->id, $room->id);
         $response = $this->actingAs($user)->get('/room/'.$room->uname)->assertStatus(200);
     }
+
+    /**
+     * 部屋を作成した後、オーナーが参加者として登録されている
+     */
+    public function testIsRegisteredOwner()
+    {
+        $user = factory(User::class)->create();
+        $board = $this->createBoard();
+
+        $name = 'new room';
+
+        Passport::actingAs($user);
+        $response = $this->post('/api/room/create', [
+            'name'      => $name,
+        ])->assertJson([
+            'status'  => 'success'
+        ]);
+
+        $this->assertDatabaseHas('room_user', [
+            'user_id'  => $user->id,
+            'go' => 0,
+            'status' => config('const.piece_status_health'),
+            'position' => 1
+        ]);
+    }
+
+    /**
+     * 部屋を作成した後、部屋の参加人数が1になっている
+     */
+    public function testIsOnePersonInTheRoom()
+    {
+        $user = factory(User::class)->create();
+        $board = $this->createBoard();
+
+        $name = 'new room';
+
+        Passport::actingAs($user);
+        $response = $this->post('/api/room/create', [
+            'name'      => $name,
+        ])->assertJson([
+            'status'  => 'success'
+        ]);
+
+        $this->assertDatabaseHas('rooms', [
+            'owner_id'      => $user->id,
+            'member_count'  => 1,
+            'status'        => config('const.piece_status_health'),
+        ]);
+    }
 }
