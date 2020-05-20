@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\Room;
+use App\Models\Space;
 use Illuminate\Support\Facades\Auth;
 
 class RoomRepository
@@ -45,7 +46,7 @@ class RoomRepository
     {
         return $this->model::where([
             'uname' => $uname
-        ])->first();
+        ])->with('board.spaces')->first();
     }
 
     public function getOpenRooms()
@@ -124,6 +125,41 @@ class RoomRepository
         return $this->model::where([
             'deleted_at' => NULL
         ])->count();
+    }
+
+    /**
+     * ゲームボードのマスを取得
+     */
+    public function getSpaces(Room $room)
+    {
+        if ($room->spaces->count()) {
+            $spaces = $room->spaces;
+        } else {
+            $spaces = $this->setSpaces($room);
+        }
+
+        $viewSpaces = [];
+        foreach ($spaces as $space) {
+            $viewSpaces[$space->position] = $space;
+        }
+        return $viewSpaces;
+    }
+
+    /**
+     * 部屋のゲームボードにマスを配置する
+     */
+    private function setSpaces(Room $room)
+    {
+        $room->spaces()->detach();
+
+        $spaces = Space::where('board_id', $room->board_id)->get();
+
+        foreach ($spaces as $space) {
+            // TODO:ランダム設置はアップデート時に実装
+            $room->spaces()->attach($space->id, ['position' => $space->position]);
+        }
+
+        return $room->spaces;
     }
 }
 

@@ -27,4 +27,12 @@ class Room extends Model
     {
         return $this->belongsToMany('App\Models\User');
     }
+
+    /**
+     * この部屋に配置した特殊マス
+     */
+    public function spaces()
+    {
+        return $this->belongsToMany('App\Models\Space');
+    }
 }

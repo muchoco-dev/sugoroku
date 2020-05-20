@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\User;
 use App\Models\Room;
 use App\Models\Board;
+use App\Models\Space;
 use App\Repositories\RoomRepository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
@@ -16,12 +17,22 @@ class RoomTest extends TestCase
 
     use RefreshDatabase;
 
+    /**
+     * ゲームボードの作成
+     */
     private function createBoard()
     {
         $board = factory(Board::class)->create([
             'id'            => 1,
             'goal_position' => 10
         ]);
+
+        // すごろくマスの作成
+        factory(Space::class)->create([
+            'board_id'  => 1,
+            'position'  => 2,
+        ]);
+
         return $board;
     }
 
@@ -442,6 +453,48 @@ class RoomTest extends TestCase
     }
 
     /**
+     * 最初のユーザが部屋に入ったときにゲームボードのマス配置が保存される
+     */
+    public function testSpacesPlacementIsDecidedWhenOwnerEnterRoom()
+    {
+
+        $user = factory(User::class)->create();
+        $board = $this->createBoard();
+
+        Passport::actingAs($user);
+        $this->post('/api/room/create', [
+            'name' => 'test room'
+        ]);
+
+        $uname = uniqid();
+        $room = factory(Room::class)->create([
+            'uname'     => $uname,
+            'name'      => 'test room',
+            'owner_id'  => $user->id,
+            'board_id'  => $board->id,
+            'max_member_count'  => 10,
+            'member_count'      => 0,
+            'status'    => config('const.room_status_open')
+        ]);
+
+        // マス配置されていない
+        $this->assertDatabaseMissing('room_space', [
+            'room_id'  => $room->id,
+        ]);
+
+        $repository = new RoomRepository();
+        $result = $repository->addMember($room->owner_id, $room->id);
+
+        $this->actingAs($user)->get("/room/{$room->uname}")->assertStatus(200);
+
+        // マス配置されている
+        $this->assertDatabaseHas('room_space', [
+            'room_id'  => $room->id,
+        ]);
+
+    }
+
+    /*
      * 部屋を作成した後、オーナーが参加者として登録されている
      */
     public function testIsRegisteredOwner()

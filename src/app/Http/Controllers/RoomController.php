@@ -66,7 +66,8 @@ class RoomController extends Controller
         ]);
     }
 
-    public function show($uname) {
+    public function show($uname)
+    {
         $repository = new RoomRepository();
         $room = $repository->findByUname($uname);
         if ($room === null) {
@@ -76,6 +77,9 @@ class RoomController extends Controller
             return abort(404);
         }
 
-        return view('room.show', $room);
+        $spaces = $repository->getSpaces($room);
+
+        return view('room.show', compact('room', 'spaces'));
     }
+
 }
