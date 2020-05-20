@@ -312,9 +312,61 @@ class RoomTest extends TestCase
     }
 
     /**
+     * unameに該当する部屋が存在しない場合は404
+     */
+    public function testNotExistRoomFromUnameTo404() {
+        $user = factory(User::class)->create();
+        $response = $this->actingAs($user)->get('/room/囲碁')->assertStatus(404);
+    }
+
+    /**
+     * unameに該当する部屋が存在するかつ
+     * 入室していない場合は404
+     */
+    public function testExistRoomFromUnameNotMemberTo404() {
+        $user = factory(User::class)->create();
+        $board = $this->createBoard();
+
+        $room = factory(Room::class)->create([
+            'uname'     => uniqid(),
+            'name'      => 'exist room',
+            'owner_id'  => $user->id,
+            'board_id'  => $board->id,
+            'max_member_count'  => 10,
+            'member_count'      => 0,
+            'status'    => config('const.room_status_open'),
+        ]);
+
+        $response = $this->actingAs($user)->get('/room/'.$room->uname)->assertStatus(404);
+    }
+
+    /**
+     * unameに該当する部屋が存在するかつ
+     * 入室している場合は正常確認（ステータス:200）
+     */
+    public function testExistRoomFromUnameMemberTo200() {
+        $user = factory(User::class)->create();
+        $board = $this->createBoard();
+
+        $room = factory(Room::class)->create([
+            'uname'     => uniqid(),
+            'name'      => 'exist room',
+            'owner_id'  => $user->id,
+            'board_id'  => $board->id,
+            'max_member_count'  => 10,
+            'member_count'      => 0,
+            'status'    => config('const.room_status_open'),
+        ]);
+
+        $repository = new RoomRepository();
+        $result = $repository->addMember($user->id, $room->id);
+        $response = $this->actingAs($user)->get('/room/'.$room->uname)->assertStatus(200);
+    }
+
+    /**
      * 現在の有効な部屋数を返せるかどうかを確認
      */
-    public function testgetCurrentActiveRoomsCount()
+    public function testGetCurrentActiveRoomsCount()
     {
         $user = factory(User::class)->create();
         $board = $this->createBoard();
@@ -341,28 +393,7 @@ class RoomTest extends TestCase
     public function testUserCannotCreateRoomWhenCurrentActivityRoomsIsGreaterThanMaxActivityRooms()
     {
         $users = factory(User::class, 20)->create();
-        $uname = [
-            '部屋1',
-            '部屋2',
-            '部屋3',
-            '部屋4',
-            '部屋5',
-            '部屋6',
-            '部屋7',
-            '部屋8',
-            '部屋9',
-            '部屋10',
-            '部屋11',
-            '部屋12',
-            '部屋13',
-            '部屋14',
-            '部屋15',
-            '部屋16',
-            '部屋17',
-            '部屋18',
-            '部屋19',
-            '部屋20',
-        ];
+        $uname = '部屋1';
         $boards = factory(Board::class, 20)->create([
             'goal_position' => 10
         ]);
@@ -395,11 +426,11 @@ class RoomTest extends TestCase
 
         $repository = new RoomRepository();
 
-        $uname = '部屋21';
+        $name = '部屋2';
 
         Passport::actingAs($user);
         $response = $this->post('/api/room/create', [
-            'name' => $uname
+            'name' => $name
         ])->assertJson([
             'status'    => 'error',
             'message'   => '現在の有効部屋数が有効部屋数を超えているようです'
@@ -407,7 +438,7 @@ class RoomTest extends TestCase
 
         $this->assertDatabaseMissing('rooms', [
             'owner_id'  => $user->id,
-            'name'      => $uname,
+            'name'      => $name,
             'status'    => config('const.room_status_open')
         ]);
     }

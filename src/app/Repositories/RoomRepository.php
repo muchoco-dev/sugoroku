@@ -33,7 +33,7 @@ class RoomRepository
         $room->name = $data['name'];
         $room->owner_id = $data['owner_id'];
         $room->board_id = $data['board_id'];
-        $room->max_member_count = 10;
+        $room->max_member_count = config('const.max_member_count');
         $room->member_count = 1;
         $room->status = config('const.room_status_open');
         $room->save();
