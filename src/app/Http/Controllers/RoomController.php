@@ -71,7 +71,7 @@ class RoomController extends Controller
         $repository = new RoomRepository();
         $room = $repository->findByUname($uname);
 
-        if ($room->deleted_at !== null) {
+        if ($room === null) {
             abort(404);
         }
 

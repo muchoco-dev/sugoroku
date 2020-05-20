@@ -7,6 +7,7 @@ use App\Models\Room;
 use App\Models\Board;
 use App\Models\RoomUser;
 use App\Repositories\RoomRepository;
+use Carbon\Traits\Timestamp;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Laravel\Passport\Passport;
@@ -362,5 +363,92 @@ class RoomTest extends TestCase
         $repository = new RoomRepository();
         $result = $repository->addMember($user->id, $room->id);
         $response = $this->actingAs($user)->get('/room/'.$room->uname)->assertStatus(200);
+    }
+
+    /**
+     * アクセスした部屋のdeleted_atがNULLでなければ404
+     */
+    public function testAccessRoomDeletedAtNullTo404()
+    {
+        $user = factory(User::class)->create();
+        $board = $this->createBoard();
+
+        $room = factory(Room::class)->create([
+            'uname'     => uniqid(),
+            'name'      => 'first room',
+            'owner_id'  => $user->id,
+            'board_id'  => $board->id,
+            'max_member_count'  => 10,
+            'member_count'      => 0,
+            'status'    => config('const.room_status_open'),
+            'deleted_at' => '2020-05-06 12:00:00'
+        ]);
+        $response = $this->actingAs($user)->get('/room/'.$room->uname.'/join')->assertStatus(404);
+    }
+
+
+    /**
+     * isMember()の返り値がtrueなら、/room/{uname}にリダイレクト
+     */
+    public function testisMemberTrueToRedirectToRoom() {
+        $user = factory(User::class)->create();
+        $board = $this->createBoard();
+
+        $room = factory(Room::class)->create([
+            'uname'     => uniqid(),
+            'name'      => 'exist room',
+            'owner_id'  => $user->id,
+            'board_id'  => $board->id,
+            'max_member_count'  => 10,
+            'member_count'      => 0,
+            'status'    => config('const.room_status_open'),
+        ]);
+
+        $repository = new RoomRepository();
+        $result = $repository->addMember($user->id, $room->id);
+        $response = $this->actingAs($user)->get('/room/'.$room->uname.'/join')->assertRedirect('/room/'.$room->uname);
+    }
+
+    /**
+     * addMember()の返り値がtrueなら、/room/{uname}にリダイレクト
+     */
+    public function testAddMemberIsTrueToRedirectRoom() {
+        $user = factory(User::class)->create();
+        $board = $this->createBoard();
+
+        $room = factory(Room::class)->create([
+            'uname'     => uniqid(),
+            'name'      => 'first room',
+            'owner_id'  => $user->id,
+            'board_id'  => $board->id,
+            'max_member_count'  => 10,
+            'member_count'      => 0,
+            'status'    => config('const.room_status_open'),
+        ]);
+
+        $response = $this->actingAs($user)->get('/room/'.$room->uname.'/join')->assertRedirect('/room/'.$room->uname);
+    }
+
+    /**
+     * addMember()の返り値がfalseなら、エラーメッセージ表示
+     */
+    public function testAddMemberIsFalseToError() {
+        $user = factory(User::class)->create();
+        $board = $this->createBoard();
+
+        $room = factory(Room::class)->create([
+            'uname'     => uniqid(),
+            'name'      => 'first room',
+            'owner_id'  => $user->id,
+            'board_id'  => $board->id,
+            'max_member_count'  => 1,
+            'member_count'      => 2,
+            'status'    => config('const.room_status_open'),
+        ]);
+
+        $response = $this->actingAs($user)->get('/room/'.$room->uname.'/join')->assertJson([
+            'status'    => 'error',
+            'message'   => '入室できませんでした'
+        ]);
     }
 }
