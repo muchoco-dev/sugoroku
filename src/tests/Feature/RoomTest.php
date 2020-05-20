@@ -494,6 +494,7 @@ class RoomTest extends TestCase
 
     }
 
+    /*
      * 部屋を作成した後、オーナーが参加者として登録されている
      */
     public function testIsRegisteredOwner()
