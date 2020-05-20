@@ -16,4 +16,12 @@ class Board extends Model
     {
         return $this->hasMany('App\Models\Room');
     }
+
+    /**
+     * ボードが所有する特殊マスを取得
+     */
+    public function spaces()
+    {
+        return $this->hasMany('App\Models\Space');
+    }
 }

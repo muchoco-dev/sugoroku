@@ -40,6 +40,15 @@ class RoomController extends Controller
             ]);
         }
 
+        // 現在の有効な部屋数が有効な部屋数以上であればエラー
+        $currentActiveRoomsCount = $repository->getCurrentActiveRoomsCount();
+        if ($currentActiveRoomsCount >= config('const.max_number_of_active_rooms')) {
+            return response()->json([
+                'status'    => 'error',
+                'message'   => '現在の有効部屋数が有効部屋数を超えているようです'
+            ]);
+        }
+
         // 部屋作成
         $validated = $request->validated();
         $data = [
@@ -47,10 +56,30 @@ class RoomController extends Controller
             'owner_id'  => Auth::id(),
             'board_id'  => 1
         ];
-        $repository->create($data);
+        $roomId = $repository->create($data);
+
+        // 入室処理
+        $repository->addMember(Auth::id(), $roomId);
 
         return response()->json([
             'status'     => 'success'
         ]);
     }
+
+    public function show($uname)
+    {
+        $repository = new RoomRepository();
+        $room = $repository->findByUname($uname);
+        if ($room === null) {
+            return abort(404);
+        }
+        if (!$repository->isMember($room, Auth::id(), $room->id)) {
+            return abort(404);
+        }
+
+        $spaces = $repository->getSpaces($room);
+
+        return view('room.show', compact('room', 'spaces'));
+    }
+
 }

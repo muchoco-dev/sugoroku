@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\User;
 use App\Models\Room;
 use App\Models\Board;
+use App\Models\Space;
 use App\Repositories\RoomRepository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
@@ -16,12 +17,22 @@ class RoomTest extends TestCase
 
     use RefreshDatabase;
 
+    /**
+     * ゲームボードの作成
+     */
     private function createBoard()
     {
         $board = factory(Board::class)->create([
             'id'            => 1,
             'goal_position' => 10
         ]);
+
+        // すごろくマスの作成
+        factory(Space::class)->create([
+            'board_id'  => 1,
+            'position'  => 2,
+        ]);
+
         return $board;
     }
 
@@ -178,4 +189,361 @@ class RoomTest extends TestCase
         $this->assertEmpty($rooms);
     }
 
+    /**
+     * roomsテーブルのunameカラムと一致するデータを取得
+     */
+    public function testGetAMatchWithTheUnameColumnInTheRoomTable()
+    {
+        $user = factory(User::class)->create();
+        $board = $this->createBoard();
+
+        $room = factory(Room::class)->create([
+            'uname'     => uniqid(),
+            'name'      => 'first room',
+            'owner_id'  => $user->id,
+            'board_id'  => $board->id,
+            'max_member_count'  => 10,
+            'member_count'      => 0,
+            'status'    => config('const.room_status_open'),
+        ]);
+
+        $repository = new RoomRepository();
+        $roomObject = $repository->findByUname($room->uname);
+        $this->assertEquals($room->uname, $roomObject['uname']);
+    }
+
+    /**
+     * deleted_atがNULLでない部屋は取得されない(findByUname)
+     */
+    public function testUserCannotGetRoomsAtDeletedAtIsNotNullEvenIfFindByUname()
+    {
+        $user = factory(User::class)->create();
+        $board = $this->createBoard();
+
+        $room = factory(Room::class)->create([
+            'uname'     => uniqid(),
+            'name'      => 'first room',
+            'owner_id'  => $user->id,
+            'board_id'  => $board->id,
+            'max_member_count'  => 10,
+            'member_count'      => 0,
+            'status'    => config('const.room_status_open'),
+            'deleted_at' => '2020-05-06 12:00:00'
+        ]);
+
+        $repository = new RoomRepository();
+        $roomObject = $repository->findByUname($room->uname);
+        $this->assertEmpty($roomObject);
+    }
+
+
+    /**
+     * member_countがmax_member_count以上ならfalseが返ってくる
+     */
+    public function testReturnFalseWhenMemberCountIsGreaterThanMaxMemberCount()
+    {
+        $user = factory(User::class)->create();
+        $board = $this->createBoard();
+
+        $room = factory(Room::class)->create([
+            'uname'     => uniqid(),
+            'name'      => 'first room',
+            'owner_id'  => $user->id,
+            'board_id'  => $board->id,
+            'max_member_count'  => 10,
+            'member_count'      => 12,
+            'status'    => config('const.room_status_open'),
+        ]);
+
+        $repository = new RoomRepository();
+        $result = $repository->addMember($room->owner_id, $room->id);
+        $this->assertFalse($result);
+    }
+
+    /**
+     * ユーザーが既に入室済かどうかを確認
+     */
+    public function testReturnFalseWhenUserIsAlreadyMember()
+    {
+        $user = factory(User::class)->create();
+        $board = $this->createBoard();
+
+        $room = factory(Room::class)->create([
+            'uname'     => uniqid(),
+            'name'      => 'first room',
+            'owner_id'  => $user->id,
+            'board_id'  => $board->id,
+            'max_member_count'  => 10,
+            'member_count'      => 0,
+            'status'    => config('const.room_status_open'),
+        ]);
+
+        // 中間(room_user)テーブルの作成
+        $roomUser = $room->users()->attach($user->id, [
+            'go' => 0,
+            'status' => config('const.piece_status_health'),
+            'position' => 1
+        ]);
+
+        $repository = new RoomRepository();
+        $result = $repository->addMember($user->id, $room->id);
+        $this->assertFalse($result);
+    }
+
+    /**
+     * ユーザーが入室に成功したかどうかを確認
+     */
+    public function testUserIsAddedMember()
+    {
+        $user = factory(User::class)->create();
+        $board = $this->createBoard();
+
+        $room = factory(Room::class)->create([
+            'uname'     => uniqid(),
+            'name'      => 'first room',
+            'owner_id'  => $user->id,
+            'board_id'  => $board->id,
+            'max_member_count'  => 10,
+            'member_count'      => 0,
+            'status'    => config('const.room_status_open'),
+        ]);
+
+        $repository = new RoomRepository();
+
+        $result = $repository->addMember($user->id, $room->id);
+        $this->assertTrue($result);
+
+        // room_userテーブルに新しいデータが保存されているかチェックする。
+        $checkResult = $repository->isMember($room, $user->id, $room->id);
+        $this->assertTrue($checkResult);
+
+        // 部屋のmember_coountが1増えてる。
+        $member_count = $room['member_count'] + 1;
+        $this->assertEquals($member_count, 1);
+    }
+
+    /**
+     * unameに該当する部屋が存在しない場合は404
+     */
+    public function testNotExistRoomFromUnameTo404() {
+        $user = factory(User::class)->create();
+        $response = $this->actingAs($user)->get('/room/囲碁')->assertStatus(404);
+    }
+
+    /**
+     * unameに該当する部屋が存在するかつ
+     * 入室していない場合は404
+     */
+    public function testExistRoomFromUnameNotMemberTo404() {
+        $user = factory(User::class)->create();
+        $board = $this->createBoard();
+
+        $room = factory(Room::class)->create([
+            'uname'     => uniqid(),
+            'name'      => 'exist room',
+            'owner_id'  => $user->id,
+            'board_id'  => $board->id,
+            'max_member_count'  => 10,
+            'member_count'      => 0,
+            'status'    => config('const.room_status_open'),
+        ]);
+
+        $response = $this->actingAs($user)->get('/room/'.$room->uname)->assertStatus(404);
+    }
+
+    /**
+     * unameに該当する部屋が存在するかつ
+     * 入室している場合は正常確認（ステータス:200）
+     */
+    public function testExistRoomFromUnameMemberTo200() {
+        $user = factory(User::class)->create();
+        $board = $this->createBoard();
+
+        $room = factory(Room::class)->create([
+            'uname'     => uniqid(),
+            'name'      => 'exist room',
+            'owner_id'  => $user->id,
+            'board_id'  => $board->id,
+            'max_member_count'  => 10,
+            'member_count'      => 0,
+            'status'    => config('const.room_status_open'),
+        ]);
+
+        $repository = new RoomRepository();
+        $result = $repository->addMember($user->id, $room->id);
+        $response = $this->actingAs($user)->get('/room/'.$room->uname)->assertStatus(200);
+    }
+
+    /**
+     * 現在の有効な部屋数を返せるかどうかを確認
+     */
+    public function testGetCurrentActiveRoomsCount()
+    {
+        $user = factory(User::class)->create();
+        $board = $this->createBoard();
+
+        $room = factory(Room::class)->create([
+            'uname'     => uniqid(),
+            'name'      => 'first room',
+            'owner_id'  => $user->id,
+            'board_id'  => $board->id,
+            'max_member_count'  => 10,
+            'member_count'      => 0,
+            'status'    => config('const.room_status_open'),
+        ]);
+
+        $repository = new RoomRepository();
+
+        $count = $repository->getCurrentActiveRoomsCount();
+        $this->assertEquals($count, 1);
+    }
+
+    /**
+     * 現在の有効な部屋数が有効な部屋数以上ならば、新しく部屋を作ることはできない
+     */
+    public function testUserCannotCreateRoomWhenCurrentActivityRoomsIsGreaterThanMaxActivityRooms()
+    {
+        $users = factory(User::class, 20)->create();
+        $name = 'first room';
+        $boards = factory(Board::class, 20)->create([
+            'goal_position' => 10
+        ]);
+
+        $boardIds = [];
+
+        foreach ($boards as $board) {
+            $boardIds[] = $board['id'];
+        }
+
+        $roomCreateCount = 0;
+
+        foreach ($users as $user) {
+            factory(Room::class)->create([
+                'uname'     => uniqid(),
+                'name'      => $name,
+                'owner_id'  => $user->id,
+                'board_id'  => $boardIds[$roomCreateCount],
+                'max_member_count'  => 10,
+                'member_count'      => 0,
+                'status'    => config('const.room_status_open')
+            ]);
+            $roomCreateCount++;
+        }
+
+        $user = factory(User::class)->create();
+        $board = factory(Board::class)->create([
+            'goal_position' => 10
+        ]);
+
+        $repository = new RoomRepository();
+
+        Passport::actingAs($user);
+        $response = $this->post('/api/room/create', [
+            'name' => $name
+        ])->assertJson([
+            'status'    => 'error',
+            'message'   => '現在の有効部屋数が有効部屋数を超えているようです'
+        ]);
+
+        $this->assertDatabaseMissing('rooms', [
+            'owner_id'  => $user->id,
+            'name'      => $name,
+            'status'    => config('const.room_status_open')
+        ]);
+    }
+
+    /**
+     * 最初のユーザが部屋に入ったときにゲームボードのマス配置が保存される
+     */
+    public function testSpacesPlacementIsDecidedWhenOwnerEnterRoom()
+    {
+
+        $user = factory(User::class)->create();
+        $board = $this->createBoard();
+
+        Passport::actingAs($user);
+        $this->post('/api/room/create', [
+            'name' => 'test room'
+        ]);
+
+        $uname = uniqid();
+        $room = factory(Room::class)->create([
+            'uname'     => $uname,
+            'name'      => 'test room',
+            'owner_id'  => $user->id,
+            'board_id'  => $board->id,
+            'max_member_count'  => 10,
+            'member_count'      => 0,
+            'status'    => config('const.room_status_open')
+        ]);
+
+        // マス配置されていない
+        $this->assertDatabaseMissing('room_space', [
+            'room_id'  => $room->id,
+        ]);
+
+        $repository = new RoomRepository();
+        $result = $repository->addMember($room->owner_id, $room->id);
+
+        $this->actingAs($user)->get("/room/{$room->uname}")->assertStatus(200);
+
+        // マス配置されている
+        $this->assertDatabaseHas('room_space', [
+            'room_id'  => $room->id,
+        ]);
+
+    }
+
+    /*
+     * 部屋を作成した後、オーナーが参加者として登録されている
+     */
+    public function testIsRegisteredOwner()
+    {
+        $user = factory(User::class)->create();
+        $board = $this->createBoard();
+
+        $name = 'new room';
+
+        Passport::actingAs($user);
+        $response = $this->post('/api/room/create', [
+            'name'      => $name,
+        ])->assertJson([
+            'status'  => 'success'
+        ]);
+
+        $repository = new RoomRepository();
+        $room = $repository->getOwnOpenRoom($user->id);
+
+        $this->assertDatabaseHas('room_user', [
+            'room_id' => $room->id,
+            'user_id'  => $user->id,
+            'go' => 0,
+            'status' => config('const.piece_status_health'),
+            'position' => 1
+        ]);
+    }
+
+    /**
+     * 部屋を作成した後、部屋の参加人数が1になっている
+     */
+    public function testIsOnePersonInTheRoom()
+    {
+        $user = factory(User::class)->create();
+        $board = $this->createBoard();
+
+        $name = 'new room';
+
+        Passport::actingAs($user);
+        $response = $this->post('/api/room/create', [
+            'name'      => $name,
+        ])->assertJson([
+            'status'  => 'success'
+        ]);
+
+        $this->assertDatabaseHas('rooms', [
+            'owner_id'      => $user->id,
+            'member_count'  => 1,
+            'status'        => config('const.room_status_open'),
+        ]);
+    }
 }
