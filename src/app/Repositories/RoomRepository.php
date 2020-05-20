@@ -88,7 +88,9 @@ class RoomRepository
 
     }
 
-    // メンバー数が最大メンバー数を超えているかチェックする
+    /**
+     * メンバー数が最大メンバー数を超えているかチェックする
+     */
     public function isMemberExceededMaxMember($room)
     {
         if ($room['member_count'] > $room['max_member_count']) {
@@ -97,7 +99,9 @@ class RoomRepository
         return false;
     }
 
-    // 入室済みかどうかをチェックする
+    /**
+     * 入室済みかどうかをチェックする
+     */
     public function isMember($room, $userId, $roomId)
     {
         $roomUserSearchResult = $room->users()->find($userId);
@@ -110,6 +114,16 @@ class RoomRepository
             }
         }
         return false;
+    }
+
+    /**
+     * 現在の有効な部屋数を取得
+     */
+    public function getCurrentActiveRoomsCount()
+    {
+        return $this->model::where([
+            'deleted_at' => NULL
+        ])->count();
     }
 }
 
