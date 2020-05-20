@@ -40,6 +40,15 @@ class RoomController extends Controller
             ]);
         }
 
+        // 現在の有効な部屋数が有効な部屋数以上であればエラー
+        $currentActiveRoomsCount = $repository->getCurrentActiveRoomsCount();
+        if ($currentActiveRoomsCount >= config('const.max_number_of_active_rooms')) {
+            return response()->json([
+                'status'    => 'error',
+                'message'   => '現在の有効部屋数が有効部屋数を超えているようです'
+            ]);
+        }
+
         // 部屋作成
         $validated = $request->validated();
         $data = [
