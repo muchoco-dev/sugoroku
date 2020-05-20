@@ -393,7 +393,7 @@ class RoomTest extends TestCase
     public function testUserCannotCreateRoomWhenCurrentActivityRoomsIsGreaterThanMaxActivityRooms()
     {
         $users = factory(User::class, 20)->create();
-        $uname = 'first room';
+        $name = 'first room';
         $boards = factory(Board::class, 20)->create([
             'goal_position' => 10
         ]);
@@ -409,7 +409,7 @@ class RoomTest extends TestCase
         foreach ($users as $user) {
             factory(Room::class)->create([
                 'uname'     => uniqid(),
-                'name'      => $uname,
+                'name'      => $name,
                 'owner_id'  => $user->id,
                 'board_id'  => $boardIds[$roomCreateCount],
                 'max_member_count'  => 10,
@@ -425,8 +425,6 @@ class RoomTest extends TestCase
         ]);
 
         $repository = new RoomRepository();
-
-        $name = 'second room';
 
         Passport::actingAs($user);
         $response = $this->post('/api/room/create', [
