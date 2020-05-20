@@ -13,7 +13,7 @@ class BoardsTableSeeder extends Seeder
     {
         DB::table('boards')->insert([
             'id'            => 1,
-            'goal_position' => 30,
+            'goal_position' => 29,
             'goal_status'   => config('const.piece_status_health')
         ]);
     }
