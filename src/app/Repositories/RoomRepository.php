@@ -132,11 +132,16 @@ class RoomRepository
     public function getSpaces(Room $room)
     {
         if ($room->spaces->count()) {
-            return $room->spaces;
+            $spaces = $room->spaces;
+        } else {
+            $spaces = $this->setSpaces($room);
         }
 
-        return $this->setSpaces($room);
-
+        $viewSpaces = [];
+        foreach ($spaces as $space) {
+            $viewSpaces[$space->position] = $space;
+        }
+        return $viewSpaces;
     }
 
     /**
