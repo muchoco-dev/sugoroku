@@ -56,7 +56,41 @@ class RoomRepository
         ])->get();
     }
 
-    public function changeStatus($id, $status){}
+    private function changeStatus($id, $status)
+    {
+        $room = $this->model::find($id);
+        if (!$room) return false;
+
+        $room->status = $status;
+        $room->save();
+    }
+
+    /**
+     * ゲーム開始処理
+     */
+    public function gameStart($id)
+    {
+        $room = $this->model::find($id);
+        if (!$room) return false;
+
+        // 部屋のステータス変更
+        $this->changeStatus($room->id, config('const.room_status_busy'));
+
+        // 参加者のプレイ順をセット
+        $users = $room->users;
+        $go_list = [];
+        for ($i = 1; $i <= count($users); $i++) {
+            array_push($go_list, $i);
+        }
+        shuffle($go_list);
+
+        foreach ($users as $key => $user) {
+            $room->users()->updateExistingPivot($user->id, ['go' => $go_list[$key]]);
+        }
+
+        return true;
+
+    }
 
     /**
      * 入室処理

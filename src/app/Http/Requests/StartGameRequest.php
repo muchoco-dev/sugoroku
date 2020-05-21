@@ -5,14 +5,16 @@ namespace App\Http\Requests;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreRoomRequest extends FormRequest
+class StartGameRequest extends FormRequest
 {
     /**
+     * Determine if the user is authorized to make this request.
+     *
      * @return bool
      */
     public function authorize()
     {
-        return Auth::check();
+        return Auth::check();;
     }
 
     /**
@@ -23,7 +25,7 @@ class StoreRoomRequest extends FormRequest
     public function rules()
     {
         return [
-            'name'  => 'required|max:255'
+            'room_id' => 'required|exists:App\Models\Room,id'
         ];
     }
 }

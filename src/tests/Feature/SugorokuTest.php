@@ -9,10 +9,12 @@ use App\Models\Space;
 use App\Repositories\RoomRepository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Laravel\Passport\Passport;
 use Tests\TestCase;
 
 class SugorokuTest extends TestCase
 {
+
     use RefreshDatabase;
 
     private $owner;     // 部屋を所有しているUser
@@ -31,7 +33,7 @@ class SugorokuTest extends TestCase
     private function createUsers()
     {
         $this->owner = factory(User::class)->create();
-        $this->members = factory(User::class, 3)->create();
+        $this->members = factory(User::class, 2)->create();
     }
 
     /**
@@ -64,6 +66,12 @@ class SugorokuTest extends TestCase
 
         $repository = new RoomRepository();
         $repository->addMember($this->owner->id, $this->room->id);
+
+        // 参加者は2人（最大人数 - 1）
+        foreach ($this->members as $member) {
+            $repository->addMember($member->id, $this->room->id);
+        }
+
     }
 
     /**
@@ -71,6 +79,14 @@ class SugorokuTest extends TestCase
      */
     public function testGuestCannotStartGame()
     {
+        $response = $this->post('/api/sugoroku/start', [
+            'room_id'   => $this->room->id
+        ]);
+
+        $this->assertDatabaseHas('rooms', [
+            'id'        =>  $this->room->id,
+            'status'    =>  $this->room->status
+        ]);
     }
 
     /**
@@ -78,7 +94,17 @@ class SugorokuTest extends TestCase
      */
     public function testUserCannotStartGame()
     {
-    
+        $user = factory(User::class)->create();
+
+        Passport::actingAs($user);
+        $response = $this->post('/api/sugoroku/start', [
+            'room_id'   => $this->room->id
+        ]);
+
+        $this->assertDatabaseHas('rooms', [
+            'id'        =>  $this->room->id,
+            'status'    =>  $this->room->status
+        ]);
     }
 
     /**
@@ -86,6 +112,39 @@ class SugorokuTest extends TestCase
      */
     public function testMemberCannotStartGame()
     {
-        $this->assertTrue(true); 
+        Passport::actingAs($this->members[0]);
+        $response = $this->post('/api/sugoroku/start', [
+            'room_id'   => $this->room->id
+        ]);
+
+        $this->assertDatabaseHas('rooms', [
+            'id'        =>  $this->room->id,
+            'status'    =>  $this->room->status
+        ]);
+    }
+
+    /**
+     * 部屋のオーナーはゲームスタートできる
+     */
+    public function testOwnerCanStartGame()
+    {
+        Passport::actingAs($this->owner);
+        $response = $this->post('/api/sugoroku/start', [
+            'room_id'   => $this->room->id
+        ]);
+
+        // 部屋のステータスが変わる
+        $this->assertDatabaseHas('rooms', [
+            'id'        =>  $this->room->id,
+            'status'    =>  config('const.room_status_busy')
+        ]);
+
+        $room = Room::find($this->room->id);
+        $room_users = $room->users;
+
+        // ユーザのプレイ順が設定される
+        foreach ($room_users as $user) {
+            $this->assertNotNull($user->pivot->go);
+        }
     }
 }
