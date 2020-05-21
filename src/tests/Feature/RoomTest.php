@@ -555,7 +555,6 @@ class RoomTest extends TestCase
     {
         Event::fake();
 
-        $roomModel = new Room;
         $user = factory(User::class)->create();
         $board = $this->createBoard();
         $uname = uniqid();
@@ -570,7 +569,7 @@ class RoomTest extends TestCase
             'status'    => config('const.room_status_open')
         ]);
 
-        $room = $roomModel::where([
+        $room = Room::where([
             'id' => $room->id
         ])->first();
 
