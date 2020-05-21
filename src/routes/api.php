@@ -17,9 +17,5 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 Route::middleware('auth:api')->post('/room/create', 'RoomController@store');
+Route::middleware('auth:api')->post('/room/{uname}/start', 'RoomController@gameStart');
 
-Route::get('/personal', function(){
-    $user = App\Models\User::find(1);
-    $token = $user->createToken('token_for_user1')->accessToken;
-    return response()->json(['token' => $token]);
-});
