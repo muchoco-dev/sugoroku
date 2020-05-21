@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\Events\MemberAdded;
 use App\Models\Room;
 use App\Models\Space;
 use Illuminate\Support\Facades\Auth;
@@ -84,6 +85,8 @@ class RoomRepository
         // Roomテーブルのmember_countを1足してDB更新
         $room->member_count = $room['member_count'] + 1;
         $room->save();
+
+        event(new MemberAdded($userId));
 
         return true;
 
