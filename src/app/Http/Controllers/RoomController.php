@@ -61,9 +61,10 @@ class RoomController extends Controller
         // 入室処理
         $repository->addMember(Auth::id(), $roomId);
 
-        return response()->json([
-            'status'     => 'success'
-        ]);
+        // 作成した部屋を取得
+        $createRoomUser = $repository->getOwnOpenRoom(Auth::id());
+
+        return redirect('/room/'.$createRoomUser->uname);
     }
 
     public function show($uname)
@@ -80,29 +81,6 @@ class RoomController extends Controller
         $spaces = $repository->getSpaces($room);
 
         return view('room.show', compact('room', 'spaces'));
-    }
-    
-    public function join($uname) {
-        $repository = new RoomRepository();
-        $room = $repository->findByUname($uname);
-
-        if ($room === null) {
-            abort(404);
-        }
-
-        if ($repository->isMember($room, Auth::id(), $room->id)) {
-            return redirect('/room/'.$uname);
-        }
-
-        if($repository->addMember(Auth::id(), $room->id)) {
-            return redirect('/room/'.$uname);
-
-        } else {
-            return response()->json([
-                'status'    => 'error',
-                'message'   => '入室できませんでした'
-            ]);
-        }
     }
 
 }

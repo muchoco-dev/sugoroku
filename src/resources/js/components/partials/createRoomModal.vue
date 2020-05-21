@@ -45,9 +45,7 @@ export default {
           },
           'name': this.name
       }).then(function(response) {
-        if (response.data.status === 'success') {
-            console.log('部屋を作成できました。');
-        } else {
+        if (response.data.status === 'error') {
             alert(response.data.message);
         }
       }).catch(function(error) {
