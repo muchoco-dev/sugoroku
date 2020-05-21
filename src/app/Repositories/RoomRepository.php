@@ -86,7 +86,7 @@ class RoomRepository
         $room->member_count = $room['member_count'] + 1;
         $room->save();
 
-        event(new MemberAdded($userId));
+        event(new MemberAdded($userId, $roomId));
 
         return true;
 
