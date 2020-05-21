@@ -7,7 +7,6 @@ use App\Models\Room;
 use App\Models\Board;
 use App\Models\Space;
 use App\Repositories\RoomRepository;
-use Carbon\Traits\Timestamp;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Laravel\Passport\Passport;
