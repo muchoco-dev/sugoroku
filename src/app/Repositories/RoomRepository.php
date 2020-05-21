@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\Room;
+use App\Models\Space;
 use Illuminate\Support\Facades\Auth;
 
 class RoomRepository
@@ -34,17 +35,18 @@ class RoomRepository
         $room->owner_id = $data['owner_id'];
         $room->board_id = $data['board_id'];
         $room->max_member_count = config('const.max_member_count');
-        $room->member_count = 1;
+        $room->member_count = 0;
         $room->status = config('const.room_status_open');
         $room->save();
 
+        return $room->id;
     }
 
     public function findByUname($uname)
     {
         return $this->model::where([
             'uname' => $uname
-        ])->first();
+        ])->with('board.spaces')->first();
     }
 
     public function getOpenRooms()
@@ -87,7 +89,9 @@ class RoomRepository
 
     }
 
-    // メンバー数が最大メンバー数を超えているかチェックする
+    /**
+     * メンバー数が最大メンバー数を超えているかチェックする
+     */
     public function isMemberExceededMaxMember($room)
     {
         if ($room['member_count'] > $room['max_member_count']) {
@@ -96,7 +100,9 @@ class RoomRepository
         return false;
     }
 
-    // 入室済みかどうかをチェックする
+    /**
+     * 入室済みかどうかをチェックする
+     */
     public function isMember($room, $userId, $roomId)
     {
         $roomUserSearchResult = $room->users()->find($userId);
@@ -109,6 +115,51 @@ class RoomRepository
             }
         }
         return false;
+    }
+
+    /**
+     * 現在の有効な部屋数を取得
+     */
+    public function getCurrentActiveRoomsCount()
+    {
+        return $this->model::where([
+            'deleted_at' => NULL
+        ])->count();
+    }
+
+    /**
+     * ゲームボードのマスを取得
+     */
+    public function getSpaces(Room $room)
+    {
+        if ($room->spaces->count()) {
+            $spaces = $room->spaces;
+        } else {
+            $spaces = $this->setSpaces($room);
+        }
+
+        $viewSpaces = [];
+        foreach ($spaces as $space) {
+            $viewSpaces[$space->position] = $space;
+        }
+        return $viewSpaces;
+    }
+
+    /**
+     * 部屋のゲームボードにマスを配置する
+     */
+    private function setSpaces(Room $room)
+    {
+        $room->spaces()->detach();
+
+        $spaces = Space::where('board_id', $room->board_id)->get();
+
+        foreach ($spaces as $space) {
+            // TODO:ランダム設置はアップデート時に実装
+            $room->spaces()->attach($space->id, ['position' => $space->position]);
+        }
+
+        return $room->spaces;
     }
 }
 
