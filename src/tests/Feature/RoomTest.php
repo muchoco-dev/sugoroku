@@ -608,18 +608,15 @@ class RoomTest extends TestCase
         $result = $repository->addMember($user->id, $room->id);
         $this->assertTrue($result);
 
-        // まだ、認証されていない
-        $this->assertFalse(Auth::check());
-        session()->setPreviousUrl('/calling/url');
-
-        $response = $this->from('/calling/url')->post('login', [
+        $response = $this->post('login', [
             'email'    => $user->email,
             'password' => 'test1111'
         ]);
 
-        // 認証されている
-        $this->assertTrue(Auth::check());
+        $response->assertRedirect('/rooms');
 
-        $response->assertRedirect('/room'.$room->uname);
+        $response = $this->actingAs($user)->get('rooms');
+
+        $response->assertRedirect('/room/'.$room->uname);
     }
 }
