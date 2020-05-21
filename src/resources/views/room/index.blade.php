@@ -10,11 +10,13 @@
                     <div class="card">
                         <p>部屋名：{{ $room['name'] }}</p>
                         <p>人数：{{ $room['member_count'].'/'.$room['max_member_count'] }}</p>
+                        <button>参加する</button>
                     </div>
                 @endforeach
             </div>
             <button @click="showCreateForm = true">部屋を作成する</button>
             <create-room-modal v-if="showCreateForm" @close="showCreateForm = false" token="{{ $token }}"></create-room-modal>
+
         </div>
     </div>
 </div>
