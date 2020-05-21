@@ -37,6 +37,6 @@ class MemberAdded implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        return new PrivateChannel('member-added-channel-' . $this->roomId, $this->userId);
+        return new PrivateChannel('member-added-channel.' . $this->roomId, $this->userId);
     }
 }
