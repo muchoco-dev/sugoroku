@@ -548,9 +548,9 @@ class RoomTest extends TestCase
     }
 
      /**
-     * アクセスした部屋のdeleted_atがNULLでなければ404
+     * unameに該当する有効な部屋が存在しない場合は404エラー
      */
-    public function testAccessRoomDeletedAtNullTo404()
+    public function testNotEffectRoomFromUnameTo404()
     {
         $user = factory(User::class)->create();
         $board = $this->createBoard();
@@ -569,9 +569,11 @@ class RoomTest extends TestCase
     }
 
      /**
-     * isMember()の返り値がtrueなら、/room/{uname}にリダイレクト
+     * unameに該当する有効な部屋が存在するかつ
+     * 入室済の場合は/room/{uname}にリダイレクト
      */
-    public function testisMemberTrueToRedirectToRoom() {
+    public function testEffectRoomFromUnameisMemberRedirectToRoom() 
+    {
         $user = factory(User::class)->create();
         $board = $this->createBoard();
 
@@ -591,9 +593,10 @@ class RoomTest extends TestCase
     }
 
     /**
-     * addMember()の返り値がtrueなら、/room/{uname}にリダイレクト
+     * unameに該当する有効な部屋が存在するかつ
+     * 入室できた場合は/room/{uname}にリダイレクト
      */
-    public function testAddMemberIsTrueToRedirectRoom() {
+    public function testJoinEffectRoomFromUnameRedirectToRoom() {
         $user = factory(User::class)->create();
         $board = $this->createBoard();
 
@@ -611,9 +614,10 @@ class RoomTest extends TestCase
     }
 
     /**
-     * addMember()の返り値がfalseなら、エラーメッセージ表示
+     * unameに該当する有効な部屋が存在するかつ
+     * 入室できない場合はエラーを返却
      */
-    public function testAddMemberIsFalseToError() {
+    public function testNotJoinEffectRoomFromUnameToError() {
         $user = factory(User::class)->create();
         $board = $this->createBoard();
 
