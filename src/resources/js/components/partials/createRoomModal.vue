@@ -45,7 +45,9 @@ export default {
           },
           'name': this.name
       }).then(function(response) {
-        if (response.data.status === 'error') {
+        if (response.data.status === 'success') {
+          location.href = '/room/'+response.data.uname;
+        } else {
             alert(response.data.message);
         }
       }).catch(function(error) {

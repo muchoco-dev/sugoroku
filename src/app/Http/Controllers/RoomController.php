@@ -64,7 +64,11 @@ class RoomController extends Controller
         // 作成した部屋を取得
         $createRoomUser = $repository->getOwnOpenRoom(Auth::id());
 
-        return redirect('/room/'.$createRoomUser->uname);
+        return response()->json([
+            'status'     => 'success',
+            'uname'      => $createRoomUser->uname
+        ]);
+
     }
 
     public function show($uname)
