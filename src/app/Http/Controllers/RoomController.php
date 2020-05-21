@@ -82,7 +82,7 @@ class RoomController extends Controller
 
         return view('room.show', compact('room', 'spaces'));
     }
-
+    
     public function join($uname) {
         $repository = new RoomRepository();
         $room = $repository->findByUname($uname);
