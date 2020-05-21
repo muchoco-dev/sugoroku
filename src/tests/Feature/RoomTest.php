@@ -546,4 +546,94 @@ class RoomTest extends TestCase
             'status'        => config('const.room_status_open'),
         ]);
     }
+
+     /**
+     * unameに該当する有効な部屋が存在しない場合は404エラー
+     */
+    public function testNotEffectRoomFromUnameTo404()
+    {
+        $user = factory(User::class)->create();
+        $board = $this->createBoard();
+
+        $room = factory(Room::class)->create([
+            'uname'     => uniqid(),
+            'name'      => 'first room',
+            'owner_id'  => $user->id,
+            'board_id'  => $board->id,
+            'max_member_count'  => 10,
+            'member_count'      => 0,
+            'status'    => config('const.room_status_open'),
+            'deleted_at' => '2020-05-06 12:00:00'
+        ]);
+        $response = $this->actingAs($user)->get('/room/'.$room->uname.'/join')->assertStatus(404);
+    }
+
+     /**
+     * unameに該当する有効な部屋が存在するかつ
+     * 入室済の場合は/room/{uname}にリダイレクト
+     */
+    public function testEffectRoomFromUnameisMemberRedirectToRoom() 
+    {
+        $user = factory(User::class)->create();
+        $board = $this->createBoard();
+
+        $room = factory(Room::class)->create([
+            'uname'     => uniqid(),
+            'name'      => 'exist room',
+            'owner_id'  => $user->id,
+            'board_id'  => $board->id,
+            'max_member_count'  => 10,
+            'member_count'      => 0,
+            'status'    => config('const.room_status_open'),
+        ]);
+
+        $repository = new RoomRepository();
+        $result = $repository->addMember($user->id, $room->id);
+        $response = $this->actingAs($user)->get('/room/'.$room->uname.'/join')->assertRedirect('/room/'.$room->uname);
+    }
+
+    /**
+     * unameに該当する有効な部屋が存在するかつ
+     * 入室できた場合は/room/{uname}にリダイレクト
+     */
+    public function testJoinEffectRoomFromUnameRedirectToRoom() {
+        $user = factory(User::class)->create();
+        $board = $this->createBoard();
+
+        $room = factory(Room::class)->create([
+            'uname'     => uniqid(),
+            'name'      => 'first room',
+            'owner_id'  => $user->id,
+            'board_id'  => $board->id,
+            'max_member_count'  => 10,
+            'member_count'      => 0,
+            'status'    => config('const.room_status_open'),
+        ]);
+
+        $response = $this->actingAs($user)->get('/room/'.$room->uname.'/join')->assertRedirect('/room/'.$room->uname);
+    }
+
+    /**
+     * unameに該当する有効な部屋が存在するかつ
+     * 入室できない場合はエラーを返却
+     */
+    public function testNotJoinEffectRoomFromUnameToError() {
+        $user = factory(User::class)->create();
+        $board = $this->createBoard();
+
+        $room = factory(Room::class)->create([
+            'uname'     => uniqid(),
+            'name'      => 'first room',
+            'owner_id'  => $user->id,
+            'board_id'  => $board->id,
+            'max_member_count'  => 1,
+            'member_count'      => 2,
+            'status'    => config('const.room_status_open'),
+        ]);
+
+        $response = $this->actingAs($user)->get('/room/'.$room->uname.'/join')->assertJson([
+            'status'    => 'error',
+            'message'   => '入室できませんでした'
+        ]);
+    }
 }
