@@ -1925,14 +1925,9 @@ __webpack_require__.r(__webpack_exports__);
       is_started: false
     };
   },
-  created: function created() {
-    if (this.room.status === this.room_status_open) {
-      this.is_started = false;
-    }
-  },
   methods: {
     canShowStartButton: function canShowStartButton() {
-      if (this.room.owner_id === this.user_id) {
+      if (this.room.owner_id === this.user_id && this.room.status === this.room_status_open) {
         if (!this.is_started) {
           return true;
         }

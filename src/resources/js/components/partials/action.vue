@@ -16,14 +16,10 @@ export default {
       is_started: false
     }
   },
-  created: function () {
-    if (this.room.status === this.room_status_open) {
-        this.is_started = false;
-    }
-  },
   methods: {
     canShowStartButton: function () {
-      if (this.room.owner_id === this.user_id) {
+      if (this.room.owner_id === this.user_id &&
+            this.room.status === this.room_status_open) {
         if (!this.is_started) {
           return true;
         }
