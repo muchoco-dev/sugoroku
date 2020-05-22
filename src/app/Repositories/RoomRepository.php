@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\Events\MemberAdded;
 use App\Models\Room;
 use App\Models\Space;
 use Illuminate\Support\Facades\Auth;
@@ -119,6 +120,8 @@ class RoomRepository
         $room->member_count = $room['member_count'] + 1;
         $room->save();
 
+        event(new MemberAdded($userId, $roomId));
+
         return true;
 
     }
@@ -218,8 +221,33 @@ class RoomRepository
 
         // 取得した部屋を論理削除(ソフトデリート)
         $room->delete();
-
         return true;
+    }
+
+    /**
+     * ユーザが参加中の有効な部屋のIDを取得
+     */
+    public function getUserJoinActiveRoomId($userId)
+    {
+        $room = $this->model::where([
+            'status'        => config('const.room_status_open'),
+            'deleted_at'    => NULL
+        ])->orWhere([
+            'status'        => config('const.room_status_busy'),
+            'deleted_at'    => NULL
+        ])->first();
+
+        if ($room == null) {
+            return NULL;
+        }
+
+        $result = Room::find($room->id)->users()->get();
+        foreach ($result as $item) {
+            if ($item->pivot['user_id'] == $userId) {
+                return $item->pivot['room_id'];
+            }
+        }
+        return NULL;
     }
 }
 
