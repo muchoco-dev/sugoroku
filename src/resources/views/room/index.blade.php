@@ -10,13 +10,9 @@
                     <div class="card">
                         <p>部屋名：{{ $room['name'] }}</p>
                         <p>人数：{{ $room['member_count'].'/'.$room['max_member_count'] }}</p>
-                        <button>
-                            @if ($room['member_count'] <= $room['max_member_count'])
-                                参加
-                            @else ($room['member_count'] === $room['max_member_count'])
-                                
-                            @endif
-                        </button>
+                        @if ($room['member_count'] <= $room['max_member_count'])
+                            <button>参加</button>                                
+                        @endif
                     </div>
                 @endforeach
             </div>
