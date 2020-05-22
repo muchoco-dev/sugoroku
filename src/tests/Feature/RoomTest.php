@@ -586,6 +586,7 @@ class RoomTest extends TestCase
 
         Event::assertDispatched(MemberAdded::class);
     }
+
          /**
      * unameに該当する有効な部屋が存在しない場合は404エラー
      */
@@ -611,7 +612,7 @@ class RoomTest extends TestCase
      * unameに該当する有効な部屋が存在するかつ
      * 入室済の場合は/room/{uname}にリダイレクト
      */
-    public function testEffectRoomFromUnameisMemberRedirectToRoom() 
+    public function testEffectRoomFromUnameisMemberRedirectToRoom()
     {
         $user = factory(User::class)->create();
         $board = $this->createBoard();
@@ -885,3 +886,4 @@ class RoomTest extends TestCase
         $roomId = $repository->getUserJoinActiveRoomId($user->id);
         $this->assertNotNull($roomId);
     }
+}
