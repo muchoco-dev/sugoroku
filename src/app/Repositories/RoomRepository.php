@@ -195,6 +195,32 @@ class RoomRepository
 
         return $room->spaces;
     }
+
+    /**
+     * 解散機能(バルス)
+     */
+    public function balus($userId)
+    {
+        // オーナーが作成した部屋を取得
+        $room = $this->model::where([
+            'owner_id'      => $userId,
+        ])->first();
+
+        // ゲーム中の場合はバルス不可
+        if ($room->status == config('const.room_status_busy')) {
+            return false;
+        }
+
+        // room_userテーブルの物理削除
+        foreach ($room->users as $user) {
+            $user->pivot->forceDelete();
+        }
+
+        // 取得した部屋を論理削除(ソフトデリート)
+        $room->delete();
+
+        return true;
+    }
 }
 
 
