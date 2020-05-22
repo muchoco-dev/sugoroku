@@ -548,7 +548,7 @@ class RoomTest extends TestCase
         ]);
     }
 
-         /**
+    /**
      * unameに該当する有効な部屋が存在しない場合は404エラー
      */
     public function testNotEffectRoomFromUnameTo404()
@@ -708,5 +708,28 @@ class RoomTest extends TestCase
         $response = $this->actingAs($user)->get('rooms');
 
         $response->assertRedirect('/room/'.$room->uname);
+    }
+
+    /**
+     * 部屋作成後にstatusに成功、unameに作成後のユニークキーが設定されている
+     */
+    public function testCreateRoomAfterStatusSuccessUnameUniqId()
+    {
+        $user = factory(User::class)->create();
+        $board = $this->createBoard();
+
+        $name = 'first room';
+        Passport::actingAs($user);
+        $response = $this->post('/api/room/create', [
+            'name' => $name
+        ]);
+
+        $repository = new RoomRepository();
+        $room = $repository->getOwnOpenRoom($user->id);
+
+        $response->assertJson([
+            'status'   => 'success',
+            'uname'    => $room->uname
+        ]);
     }
 }
