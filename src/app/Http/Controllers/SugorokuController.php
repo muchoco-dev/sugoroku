@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Room;
 use Illuminate\Http\Request;
+use App\Events\SugorokuStarted;
 use App\Repositories\RoomRepository;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\StartGameRequest;
@@ -26,6 +27,8 @@ class SugorokuController extends Controller
 
         $repository = new RoomRepository;
         $repository->gameStart($room->id);
+
+        event(new SugorokuStarted($room->id));
 
         return response()->json([
             'status'    => 'success'

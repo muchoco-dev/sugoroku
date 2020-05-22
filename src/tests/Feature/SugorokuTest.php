@@ -2,13 +2,15 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
-use App\Models\Room;
+use App\Repositories\RoomRepository;
+use App\Events\SugorokuStarted;
 use App\Models\Board;
 use App\Models\Space;
-use App\Repositories\RoomRepository;
+use App\Models\User;
+use App\Models\Room;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Support\Facades\Event;
 use Laravel\Passport\Passport;
 use Tests\TestCase;
 
@@ -146,5 +148,20 @@ class SugorokuTest extends TestCase
         foreach ($room_users as $user) {
             $this->assertNotNull($user->pivot->go);
         }
+    }
+
+    /**
+     * ゲームをスタートすると、SugorokuStartedイベントが発行される
+     */
+    public function testDispatchEventWhenGameStarted()
+    {
+        Event::fake();
+
+        Passport::actingAs($this->owner);
+        $response = $this->post('/api/sugoroku/start', [
+            'room_id'   => $this->room->id
+        ]);
+
+        Event::assertDispatched(SugorokuStarted::class);
     }
 }
