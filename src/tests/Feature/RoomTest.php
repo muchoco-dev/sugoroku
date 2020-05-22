@@ -571,7 +571,7 @@ class RoomTest extends TestCase
             'status'    => config('const.room_status_open')
         ]);
 
-        event($roomRepository->addMember($user->id, $room->id));
+        $roomRepository->addMember($user->id, $room->id);
 
         Event::assertDispatched(MemberAdded::class);
     }
