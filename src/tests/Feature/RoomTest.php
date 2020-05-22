@@ -555,6 +555,8 @@ class RoomTest extends TestCase
     {
         Event::fake();
 
+        $roomRepository = new RoomRepository();
+
         $user = factory(User::class)->create();
         $board = $this->createBoard();
         $uname = uniqid();
@@ -569,11 +571,7 @@ class RoomTest extends TestCase
             'status'    => config('const.room_status_open')
         ]);
 
-        $room = Room::where([
-            'id' => $room->id
-        ])->first();
-
-        event(new MemberAdded($user->id, $room->id));
+        event($roomRepository->addMember($user->id, $room->id));
 
         Event::assertDispatched(MemberAdded::class);
     }
