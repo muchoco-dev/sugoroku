@@ -560,8 +560,6 @@ class RoomTest extends TestCase
     }
 
     /**
-<<<<<<< HEAD
-=======
      * メンバーの追加が成功した際にMemberAddedイベントが発行
      */
     public function testCanExecuteMemberAddedEvent()
@@ -590,7 +588,6 @@ class RoomTest extends TestCase
     }
 
          /**
->>>>>>> origin/master
      * unameに該当する有効な部屋が存在しない場合は404エラー
      */
     public function testNotEffectRoomFromUnameTo404()
