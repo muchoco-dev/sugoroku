@@ -23,7 +23,7 @@ export default {
   },
   methods: {
     canShowStartButton: function () {
-      if (this.room.id === this.user_id) {
+      if (this.room.owner_id === this.user_id) {
         if (!this.is_started) {
           return true;
         }

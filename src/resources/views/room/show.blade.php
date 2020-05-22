@@ -6,5 +6,6 @@
         :room="{{ $room }}"
         :user_id="{{ Auth::id() }}"
         :room_status_open="{{ config('const.room_status_open') }}"
-        token="{{ $token }}"></action>
+        token="{{ $pusher_token }}"></action>
+    <logs :room_id="{{ $room->id }}"></logs>
 @endsection
