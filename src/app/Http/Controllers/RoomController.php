@@ -74,18 +74,22 @@ class RoomController extends Controller
 
     public function show($uname)
     {
-        $repository = new RoomRepository();
-        $room = $repository->findByUname($uname);
+        $roomRepository = new RoomRepository();
+        $userRepository = new UserRepository;
+
+        $room = $roomRepository->findByUname($uname);
         if ($room === null) {
             return abort(404);
         }
-        if (!$repository->isMember($room, Auth::id(), $room->id)) {
+        if (!$roomRepository->isMember($room, Auth::id(), $room->id)) {
             return abort(404);
         }
 
-        $spaces = $repository->getSpaces($room);
+        $spaces = $roomRepository->getSpaces($room);
 
-        return view('room.show', compact('room', 'spaces'));
+        $token = $userRepository->getPersonalAccessToken();
+
+        return view('room.show', compact('room', 'spaces', 'token'));
     }
     
     public function join($uname) {
