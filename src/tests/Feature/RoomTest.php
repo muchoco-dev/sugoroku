@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Events\MemberAdded;
 use App\Models\User;
 use App\Models\Room;
 use App\Models\Board;
@@ -9,7 +10,7 @@ use App\Models\Space;
 use Illuminate\Support\Facades\Auth;
 use App\Repositories\RoomRepository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Support\Facades\Event;
 use Laravel\Passport\Passport;
 use Tests\TestCase;
 
@@ -505,7 +506,7 @@ class RoomTest extends TestCase
 
     }
 
-    /*
+    /**
      * 部屋を作成した後、オーナーが参加者として登録されている
      */
     public function testIsRegisteredOwner()
@@ -558,6 +559,34 @@ class RoomTest extends TestCase
         ]);
     }
 
+    /**
+     * メンバーの追加が成功した際にMemberAddedイベントが発行
+     */
+    public function testCanExecuteMemberAddedEvent()
+    {
+        Event::fake();
+
+        $roomRepository = new RoomRepository();
+
+        $user = factory(User::class)->create();
+        $board = $this->createBoard();
+        $uname = uniqid();
+
+        $room = factory(Room::class)->create([
+            'uname'     => $uname,
+            'name'      => 'test room',
+            'owner_id'  => $user->id,
+            'board_id'  => $board->id,
+            'max_member_count'  => config('const.max_member_count'),
+            'member_count'      => 0,
+            'status'    => config('const.room_status_open')
+        ]);
+
+        $roomRepository->addMember($user->id, $room->id);
+
+        Event::assertDispatched(MemberAdded::class);
+    }
+
          /**
      * unameに該当する有効な部屋が存在しない場合は404エラー
      */
@@ -583,7 +612,7 @@ class RoomTest extends TestCase
      * unameに該当する有効な部屋が存在するかつ
      * 入室済の場合は/room/{uname}にリダイレクト
      */
-    public function testEffectRoomFromUnameisMemberRedirectToRoom() 
+    public function testEffectRoomFromUnameisMemberRedirectToRoom()
     {
         $user = factory(User::class)->create();
         $board = $this->createBoard();
