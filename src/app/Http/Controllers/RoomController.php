@@ -20,8 +20,14 @@ class RoomController extends Controller
         $roomRepository = new RoomRepository();
         $userRepository = new UserRepository();
 
-
         $rooms = $roomRepository->getOpenRooms();
+
+        foreach ($rooms as $room) {
+            // 有効な部屋に入室済みの場合
+            if ($roomRepository->isMember($room, Auth::id(), $room->id)) {
+                return redirect()->route('room.show', ['uname' => $room->uname]);
+            }
+        }
         $token = $userRepository->getPersonalAccessToken();
 
         return view('room.index', compact('rooms', 'token'));
