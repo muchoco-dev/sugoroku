@@ -28,9 +28,9 @@ class RoomController extends Controller
                 return redirect()->route('room.show', ['uname' => $room->uname]);
             }
         }
-        $token = $userRepository->getPersonalAccessToken();
+        $pusher_token = $userRepository->getPersonalAccessToken();
 
-        return view('room.index', compact('rooms', 'token'));
+        return view('room.index', compact('rooms', 'pusher_token'));
     }
 
     public function store(StoreRoomRequest $request)
@@ -74,18 +74,22 @@ class RoomController extends Controller
 
     public function show($uname)
     {
-        $repository = new RoomRepository();
-        $room = $repository->findByUname($uname);
+        $roomRepository = new RoomRepository();
+        $userRepository = new UserRepository;
+
+        $room = $roomRepository->findByUname($uname);
         if ($room === null) {
             return abort(404);
         }
-        if (!$repository->isMember($room, Auth::id(), $room->id)) {
+        if (!$roomRepository->isMember($room, Auth::id(), $room->id)) {
             return abort(404);
         }
 
-        $spaces = $repository->getSpaces($room);
+        $spaces = $roomRepository->getSpaces($room);
 
-        return view('room.show', compact('room', 'spaces'));
+        $pusher_token = $userRepository->getPersonalAccessToken();
+
+        return view('room.show', compact('room', 'spaces', 'pusher_token'));
     }
     
     public function join($uname) {
