@@ -197,24 +197,53 @@ class RoomRepository
     }
 
     /**
+     * 解散機能(バルス)
+     */
+    public function balus($userId)
+    {
+        // オーナーが作成した部屋を取得
+        $room = $this->model::where([
+            'owner_id'      => $userId,
+        ])->first();
+
+        // ゲーム中の場合はバルス不可
+        if ($room->status == config('const.room_status_busy')) {
+            return false;
+        }
+
+        // room_userテーブルの物理削除
+        foreach ($room->users as $user) {
+            $user->pivot->forceDelete();
+        }
+
+        // 取得した部屋を論理削除(ソフトデリート)
+        $room->delete();
+        return true;
+    }
+
+    /**
      * ユーザが参加中の有効な部屋のIDを取得
      */
     public function getUserJoinActiveRoomId($userId)
     {
-        $rooms = $this->model::where([
+        $room = $this->model::where([
             'status'        => config('const.room_status_open'),
             'deleted_at'    => NULL
-        ])->get();
+        ])->orWhere([
+            'status'        => config('const.room_status_busy'),
+            'deleted_at'    => NULL
+        ])->first();
 
-        foreach ($rooms as $room) {
-            $result = Room::find($room->id)->users()->get();
-            foreach ($result as $item) {
-                if ($item->pivot['user_id'] == $userId) {
-                    return $item->pivot['room_id'];
-                }
-            }
+        if ($room == null) {
+            return NULL;
         }
 
+        $result = Room::find($room->id)->users()->get();
+        foreach ($result as $item) {
+            if ($item->pivot['user_id'] == $userId) {
+                return $item->pivot['room_id'];
+            }
+        }
         return NULL;
     }
 }
