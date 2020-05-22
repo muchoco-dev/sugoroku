@@ -20,23 +20,29 @@ class RoomController extends Controller
         $roomRepository = new RoomRepository();
         $userRepository = new UserRepository();
 
-
         $rooms = $roomRepository->getOpenRooms();
-        $token = $userRepository->getPersonalAccessToken();
 
-        return view('room.index', compact('rooms', 'token'));
+        foreach ($rooms as $room) {
+            // 有効な部屋に入室済みの場合
+            if ($roomRepository->isMember($room, Auth::id(), $room->id)) {
+                return redirect()->route('room.show', ['uname' => $room->uname]);
+            }
+        }
+        $pusher_token = $userRepository->getPersonalAccessToken();
+
+        return view('room.index', compact('rooms', 'pusher_token'));
     }
 
     public function store(StoreRoomRequest $request)
     {
         $repository = new RoomRepository();
 
-        // オープン中の部屋を既に所有していたらエラー
-        $room = $repository->getOwnOpenRoom(Auth::id());
-        if ($room) {
+        // ユーザーが参加中の有効な部屋のIDを返却できたらエラー
+        $activeRoomId = $repository->getUserJoinActiveRoomId(Auth::id());
+        if ($activeRoomId != NULL) {
             return response()->json([
                 'status'    => 'error',
-                'message'   => '既にオープン中の部屋があるようです'
+                'message'   => '既にゲームに参加中の部屋があるようです'
             ]);
         }
 
@@ -68,18 +74,45 @@ class RoomController extends Controller
 
     public function show($uname)
     {
-        $repository = new RoomRepository();
-        $room = $repository->findByUname($uname);
+        $roomRepository = new RoomRepository();
+        $userRepository = new UserRepository;
+
+        $room = $roomRepository->findByUname($uname);
         if ($room === null) {
             return abort(404);
         }
-        if (!$repository->isMember($room, Auth::id(), $room->id)) {
+        if (!$roomRepository->isMember($room, Auth::id(), $room->id)) {
             return abort(404);
         }
 
-        $spaces = $repository->getSpaces($room);
+        $spaces = $roomRepository->getSpaces($room);
 
-        return view('room.show', compact('room', 'spaces'));
+        $pusher_token = $userRepository->getPersonalAccessToken();
+
+        return view('room.show', compact('room', 'spaces', 'pusher_token'));
+    }
+    
+    public function join($uname) {
+        $repository = new RoomRepository();
+        $room = $repository->findByUname($uname);
+
+        if ($room === null) {
+            abort(404);
+        }
+
+        if ($repository->isMember($room, Auth::id(), $room->id)) {
+            return redirect('/room/'.$uname);
+        }
+
+        if($repository->addMember(Auth::id(), $room->id)) {
+            return redirect('/room/'.$uname);
+
+        } else {
+            return response()->json([
+                'status'    => 'error',
+                'message'   => '入室できませんでした'
+            ]);
+        }
     }
 
 }

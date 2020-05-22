@@ -57,7 +57,41 @@ class RoomRepository
         ])->get();
     }
 
-    public function changeStatus($id, $status){}
+    private function changeStatus($id, $status)
+    {
+        $room = $this->model::find($id);
+        if (!$room) return false;
+
+        $room->status = $status;
+        $room->save();
+    }
+
+    /**
+     * ゲーム開始処理
+     */
+    public function gameStart($id)
+    {
+        $room = $this->model::find($id);
+        if (!$room) return false;
+
+        // 部屋のステータス変更
+        $this->changeStatus($room->id, config('const.room_status_busy'));
+
+        // 参加者のプレイ順をセット
+        $users = $room->users;
+        $go_list = [];
+        for ($i = 1; $i <= count($users); $i++) {
+            array_push($go_list, $i);
+        }
+        shuffle($go_list);
+
+        foreach ($users as $key => $user) {
+            $room->users()->updateExistingPivot($user->id, ['go' => $go_list[$key]]);
+        }
+
+        return true;
+
+    }
 
     /**
      * 入室処理
@@ -163,6 +197,57 @@ class RoomRepository
         }
 
         return $room->spaces;
+    }
+
+    /**
+     * 解散機能(バルス)
+     */
+    public function balus($userId)
+    {
+        // オーナーが作成した部屋を取得
+        $room = $this->model::where([
+            'owner_id'      => $userId,
+        ])->first();
+
+        // ゲーム中の場合はバルス不可
+        if ($room->status == config('const.room_status_busy')) {
+            return false;
+        }
+
+        // room_userテーブルの物理削除
+        foreach ($room->users as $user) {
+            $user->pivot->forceDelete();
+        }
+
+        // 取得した部屋を論理削除(ソフトデリート)
+        $room->delete();
+        return true;
+    }
+
+    /**
+     * ユーザが参加中の有効な部屋のIDを取得
+     */
+    public function getUserJoinActiveRoomId($userId)
+    {
+        $room = $this->model::where([
+            'status'        => config('const.room_status_open'),
+            'deleted_at'    => NULL
+        ])->orWhere([
+            'status'        => config('const.room_status_busy'),
+            'deleted_at'    => NULL
+        ])->first();
+
+        if ($room == null) {
+            return NULL;
+        }
+
+        $result = Room::find($room->id)->users()->get();
+        foreach ($result as $item) {
+            if ($item->pivot['user_id'] == $userId) {
+                return $item->pivot['room_id'];
+            }
+        }
+        return NULL;
     }
 }
 

@@ -27,21 +27,18 @@
 export default {
   props: {
       board: Object,
-      spaces_str: String
+      spaces: Object
   },
   data() {
     return {
-        col_count: 0,
-        spaces: []
+        col_count: 0
     }
   },
   created: function () {
-      this.spaces = JSON.parse(this.spaces_str);
       this.col_count = (Number(this.board.goal_position) - 2) / 2;
   },
   methods: {
     getSpaceName: function (id) {
-        console.log(this.spaces[id]);
         if (this.spaces[id]) {
             return this.spaces[id].name;
         }
