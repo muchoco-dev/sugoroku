@@ -18,6 +18,12 @@ class RoomTest extends TestCase
 
     use RefreshDatabase;
 
+    public function setUp():void
+    {
+        parent::setUp();
+        $this->artisan('passport:install');
+    }
+
     /**
      * ゲームボードの作成
      */
