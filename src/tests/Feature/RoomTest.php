@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Room;
 use App\Models\Board;
 use App\Models\Space;
+use Illuminate\Support\Facades\Auth;
 use App\Repositories\RoomRepository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
@@ -547,7 +548,7 @@ class RoomTest extends TestCase
         ]);
     }
 
-     /**
+         /**
      * unameに該当する有効な部屋が存在しない場合は404エラー
      */
     public function testNotEffectRoomFromUnameTo404()
@@ -635,5 +636,77 @@ class RoomTest extends TestCase
             'status'    => 'error',
             'message'   => '入室できませんでした'
         ]);
+    }
+
+    /**
+     * ログイン中ログイン画面に遷移しようとすると/roomsに遷移するようになっていること
+     */
+    public function testRedirectToRoomsLogin()
+    {
+        $user = factory(User::class)->create();
+
+        $response = $this->actingAs($user)->get('/login');
+
+        $response->assertRedirect('/rooms');
+    }
+
+    /**
+     * ログイン後のリダイレクト先が/になっていること
+     */
+    public function testRedirectToRoomsAfterLogin()
+    {
+        $user = factory(User::class)->create([
+            'password' => bcrypt('test1111'),
+        ]);
+
+        // まだ、認証されていない
+        $this->assertFalse(Auth::check());
+
+        $response = $this->from('login')->post('login', [
+            'email'    => $user->email,
+            'password' => 'test1111'
+        ]);
+
+        // 認証されている
+        $this->assertTrue(Auth::check());
+
+        $response->assertRedirect('/rooms');
+    }
+
+    /**
+     * 有効な部屋に入室済みのユーザーはログイン後のリダイレクト先が/room/{uname}になっていること
+     */
+    public function testRedirectToRoomUnameAfterLogin()
+    {
+        $user = factory(User::class)->create([
+            'password' => bcrypt('test1111'),
+        ]);
+        $board = $this->createBoard();
+
+        $room = factory(Room::class)->create([
+            'uname'     => uniqid(),
+            'name'      => 'first room',
+            'owner_id'  => $user->id,
+            'board_id'  => $board->id,
+            'max_member_count'  => 10,
+            'member_count'      => 0,
+            'status'    => config('const.room_status_open'),
+        ]);
+
+        $repository = new RoomRepository();
+
+        $result = $repository->addMember($user->id, $room->id);
+        $this->assertTrue($result);
+
+        $response = $this->post('login', [
+            'email'    => $user->email,
+            'password' => 'test1111'
+        ]);
+
+        $response->assertRedirect('/rooms');
+
+        $response = $this->actingAs($user)->get('rooms');
+
+        $response->assertRedirect('/room/'.$room->uname);
     }
 }

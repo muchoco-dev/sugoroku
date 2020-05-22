@@ -13,9 +13,9 @@
 
 Auth::routes();
 
-Route::get('/', 'HomeController@index');
+Route::middleware('auth')->get('/', 'RoomController@index');
 
 Route::middleware('auth')->get('/home', 'HomeController@index')->name('home');
 Route::middleware('auth')->get('/rooms', 'RoomController@index')->name('rooms');
-Route::middleware('auth')->get('/room/{uname}', 'RoomController@show');
+Route::middleware('auth')->get('/room/{uname}', 'RoomController@show')->name('room.show');;
 Route::middleware('auth')->get('/room/{uname}/join', 'RoomController@join');
