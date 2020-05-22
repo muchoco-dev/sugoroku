@@ -18,6 +18,12 @@ class RoomTest extends TestCase
 
     use RefreshDatabase;
 
+    public function setUp():void
+    {
+        parent::setUp();
+        $this->artisan('passport:install');
+    }
+
     /**
      * ゲームボードの作成
      */
@@ -708,6 +714,118 @@ class RoomTest extends TestCase
         $response = $this->actingAs($user)->get('rooms');
 
         $response->assertRedirect('/room/'.$room->uname);
+    }
+
+    /**
+     * オーナーが部屋を解散したかどうかを確認
+     */
+    public function testBalus()
+    {
+        $user = factory(User::class)->create();
+        $board = $this->createBoard();
+
+        $name = 'new room';
+
+        Passport::actingAs($user);
+        $response = $this->post('/api/room/create', [
+            'name'      => $name,
+        ])->assertJson([
+            'status'  => 'success'
+        ]);
+
+        $repository = new RoomRepository();
+        $room = $repository->getOwnOpenRoom($user->id);
+
+        $result = $repository->balus($user->id);
+        $this->assertTrue($result);
+    }
+
+    /**
+     * ゲーム開始中に解散ができないことを確認
+     */
+    public function testCannotBalusDuringPlayGame()
+    {
+        $user = factory(User::class)->create();
+        $board = $this->createBoard();
+
+        $room = factory(Room::class)->create([
+            'uname'     => uniqid(),
+            'name'      => 'first room',
+            'owner_id'  => $user->id,
+            'board_id'  => $board->id,
+            'max_member_count'  => 10,
+            'member_count'      => 0,
+            'status'    => config('const.room_status_busy'),
+        ]);
+
+
+        $repository = new RoomRepository();
+        $result = $repository->addMember($user->id, $room->id);
+        $this->assertTrue($result);
+
+        $result = $repository->balus($user->id);
+        $this->assertFalse($result);
+    }
+
+    /**
+     * 解散後、部屋がソフトデリートされていることを確認
+     */
+    public function testRoomSoftDeleteAfterDisband()
+    {
+        $user = factory(User::class)->create();
+        $board = $this->createBoard();
+
+        $name = 'new room';
+
+        Passport::actingAs($user);
+        $response = $this->post('/api/room/create', [
+            'name'      => $name,
+        ])->assertJson([
+            'status'  => 'success'
+        ]);
+
+        $repository = new RoomRepository();
+        $room = $repository->getOwnOpenRoom($user->id);
+
+        $result = $repository->balus($user->id);
+        $this->assertTrue($result);
+
+        $this->assertSoftDeleted('rooms', [
+            'owner_id'      => $user->id,
+        ]);
+
+        // room_userの物理削除を確認
+        $this->assertDatabaseMissing('room_user', [
+            'room_id'   => $room->id
+        ]);
+    }
+
+    /**
+     * 解散後、room_userが物理削除されていることを確認
+     */
+    public function testRoomUserDeleteAfterDisband()
+    {
+        $user = factory(User::class)->create();
+        $board = $this->createBoard();
+
+        $name = 'new room';
+
+        Passport::actingAs($user);
+        $response = $this->post('/api/room/create', [
+            'name'      => $name,
+        ])->assertJson([
+            'status'  => 'success'
+        ]);
+
+        $repository = new RoomRepository();
+        $room = $repository->getOwnOpenRoom($user->id);
+
+        $result = $repository->balus($user->id);
+        $this->assertTrue($result);
+
+        $this->assertDatabaseMissing('room_user', [
+            'room_id'   => $room->id
+        ]);
     }
 
     /**
