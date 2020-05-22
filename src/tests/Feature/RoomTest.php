@@ -84,14 +84,14 @@ class RoomTest extends TestCase
     }
 
     /**
-     * 既にユーザが作ったオープン中の部屋がある場合、新しく部屋を作ることはできない
+     * ゲームに参加中のユーザーは、新しく部屋を作ることはできない
      */
     public function testUserCannotCreateRooms()
     {
         $user = factory(User::class)->create();
         $board = $this->createBoard();
 
-        factory(Room::class)->create([
+        $room = factory(Room::class)->create([
             'uname'     => uniqid(),
             'name'      => 'first room',
             'owner_id'  => $user->id,
@@ -101,13 +101,17 @@ class RoomTest extends TestCase
             'status'    => config('const.room_status_open')
         ]);
 
+        $repository = new RoomRepository();
+        $result = $repository->addMember($user->id, $room->id);
+        $this->assertTrue($result);
+
         $name = 'second room';
         Passport::actingAs($user);
         $response = $this->post('/api/room/create', [
             'name' => $name
         ])->assertJson([
             'status'    => 'error',
-            'message'   => '既にオープン中の部屋があるようです'
+            'message'   => '既にゲームに参加中の部屋があるようです'
         ]);
 
         $this->assertDatabaseMissing('rooms', [
@@ -635,5 +639,31 @@ class RoomTest extends TestCase
             'status'    => 'error',
             'message'   => '入室できませんでした'
         ]);
+    }
+
+    /**
+     * ユーザが参加中の有効な部屋のIDを返す
+     */
+    public function testGetUserJoinActiveRoomId()
+    {
+        $user = factory(User::class)->create();
+        $board = $this->createBoard();
+
+        $room = factory(Room::class)->create([
+            'uname'     => uniqid(),
+            'name'      => 'first room',
+            'owner_id'  => $user->id,
+            'board_id'  => $board->id,
+            'max_member_count'  => 10,
+            'member_count'      => 0,
+            'status'    => config('const.room_status_open'),
+        ]);
+
+        $repository = new RoomRepository();
+        $result = $repository->addMember($user->id, $room->id);
+        $this->assertTrue($result);
+
+        $roomId = $repository->getUserJoinActiveRoomId($user->id);
+        $this->assertNotNull($roomId);
     }
 }

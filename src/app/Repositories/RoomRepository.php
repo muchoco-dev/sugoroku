@@ -195,6 +195,28 @@ class RoomRepository
 
         return $room->spaces;
     }
+
+    /**
+     * ユーザが参加中の有効な部屋のIDを取得
+     */
+    public function getUserJoinActiveRoomId($userId)
+    {
+        $rooms = $this->model::where([
+            'status'        => config('const.room_status_open'),
+            'deleted_at'    => NULL
+        ])->get();
+
+        foreach ($rooms as $room) {
+            $result = Room::find($room->id)->users()->get();
+            foreach ($result as $item) {
+                if ($item->pivot['user_id'] == $userId) {
+                    return $item->pivot['room_id'];
+                }
+            }
+        }
+
+        return NULL;
+    }
 }
 
 

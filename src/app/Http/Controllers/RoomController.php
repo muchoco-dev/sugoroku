@@ -31,12 +31,12 @@ class RoomController extends Controller
     {
         $repository = new RoomRepository();
 
-        // オープン中の部屋を既に所有していたらエラー
-        $room = $repository->getOwnOpenRoom(Auth::id());
-        if ($room) {
+        // ユーザーが参加中の有効な部屋のIDを返却できたらエラー
+        $activeRoomId = $repository->getUserJoinActiveRoomId(Auth::id());
+        if ($activeRoomId != NULL) {
             return response()->json([
                 'status'    => 'error',
-                'message'   => '既にオープン中の部屋があるようです'
+                'message'   => '既にゲームに参加中の部屋があるようです'
             ]);
         }
 
