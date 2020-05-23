@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Events\MemberAdded;
+use App\Models\RoomUser;
 use App\Models\User;
 use App\Models\Room;
 use App\Models\Board;
@@ -907,6 +908,32 @@ class RoomTest extends TestCase
         $response->assertJson([
             'status'   => 'success',
             'uname'    => $room->uname
+        ]);
+    }
+
+    public function testGetJoinRoomMembers()
+    {
+        $roomRepository = new RoomRepository();
+
+        $user = factory(User::class)->create();
+        $board = $this->createBoard();
+        $uname = uniqid();
+
+        $room = factory(Room::class)->create([
+            'uname'     => $uname,
+            'name'      => 'test room',
+            'owner_id'  => $user->id,
+            'board_id'  => $board->id,
+            'max_member_count'  => config('const.max_member_count'),
+            'member_count'      => 0,
+            'status'    => config('const.room_status_open')
+        ]);
+
+        $members = $roomRepository->getJoinRoomMembers($room);
+        $this->assertIsObject($members);
+
+        $this->get('/room/{uname}/get_members', [
+            'uname' => $room->uname
         ]);
     }
 }
