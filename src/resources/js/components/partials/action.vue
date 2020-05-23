@@ -1,10 +1,12 @@
 <template>
 <div id="action">
-    <button v-if="canShowStartButton()" @click="start()">ゲームスタート</button>
-    <form v-if="!is_started">
-        <label>招待URL</label>
-        <input class="copy" type="text" v-model="join_url" :data-clipboard-text="join_url" readonly>
-    </form>
+    <button class="btn btn-success" v-if="canShowStartButton()" @click="start()">ゲームスタート</button>
+    <div class="input-group mt-4" v-if="!is_started">
+        <div class="input-group-prepend">
+            <span class="input-group-text">招待URL</span>
+        </div>
+        <input class="copy form-control bg-white" type="text" v-model="join_url" :data-clipboard-text="join_url" readonly>
+    </div>
 </div>
 </template>
 <script>
