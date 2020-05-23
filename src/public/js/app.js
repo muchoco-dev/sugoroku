@@ -2014,7 +2014,7 @@ __webpack_require__.r(__webpack_exports__);
         'name': this.name
       }).then(function (response) {
         if (response.data.status === 'success') {
-          console.log('部屋を作成できました。');
+          location.href = '/room/' + response.data.uname;
         } else {
           alert(response.data.message);
         }
@@ -45444,7 +45444,9 @@ var render = function() {
       _c(
         "tr",
         [
-          _c("td", { attrs: { id: _vm.col_count } }, [_vm._v("Goal")]),
+          _c("td", { attrs: { id: _vm.board.goal_position } }, [
+            _vm._v("Goal")
+          ]),
           _vm._v(" "),
           _vm._l(_vm.col_count - 2, function(n) {
             return _c("td", { attrs: { border: "0" } }, [
@@ -45452,7 +45454,7 @@ var render = function() {
             ])
           }),
           _vm._v(" "),
-          _c("td", [_vm._v(" ")])
+          _c("td", { attrs: { id: _vm.col_count + 1 } }, [_vm._v(" ")])
         ],
         2
       ),
@@ -45460,7 +45462,9 @@ var render = function() {
       _c(
         "tr",
         _vm._l(_vm.col_count, function(n) {
-          return _c("td", [_vm._v("\n                 \n            ")])
+          return _c("td", { attrs: { id: _vm.board.goal_position - n } }, [
+            _vm._v("\n                 \n            ")
+          ])
         }),
         0
       )

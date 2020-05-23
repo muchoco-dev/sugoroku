@@ -9,14 +9,14 @@
             </td>
         </tr>
         <tr>
-            <td v-bind:id="col_count">Goal</td>
+            <td v-bind:id="board.goal_position">Goal</td>
             <td border="0" v-for="n in (col_count-2)">
                 &nbsp;
             </td>
-            <td>&nbsp;</td>
+            <td v-bind:id="col_count+1">&nbsp;</td>
         </tr>
         <tr>
-            <td v-for="n in col_count">
+            <td v-for="n in col_count" v-bind:id="board.goal_position - n">
                 &nbsp;
             </td>
         </tr>
@@ -43,6 +43,9 @@ export default {
             return this.spaces[id].name;
         }
         return false;
+    },
+    setPiece: function () {
+        
     }
   }
 }
