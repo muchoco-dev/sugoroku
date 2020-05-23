@@ -1913,6 +1913,10 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: {
     room: Object,
@@ -1922,7 +1926,8 @@ __webpack_require__.r(__webpack_exports__);
   },
   data: function data() {
     return {
-      is_started: false
+      is_started: false,
+      join_url: location.href + '/join'
     };
   },
   methods: {
@@ -45281,6 +45286,38 @@ var render = function() {
           },
           [_vm._v("ゲームスタート")]
         )
+      : _vm._e(),
+    _vm._v(" "),
+    !_vm.is_started
+      ? _c("form", [
+          _c("label", [_vm._v("招待URL")]),
+          _vm._v(" "),
+          _c("input", {
+            directives: [
+              {
+                name: "model",
+                rawName: "v-model",
+                value: _vm.join_url,
+                expression: "join_url"
+              }
+            ],
+            staticClass: "copy",
+            attrs: {
+              type: "text",
+              "data-clipboard-text": _vm.join_url,
+              readonly: ""
+            },
+            domProps: { value: _vm.join_url },
+            on: {
+              input: function($event) {
+                if ($event.target.composing) {
+                  return
+                }
+                _vm.join_url = $event.target.value
+              }
+            }
+          })
+        ])
       : _vm._e()
   ])
 }
@@ -58873,6 +58910,10 @@ module.exports = function(module) {
  */
 __webpack_require__(/*! ./bootstrap */ "./resources/js/bootstrap.js");
 
+var clipboard = new ClipboardJS('.copy');
+clipboard.on('success', function (e) {
+  alert('コピーしました！');
+});
 window.Vue = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.common.js");
 /**
  * The following block of code may be used to automatically register your

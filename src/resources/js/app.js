@@ -6,6 +6,12 @@
 
 require('./bootstrap');
 
+var clipboard = new ClipboardJS('.copy');
+clipboard.on('success', function(e) {
+    alert('コピーしました！');
+});
+
+
 window.Vue = require('vue');
 
 /**
