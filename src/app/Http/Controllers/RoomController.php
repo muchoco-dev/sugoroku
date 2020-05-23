@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Repositories\UserRepository;
 use App\Repositories\RoomRepository;
@@ -96,7 +95,7 @@ class RoomController extends Controller
 
         return view('room.show', compact('room', 'spaces', 'pusher_token'));
     }
-    
+
     public function join($uname) {
         $repository = new RoomRepository();
         $room = $repository->findByUname($uname);
@@ -120,4 +119,11 @@ class RoomController extends Controller
         }
     }
 
+    public function getMembers(string $uname)
+    {
+        $repository = new RoomRepository();
+        $members = $repository->getJoinRoomMembers($repository->findByUname($uname));
+
+        return response()->json($members);
+    }
 }

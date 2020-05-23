@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Events\MemberAdded;
 use App\Models\Room;
+use App\Models\RoomUser;
 use App\Models\Space;
 use Illuminate\Support\Facades\Auth;
 
@@ -248,6 +249,11 @@ class RoomRepository
             }
         }
         return NULL;
+    }
+
+    public function getJoinRoomMembers(Room $room)
+    {
+        return RoomUser::where('room_id', $room->id)->get();
     }
 }
 
