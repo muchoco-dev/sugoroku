@@ -263,7 +263,7 @@ class RoomTest extends TestCase
             'owner_id'  => $user->id,
             'board_id'  => $board->id,
             'max_member_count'  => 10,
-            'member_count'      => 12,
+            'member_count'      => 10,
             'status'    => config('const.room_status_open'),
         ]);
 

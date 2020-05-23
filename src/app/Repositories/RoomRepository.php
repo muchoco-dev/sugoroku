@@ -131,7 +131,7 @@ class RoomRepository
      */
     public function isMemberExceededMaxMember($room)
     {
-        if ($room['member_count'] > $room['max_member_count']) {
+        if ($room['member_count'] > $room['max_member_count'] - 1) {
             return true;
         }
         return false;
