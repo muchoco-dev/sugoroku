@@ -46,7 +46,7 @@ export default {
           'name': this.name
       }).then(function(response) {
         if (response.data.status === 'success') {
-            console.log('部屋を作成できました。');
+          location.href = '/room/'+response.data.uname;
         } else {
             alert(response.data.message);
         }

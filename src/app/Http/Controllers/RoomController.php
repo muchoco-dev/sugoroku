@@ -67,9 +67,14 @@ class RoomController extends Controller
         // 入室処理
         $repository->addMember(Auth::id(), $roomId);
 
+        // 作成した部屋を取得
+        $createRoomUser = $repository->getOwnOpenRoom(Auth::id());
+
         return response()->json([
-            'status'     => 'success'
+            'status'     => 'success',
+            'uname'      => $createRoomUser->uname
         ]);
+
     }
 
     public function show($uname)
