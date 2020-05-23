@@ -1,6 +1,10 @@
 <template>
 <div id="action">
     <button v-if="canShowStartButton()" @click="start()">ゲームスタート</button>
+    <form v-if="!is_started">
+        <label>招待URL</label>
+        <input class="copy" type="text" v-model="join_url" :data-clipboard-text="join_url" readonly>
+    </form>
 </div>
 </template>
 <script>
@@ -13,7 +17,8 @@ export default {
   },
   data: function () {
     return {
-      is_started: false
+      is_started: false,
+      join_url: location.href + '/join'
     }
   },
   methods: {
