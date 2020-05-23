@@ -1,6 +1,6 @@
 <template>
 <div id="sugoroku">
-    <table border="1">
+    <table class="bg-white table table-borderless w-100">
         <tr>
             <td v-bind:id="n" v-for="n in col_count">
                 <div v-if="n === 1">Start</div>
@@ -10,7 +10,7 @@
         </tr>
         <tr>
             <td v-bind:id="board.goal_position">Goal</td>
-            <td border="0" v-for="n in (col_count-2)">
+            <td border="0" v-for="n in (col_count-2)" class="bg-light">
                 &nbsp;
             </td>
             <td v-bind:id="col_count+1">&nbsp;</td>

@@ -1917,6 +1917,8 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: {
     room: Object,
@@ -2059,7 +2061,6 @@ __webpack_require__.r(__webpack_exports__);
   mounted: function mounted() {
     var _this = this;
 
-    this.logs.push('test');
     window.Echo["private"]('sugoroku-started-channel.' + this.room_id).listen('SugorokuStarted', function (response) {
       _this.logs.push('ゲームスタート！');
     });
@@ -2122,7 +2123,8 @@ __webpack_require__.r(__webpack_exports__);
       }
 
       return false;
-    }
+    },
+    setPiece: function setPiece() {}
   }
 });
 
@@ -45278,6 +45280,7 @@ var render = function() {
       ? _c(
           "button",
           {
+            staticClass: "btn btn-success",
             on: {
               click: function($event) {
                 return _vm.start()
@@ -45289,8 +45292,8 @@ var render = function() {
       : _vm._e(),
     _vm._v(" "),
     !_vm.is_started
-      ? _c("form", [
-          _c("label", [_vm._v("招待URL")]),
+      ? _c("div", { staticClass: "input-group mt-4" }, [
+          _vm._m(0),
           _vm._v(" "),
           _c("input", {
             directives: [
@@ -45301,7 +45304,7 @@ var render = function() {
                 expression: "join_url"
               }
             ],
-            staticClass: "copy",
+            staticClass: "copy form-control bg-white",
             attrs: {
               type: "text",
               "data-clipboard-text": _vm.join_url,
@@ -45321,7 +45324,16 @@ var render = function() {
       : _vm._e()
   ])
 }
-var staticRenderFns = []
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "input-group-prepend" }, [
+      _c("span", { staticClass: "input-group-text" }, [_vm._v("招待URL")])
+    ])
+  }
+]
 render._withStripped = true
 
 
@@ -45433,7 +45445,7 @@ var render = function() {
   var _c = _vm._self._c || _h
   return _c(
     "div",
-    { attrs: { id: "logs" } },
+    { staticClass: "border h-100", attrs: { id: "logs" } },
     _vm._l(_vm.logs, function(log) {
       return _c("p", [_vm._v(_vm._s(log))])
     }),
@@ -45463,7 +45475,7 @@ var render = function() {
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
   return _c("div", { attrs: { id: "sugoroku" } }, [
-    _c("table", { attrs: { border: "1" } }, [
+    _c("table", { staticClass: "bg-white table table-borderless w-100" }, [
       _c(
         "tr",
         _vm._l(_vm.col_count, function(n) {
@@ -45486,9 +45498,11 @@ var render = function() {
           ]),
           _vm._v(" "),
           _vm._l(_vm.col_count - 2, function(n) {
-            return _c("td", { attrs: { border: "0" } }, [
-              _vm._v("\n                 \n            ")
-            ])
+            return _c(
+              "td",
+              { staticClass: "bg-light", attrs: { border: "0" } },
+              [_vm._v("\n                 \n            ")]
+            )
           }),
           _vm._v(" "),
           _c("td", { attrs: { id: _vm.col_count + 1 } }, [_vm._v(" ")])

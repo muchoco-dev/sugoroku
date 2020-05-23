@@ -1,5 +1,5 @@
 <template>
-<div id="logs">
+<div id="logs" class="border h-100">
   <p v-for="log in logs">{{ log }}</p>
 </div>
 </template>
@@ -14,8 +14,6 @@ export default {
     }
   },
   mounted: function () {
-    this.logs.push('test');
-
     window.Echo.private('sugoroku-started-channel.' + this.room_id)
       .listen('SugorokuStarted',response => {
         this.logs.push('ゲームスタート！');
