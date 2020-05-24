@@ -11,7 +11,7 @@
                         <p>部屋名：{{ $room['name'] }}</p>
                         <p>人数：{{ $room['member_count'].'/'.$room['max_member_count'] }}</p>
                         @if ($room['member_count'] < $room['max_member_count'])
-                            <a href="/room/{uname}/join" class="btn btn-primary">参加</a>
+                            <a href="/room/{{ $room['uname'] }}/join" class="btn btn-primary">参加</a>
                         @endif
                     </div>
                 @endforeach
