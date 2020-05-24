@@ -35,13 +35,12 @@ class SugorokuController extends Controller
         ]);
     }
 
-    public function getKomaPosition(StartGameRequest $request)
+    public function getKomaPosition($user_id, $room_id)
     {
-        $validated = $request->validated();
-        $room = Room::find($validated['room_id']);
+        $room = Room::find($room_id);
 
         $repository = new RoomRepository;
-        $komaPositon = $repository->getKomaPosition(Auth::id(), $room->id);
+        $komaPositon = $repository->getKomaPosition($user_id, $room->id);
 
         return response()->json([
             'status'    => 'success',

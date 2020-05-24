@@ -171,13 +171,11 @@ class SugorokuTest extends TestCase
     public function testUsergetKomaPosition() 
     {
         Passport::actingAs($this->owner);
-        $response = $this->post('/api/sugoroku/position', [
-            'room_id'   => $this->room->id
-        ]);
+        $response = $this->get("/api/sugoroku/position/{$this->owner->id}/{$this->room->id}");
 
         $response->assertJson([
             'status'   => 'success',
-            'position' => 1
+            'position' => $this->room->users()->find($this->owner->id)->pivot['position']
         ]);
 
     }
