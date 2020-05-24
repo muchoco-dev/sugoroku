@@ -14,5 +14,9 @@ return [
     'max_number_of_active_rooms'    => 20,
 
     // マップ効果
-    'effect_change_status'          => 1
+    'effect_change_status'          => 1,
+
+    // アクションID
+    'action_by_dice'                => 1,
+    'action_by_space'               => 2,
 ];

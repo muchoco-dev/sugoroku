@@ -2103,6 +2103,30 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: {
     board: Object,
@@ -2110,11 +2134,32 @@ __webpack_require__.r(__webpack_exports__);
   },
   data: function data() {
     return {
-      col_count: 0
+      col_count: 0,
+      piece_icons: ['cat', 'crow', 'frog', 'dragon', 'dog'],
+      virus_icon: 'virus',
+      piece_colors: {
+        health: 'text-success',
+        sick: 'text-danger',
+        finished: ''
+      },
+      pieces: [],
+      piece_positions: {}
     };
   },
   created: function created() {
     this.col_count = (Number(this.board.goal_position) - 2) / 2;
+    this.piece_positions = {
+      1: [{
+        aicon: this.piece_icons[0],
+        color: this.piece_colors.health
+      }, {
+        aicon: this.piece_icons[1],
+        color: this.piece_colors.health
+      }, {
+        aicon: this.virus_icon,
+        color: this.piece_colors.sick
+      }]
+    }; // TODO: 他の実装に合わせてデータ構成調整
   },
   methods: {
     getSpaceName: function getSpaceName(id) {
@@ -2122,9 +2167,11 @@ __webpack_require__.r(__webpack_exports__);
         return this.spaces[id].name;
       }
 
-      return false;
+      return '';
     },
-    setPiece: function setPiece() {}
+    setPiece: function setPiece(position) {
+      return this.piece_positions[position];
+    }
   }
 });
 
@@ -45481,9 +45528,41 @@ var render = function() {
         _vm._l(_vm.col_count, function(n) {
           return _c("td", { attrs: { id: n } }, [
             n === 1
-              ? _c("div", [_vm._v("Start")])
+              ? _c(
+                  "div",
+                  [
+                    _vm._v("\n                    Start\n                    "),
+                    _vm._l(_vm.setPiece(n), function(piece) {
+                      return _c("span", [
+                        _c("i", {
+                          class:
+                            "fas fa-2x fa-" + piece.aicon + " " + piece.color
+                        })
+                      ])
+                    })
+                  ],
+                  2
+                )
               : _vm.getSpaceName(n)
-              ? _c("div", [_vm._v(_vm._s(_vm.getSpaceName(n)))])
+              ? _c(
+                  "div",
+                  [
+                    _vm._v(
+                      "\n                    " +
+                        _vm._s(_vm.getSpaceName(n)) +
+                        "\n                    "
+                    ),
+                    _vm._l(_vm.setPiece(n), function(piece) {
+                      return _c("span", [
+                        _c("i", {
+                          class:
+                            "fas fa-2x fa-" + piece.aicon + " " + piece.color
+                        })
+                      ])
+                    })
+                  ],
+                  2
+                )
               : _c("div", [_vm._v(" ")])
           ])
         }),
@@ -45493,9 +45572,21 @@ var render = function() {
       _c(
         "tr",
         [
-          _c("td", { attrs: { id: _vm.board.goal_position } }, [
-            _vm._v("Goal")
-          ]),
+          _c(
+            "td",
+            { attrs: { id: _vm.board.goal_position } },
+            [
+              _vm._v("\n                Goal\n                "),
+              _vm._l(_vm.setPiece(_vm.board.goal_position), function(piece) {
+                return _c("span", [
+                  _c("i", {
+                    class: "fas fa-2x fa-" + piece.aicon + " " + piece.color
+                  })
+                ])
+              })
+            ],
+            2
+          ),
           _vm._v(" "),
           _vm._l(_vm.col_count - 2, function(n) {
             return _c(
@@ -45505,7 +45596,25 @@ var render = function() {
             )
           }),
           _vm._v(" "),
-          _c("td", { attrs: { id: _vm.col_count + 1 } }, [_vm._v(" ")])
+          _c(
+            "td",
+            { attrs: { id: _vm.col_count + 1 } },
+            [
+              _vm._v(
+                "\n                " +
+                  _vm._s(_vm.getSpaceName(_vm.col_count + 1)) +
+                  "\n                "
+              ),
+              _vm._l(_vm.setPiece(_vm.col_count + 1), function(piece) {
+                return _c("span", [
+                  _c("i", {
+                    class: "fas fa-2x fa-" + piece.aicon + " " + piece.color
+                  })
+                ])
+              })
+            ],
+            2
+          )
         ],
         2
       ),
@@ -45513,9 +45622,28 @@ var render = function() {
       _c(
         "tr",
         _vm._l(_vm.col_count, function(n) {
-          return _c("td", { attrs: { id: _vm.board.goal_position - n } }, [
-            _vm._v("\n                 \n            ")
-          ])
+          return _c(
+            "td",
+            { attrs: { id: _vm.board.goal_position - n } },
+            [
+              _vm._v(
+                "\n                " +
+                  _vm._s(_vm.getSpaceName(_vm.board.goal_position - n)) +
+                  "\n                "
+              ),
+              _vm._l(_vm.setPiece(_vm.board.goal_position - n), function(
+                piece
+              ) {
+                return _c("span", [
+                  _c("i", {
+                    class: "fas fa-2x fa-" + piece.aicon + " " + piece.color
+                  })
+                ])
+              }),
+              _vm._v("\n                 \n            ")
+            ],
+            2
+          )
         }),
         0
       )
