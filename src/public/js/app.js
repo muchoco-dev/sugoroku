@@ -2103,6 +2103,20 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: {
     board: Object,
@@ -2122,9 +2136,14 @@ __webpack_require__.r(__webpack_exports__);
         return this.spaces[id].name;
       }
 
-      return false;
+      return '';
     },
-    setPiece: function setPiece() {}
+    setPiece: function setPiece(position) {
+      var pieces = {
+        1: 'user1'
+      };
+      return pieces[position];
+    }
   }
 });
 
@@ -45481,9 +45500,19 @@ var render = function() {
         _vm._l(_vm.col_count, function(n) {
           return _c("td", { attrs: { id: n } }, [
             n === 1
-              ? _c("div", [_vm._v("Start")])
+              ? _c("div", [
+                  _vm._v("\n                    Start\n                    "),
+                  _c("p", [_vm._v(_vm._s(_vm.setPiece(n)))])
+                ])
               : _vm.getSpaceName(n)
-              ? _c("div", [_vm._v(_vm._s(_vm.getSpaceName(n)))])
+              ? _c("div", [
+                  _vm._v(
+                    "\n                    " +
+                      _vm._s(_vm.getSpaceName(n)) +
+                      "\n                    "
+                  ),
+                  _c("p", [_vm._v(_vm._s(_vm.setPiece(n)))])
+                ])
               : _c("div", [_vm._v(" ")])
           ])
         }),
@@ -45494,7 +45523,8 @@ var render = function() {
         "tr",
         [
           _c("td", { attrs: { id: _vm.board.goal_position } }, [
-            _vm._v("Goal")
+            _vm._v("\n                Goal\n                "),
+            _c("p", [_vm._v(_vm._s(_vm.setPiece(_vm.board.goal_position)))])
           ]),
           _vm._v(" "),
           _vm._l(_vm.col_count - 2, function(n) {
@@ -45505,7 +45535,14 @@ var render = function() {
             )
           }),
           _vm._v(" "),
-          _c("td", { attrs: { id: _vm.col_count + 1 } }, [_vm._v(" ")])
+          _c("td", { attrs: { id: _vm.col_count + 1 } }, [
+            _vm._v(
+              "\n                " +
+                _vm._s(_vm.getSpaceName(_vm.col_count + 1)) +
+                "\n                "
+            ),
+            _c("p", [_vm._v(_vm._s(_vm.setPiece(_vm.col_count + 1)))])
+          ])
         ],
         2
       ),
@@ -45514,6 +45551,14 @@ var render = function() {
         "tr",
         _vm._l(_vm.col_count, function(n) {
           return _c("td", { attrs: { id: _vm.board.goal_position - n } }, [
+            _vm._v(
+              "\n                " +
+                _vm._s(_vm.getSpaceName(_vm.board.goal_position - n)) +
+                "\n                "
+            ),
+            _c("p", [
+              _vm._v(_vm._s(_vm.setPiece(_vm.board.goal_position - n)))
+            ]),
             _vm._v("\n                 \n            ")
           ])
         }),
