@@ -164,4 +164,21 @@ class SugorokuTest extends TestCase
 
         Event::assertDispatched(SugorokuStarted::class);
     }
+
+    /**
+     * ログイン済みのユーザのみコマの現在地が取得できる
+     */
+    public function testUsergetKomaPosition() 
+    {
+        Passport::actingAs($this->owner);
+        $response = $this->post('/api/sugoroku/position', [
+            'room_id'   => $this->room->id
+        ]);
+
+        $response->assertJson([
+            'status'   => 'success',
+            'position' => 1
+        ]);
+
+    }
 }

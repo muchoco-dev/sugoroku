@@ -249,6 +249,18 @@ class RoomRepository
         }
         return NULL;
     }
+
+    /**
+     * コマの現在地を返却する
+     */
+    public function getKomaPosition($userId, $roomId)
+    {
+        $room = $this->model::where([
+            'id'      => $roomId
+        ])->first();
+
+        return $room->users()->find($userId)->pivot['position'];
+    }
 }
 
 
