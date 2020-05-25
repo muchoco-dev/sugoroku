@@ -49,6 +49,7 @@
             </td>
         </tr>
     </table>
+    <a href="#" @click="movePiece(2, 10)">user2で10すすむ</a>
 </div>
 </template>
 <script>
@@ -83,7 +84,7 @@ export default {
             },
             {
                 user_id: 2,
-                status: 1,
+                status: 2,
                 aicon: this.piece_icons[4],
             },
             {
@@ -125,6 +126,17 @@ export default {
                     } else if (new_position > this.board.goal_position) {
                         new_position = new_position - this.board.goal_position;
                     }
+
+                    // 特殊マス
+                    for (let i = parseInt(position) + 1;i <= new_position; i++) {
+                        console.log(i);
+                        if (this.spaces[i]) {
+                            if (this.spaces[i]['effect_id'] === 1) {
+                                users[key]['status'] = this.spaces[i]['effect_num'];
+                            }
+                        }
+                    }
+
                     if (!Array.isArray(piece_positions_tmp[new_position])) {
                         piece_positions_tmp[new_position] = [];
                     }

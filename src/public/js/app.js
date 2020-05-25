@@ -2131,6 +2131,7 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: {
     board: Object,
@@ -2159,7 +2160,7 @@ __webpack_require__.r(__webpack_exports__);
         aicon: this.piece_icons[0]
       }, {
         user_id: 2,
-        status: 1,
+        status: 2,
         aicon: this.piece_icons[4]
       }, {
         user_id: 0,
@@ -2200,6 +2201,17 @@ __webpack_require__.r(__webpack_exports__);
               users[key]['status'] = 3;
             } else if (new_position > this.board.goal_position) {
               new_position = new_position - this.board.goal_position;
+            } // 特殊マス
+
+
+            for (var i = parseInt(position) + 1; i <= new_position; i++) {
+              console.log(i);
+
+              if (this.spaces[i]) {
+                if (this.spaces[i]['effect_id'] === 1) {
+                  users[key]['status'] = this.spaces[i]['effect_num'];
+                }
+              }
             }
 
             if (!Array.isArray(piece_positions_tmp[new_position])) {
@@ -45726,7 +45738,20 @@ var render = function() {
         }),
         0
       )
-    ])
+    ]),
+    _vm._v(" "),
+    _c(
+      "a",
+      {
+        attrs: { href: "#" },
+        on: {
+          click: function($event) {
+            return _vm.movePiece(2, 10)
+          }
+        }
+      },
+      [_vm._v("user2で10すすむ")]
+    )
   ])
 }
 var staticRenderFns = []
