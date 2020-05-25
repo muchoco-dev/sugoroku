@@ -2142,9 +2142,9 @@ __webpack_require__.r(__webpack_exports__);
       piece_icons: ['cat', 'crow', 'frog', 'dragon', 'dog'],
       virus_icon: 'virus',
       piece_colors: {
-        health: 'text-success',
-        sick: 'text-danger',
-        finished: ''
+        1: 'text-success',
+        2: 'text-danger',
+        3: ''
       },
       pieces: [],
       piece_positions: {}
@@ -2155,16 +2155,16 @@ __webpack_require__.r(__webpack_exports__);
     this.piece_positions = {
       1: [{
         user_id: 1,
-        aicon: this.piece_icons[0],
-        color: this.piece_colors.health
+        status: 1,
+        aicon: this.piece_icons[0]
       }, {
         user_id: 2,
-        aicon: this.piece_icons[4],
-        color: this.piece_colors.health
+        status: 1,
+        aicon: this.piece_icons[4]
       }, {
         user_id: 0,
-        aicon: this.virus_icon,
-        color: this.piece_colors.sick
+        status: 2,
+        aicon: this.virus_icon
       }]
     }; // TODO: 他の実装に合わせてデータ構成調整
   },
@@ -2186,10 +2186,19 @@ __webpack_require__.r(__webpack_exports__);
         var users = this.piece_positions[position];
 
         for (var key in users) {
-          if (user_id === users[key]['user_id']) {
-            var new_position = parseInt(position) + parseInt(move_num);
+          // ゴール済みのユーザは除外
+          if (users[key]['status'] === 3) {
+            piece_positions_tmp[position].push(users[key]);
+            continue;
+          }
 
-            if (new_position > this.board.goal_position) {
+          if (user_id === users[key]['user_id']) {
+            var new_position = parseInt(position) + parseInt(move_num); // ゴール
+
+            if (new_position >= this.board.goal_position && users[key]['status'] === this.board.goal_status) {
+              new_position = this.board.goal_position;
+              users[key]['status'] = 3;
+            } else if (new_position > this.board.goal_position) {
               new_position = new_position - this.board.goal_position;
             }
 
@@ -45574,7 +45583,10 @@ var render = function() {
                       return _c("span", [
                         _c("i", {
                           class:
-                            "fas fa-2x fa-" + piece.aicon + " " + piece.color
+                            "fas fa-2x fa-" +
+                            piece.aicon +
+                            " " +
+                            _vm.piece_colors[piece.status]
                         })
                       ])
                     })
@@ -45594,7 +45606,10 @@ var render = function() {
                       return _c("span", [
                         _c("i", {
                           class:
-                            "fas fa-2x fa-" + piece.aicon + " " + piece.color
+                            "fas fa-2x fa-" +
+                            piece.aicon +
+                            " " +
+                            _vm.piece_colors[piece.status]
                         })
                       ])
                     })
@@ -45606,7 +45621,11 @@ var render = function() {
                   _vm._l(_vm.setPiece(n), function(piece) {
                     return _c("span", [
                       _c("i", {
-                        class: "fas fa-2x fa-" + piece.aicon + " " + piece.color
+                        class:
+                          "fas fa-2x fa-" +
+                          piece.aicon +
+                          " " +
+                          _vm.piece_colors[piece.status]
                       })
                     ])
                   }),
@@ -45628,7 +45647,11 @@ var render = function() {
               _vm._l(_vm.setPiece(_vm.board.goal_position), function(piece) {
                 return _c("span", [
                   _c("i", {
-                    class: "fas fa-2x fa-" + piece.aicon + " " + piece.color
+                    class:
+                      "fas fa-2x fa-" +
+                      piece.aicon +
+                      " " +
+                      _vm.piece_colors[piece.status]
                   })
                 ])
               })
@@ -45656,7 +45679,11 @@ var render = function() {
               _vm._l(_vm.setPiece(_vm.col_count + 1), function(piece) {
                 return _c("span", [
                   _c("i", {
-                    class: "fas fa-2x fa-" + piece.aicon + " " + piece.color
+                    class:
+                      "fas fa-2x fa-" +
+                      piece.aicon +
+                      " " +
+                      _vm.piece_colors[piece.status]
                   })
                 ])
               })
@@ -45684,7 +45711,11 @@ var render = function() {
               ) {
                 return _c("span", [
                   _c("i", {
-                    class: "fas fa-2x fa-" + piece.aicon + " " + piece.color
+                    class:
+                      "fas fa-2x fa-" +
+                      piece.aicon +
+                      " " +
+                      _vm.piece_colors[piece.status]
                   })
                 ])
               }),
