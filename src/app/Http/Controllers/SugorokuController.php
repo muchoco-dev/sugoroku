@@ -34,4 +34,21 @@ class SugorokuController extends Controller
             'status'    => 'success'
         ]);
     }
+
+    public function getKomaPosition($user_id, $room_id)
+    {
+        $repository = new RoomRepository;
+        $komaPositon = $repository->getKomaPosition($user_id, $room_id);
+
+        if (!$komaPositon) {
+            return response()->json([
+                'status'    => 'error',
+            ]);
+        }
+
+        return response()->json([
+            'status'    => 'success',
+            'position'   => $komaPositon
+        ]);
+    }
 }
