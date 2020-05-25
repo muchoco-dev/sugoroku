@@ -168,7 +168,7 @@ class SugorokuTest extends TestCase
     /**
      * ログイン済みのユーザのみコマの現在地が取得できる
      */
-    public function testUsergetKomaPosition() 
+    public function testUserGetKomaPosition() 
     {
         Passport::actingAs($this->owner);
         $response = $this->get("/api/sugoroku/position/{$this->owner->id}/{$this->room->id}");
@@ -181,9 +181,9 @@ class SugorokuTest extends TestCase
     }
 
     /**
-     * ログイン済みのユーザのみコマの現在地が取得できない
+     * 存在しない部屋のコマの現在地はエラーが返る
      */
-    public function testUserCannotgetKomaPosition() 
+    public function testUserCannotGetKomaPosition() 
     {
         Passport::actingAs($this->owner);
         $response = $this->get("/api/sugoroku/position/{$this->owner->id}/99");
