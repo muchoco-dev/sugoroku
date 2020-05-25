@@ -15,7 +15,11 @@
                         <i v-bind:class="'fas fa-2x fa-' + piece.aicon + ' ' + piece.color"></i>
                     </span>
                 </div>
-                <div v-else>&nbsp;</div>
+                <div v-else>
+                    <span v-for="piece in setPiece(n)">
+                        <i v-bind:class="'fas fa-2x fa-' + piece.aicon + ' ' + piece.color"></i>
+                    </span>
+                </div>
             </td>
         </tr>
         <tr>
@@ -72,18 +76,21 @@ export default {
 
       this.piece_positions = {
         1: [
-          {
-            aicon: this.piece_icons[0],
-            color: this.piece_colors.health
-          },
-          {
-            aicon: this.piece_icons[1],
-            color: this.piece_colors.health
-          },
-          {
-            aicon: this.virus_icon,
-            color: this.piece_colors.sick
-          }
+            {
+                user_id: 1,
+                aicon: this.piece_icons[0],
+                color: this.piece_colors.health
+            },
+            {
+                user_id: 2,
+                aicon: this.piece_icons[4],
+                color: this.piece_colors.health
+            },
+            {
+                user_id: 0,
+                aicon: this.virus_icon,
+                color: this.piece_colors.sick
+            }
         ]
       }; // TODO: 他の実装に合わせてデータ構成調整
    },
@@ -96,6 +103,30 @@ export default {
     },
     setPiece: function (position) {
         return this.piece_positions[position];
+    },
+    movePiece: function (user_id, move_num) {
+        let piece_positions_tmp = {};
+        for (let position in this.piece_positions) {
+            let users = this.piece_positions[position];
+            for (let key in users) {
+                if (user_id === users[key]['user_id']) {
+                    let new_position = parseInt(position) + parseInt(move_num);
+                    if (new_position > this.board.goal_position) {
+                        new_position = new_position - this.board.goal_position;
+                    }
+                    if (!Array.isArray(piece_positions_tmp[new_position])) {
+                        piece_positions_tmp[new_position] = [];
+                    }
+                    piece_positions_tmp[new_position].push(users[key]);
+                } else {
+                    if (!Array.isArray(piece_positions_tmp[position])) {
+                        piece_positions_tmp[position] = [];
+                    }
+                    piece_positions_tmp[position].push(users[key]);
+                }
+            }
+        }
+        this.piece_positions = piece_positions_tmp;
     }
   }
 }

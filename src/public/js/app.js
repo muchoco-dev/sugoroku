@@ -2127,6 +2127,10 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: {
     board: Object,
@@ -2150,12 +2154,15 @@ __webpack_require__.r(__webpack_exports__);
     this.col_count = (Number(this.board.goal_position) - 2) / 2;
     this.piece_positions = {
       1: [{
+        user_id: 1,
         aicon: this.piece_icons[0],
         color: this.piece_colors.health
       }, {
-        aicon: this.piece_icons[1],
+        user_id: 2,
+        aicon: this.piece_icons[4],
         color: this.piece_colors.health
       }, {
+        user_id: 0,
         aicon: this.virus_icon,
         color: this.piece_colors.sick
       }]
@@ -2171,6 +2178,37 @@ __webpack_require__.r(__webpack_exports__);
     },
     setPiece: function setPiece(position) {
       return this.piece_positions[position];
+    },
+    movePiece: function movePiece(user_id, move_num) {
+      var piece_positions_tmp = {};
+
+      for (var position in this.piece_positions) {
+        var users = this.piece_positions[position];
+
+        for (var key in users) {
+          if (user_id === users[key]['user_id']) {
+            var new_position = parseInt(position) + parseInt(move_num);
+
+            if (new_position > this.board.goal_position) {
+              new_position = new_position - this.board.goal_position;
+            }
+
+            if (!Array.isArray(piece_positions_tmp[new_position])) {
+              piece_positions_tmp[new_position] = [];
+            }
+
+            piece_positions_tmp[new_position].push(users[key]);
+          } else {
+            if (!Array.isArray(piece_positions_tmp[position])) {
+              piece_positions_tmp[position] = [];
+            }
+
+            piece_positions_tmp[position].push(users[key]);
+          }
+        }
+      }
+
+      this.piece_positions = piece_positions_tmp;
     }
   }
 });
@@ -45563,7 +45601,17 @@ var render = function() {
                   ],
                   2
                 )
-              : _c("div", [_vm._v(" ")])
+              : _c(
+                  "div",
+                  _vm._l(_vm.setPiece(n), function(piece) {
+                    return _c("span", [
+                      _c("i", {
+                        class: "fas fa-2x fa-" + piece.aicon + " " + piece.color
+                      })
+                    ])
+                  }),
+                  0
+                )
           ])
         }),
         0
