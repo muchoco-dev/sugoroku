@@ -6,18 +6,18 @@
                 <div v-if="n === 1">
                     Start
                     <span v-for="piece in setPiece(n)">
-                        <i v-bind:class="'fas fa-2x fa-' + piece.aicon + ' ' + piece.color"></i>
+                        <i v-bind:class="'fas fa-2x fa-' + piece.aicon + ' ' + piece_colors[piece.status]"></i>
                     </span>
                 </div>
                 <div v-else-if="getSpaceName(n)">
                     {{ getSpaceName(n) }}
                     <span v-for="piece in setPiece(n)">
-                        <i v-bind:class="'fas fa-2x fa-' + piece.aicon + ' ' + piece.color"></i>
+                        <i v-bind:class="'fas fa-2x fa-' + piece.aicon + ' ' + piece_colors[piece.status]"></i>
                     </span>
                 </div>
                 <div v-else>
                     <span v-for="piece in setPiece(n)">
-                        <i v-bind:class="'fas fa-2x fa-' + piece.aicon + ' ' + piece.color"></i>
+                        <i v-bind:class="'fas fa-2x fa-' + piece.aicon + ' ' + piece_colors[piece.status] "></i>
                     </span>
                 </div>
             </td>
@@ -26,7 +26,7 @@
             <td v-bind:id="board.goal_position">
                 Goal
                 <span v-for="piece in setPiece(board.goal_position)">
-                    <i v-bind:class="'fas fa-2x fa-' + piece.aicon + ' ' + piece.color"></i>
+                    <i v-bind:class="'fas fa-2x fa-' + piece.aicon + ' ' + piece_colors[piece.status]"></i>
                 </span>
             </td>
             <td border="0" v-for="n in (col_count-2)" class="bg-light">
@@ -35,7 +35,7 @@
             <td v-bind:id="col_count+1">
                 {{ getSpaceName(col_count+1) }}
                 <span v-for="piece in setPiece(col_count+1)">
-                    <i v-bind:class="'fas fa-2x fa-' + piece.aicon + ' ' + piece.color"></i>
+                    <i v-bind:class="'fas fa-2x fa-' + piece.aicon + ' ' + piece_colors[piece.status]"></i>
                 </span>
             </td>
         </tr>
@@ -43,7 +43,7 @@
             <td v-for="n in col_count" v-bind:id="board.goal_position - n">
                 {{ getSpaceName(board.goal_position - n) }}
                 <span v-for="piece in setPiece(board.goal_position - n)">
-                    <i v-bind:class="'fas fa-2x fa-' + piece.aicon + ' ' + piece.color"></i>
+                    <i v-bind:class="'fas fa-2x fa-' + piece.aicon + ' ' + piece_colors[piece.status]"></i>
                 </span>
                 &nbsp;
             </td>
@@ -63,9 +63,9 @@ export default {
       piece_icons: ['cat', 'crow', 'frog', 'dragon', 'dog'],
       virus_icon: 'virus',
       piece_colors: {
-        health: 'text-success',
-        sick: 'text-danger',
-        finished:  ''
+        1: 'text-success',
+        2: 'text-danger',
+        3:  ''
       },
       pieces: [],
       piece_positions: {},
@@ -78,18 +78,18 @@ export default {
         1: [
             {
                 user_id: 1,
+                status: 1,
                 aicon: this.piece_icons[0],
-                color: this.piece_colors.health
             },
             {
                 user_id: 2,
+                status: 1,
                 aicon: this.piece_icons[4],
-                color: this.piece_colors.health
             },
             {
                 user_id: 0,
+                status: 2,
                 aicon: this.virus_icon,
-                color: this.piece_colors.sick
             }
         ]
       }; // TODO: 他の実装に合わせてデータ構成調整
@@ -109,9 +109,20 @@ export default {
         for (let position in this.piece_positions) {
             let users = this.piece_positions[position];
             for (let key in users) {
+                // ゴール済みのユーザは除外
+                if (users[key]['status'] === 3) {
+                    piece_positions_tmp[position].push(users[key]);
+                    continue;
+                }
+
                 if (user_id === users[key]['user_id']) {
                     let new_position = parseInt(position) + parseInt(move_num);
-                    if (new_position > this.board.goal_position) {
+
+                    // ゴール
+                    if (new_position >= this.board.goal_position && users[key]['status'] === this.board.goal_status) {
+                        new_position = this.board.goal_position;
+                        users[key]['status'] = 3;
+                    } else if (new_position > this.board.goal_position) {
                         new_position = new_position - this.board.goal_position;
                     }
                     if (!Array.isArray(piece_positions_tmp[new_position])) {
