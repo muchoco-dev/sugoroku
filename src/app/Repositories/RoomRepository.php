@@ -259,6 +259,10 @@ class RoomRepository
             'id'      => $roomId
         ])->first();
 
+        if (!$room) {
+            return false;
+        }
+
         return $room->users()->find($userId)->pivot['position'];
     }
 }

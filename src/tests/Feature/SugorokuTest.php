@@ -179,4 +179,18 @@ class SugorokuTest extends TestCase
         ]);
 
     }
+
+    /**
+     * ログイン済みのユーザのみコマの現在地が取得できない
+     */
+    public function testUserCannotgetKomaPosition() 
+    {
+        Passport::actingAs($this->owner);
+        $response = $this->get("/api/sugoroku/position/{$this->owner->id}/99");
+
+        $response->assertJson([
+            'status'   => 'error',
+        ]);
+    }
+
 }
