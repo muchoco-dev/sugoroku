@@ -7,6 +7,7 @@
         </div>
         <input class="copy form-control bg-white" type="text" v-model="join_url" :data-clipboard-text="join_url" readonly>
     </div>
+    <button @click="delete">削除</button>
 </div>
 </template>
 <script>
@@ -53,6 +54,10 @@ export default {
           console.log(error);
         });
 
+    },
+    // 部屋の削除
+    delete: function ()  {
+      balus(Auth::id())
     }
   }
 }
