@@ -2093,6 +2093,10 @@ __webpack_require__.r(__webpack_exports__);
   mounted: function mounted() {
     var _this = this;
 
+    window.Echo["private"]('member-added-channel.' + this.room.id).listen('MemberAdded', function (response) {// response.userId
+      // response.roomId
+      // これを使ってユーザ名取得&this.membersに追加
+    });
     window.Echo["private"]('sugoroku-started-channel.' + this.room.id).listen('SugorokuStarted', function (response) {
       _this.logs.push('ゲームスタート！');
 
@@ -45634,7 +45638,7 @@ var render = function() {
         ])
       ]),
       _vm._v(" "),
-      _c("div", { staticClass: "border col-2", attrs: { id: "members" } }, [
+      _c("div", { staticClass: "col-2", attrs: { id: "members" } }, [
         _c(
           "ul",
           { staticClass: "list-group" },

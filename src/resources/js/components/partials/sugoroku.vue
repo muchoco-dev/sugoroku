@@ -52,7 +52,7 @@
                 </tr>
             </table>
         </div>
-        <div id="members" class="border col-2">
+        <div id="members" class="col-2">
             <ul class="list-group">
                 <li v-for="member in members" class="list-group-item">
                     <i v-if="member.aicon" v-bind:class="'fas fa-2x fa-' + member.aicon"></i>
@@ -112,13 +112,18 @@ export default {
     },
     created: function () {
       this.col_count = (Number(this.board.goal_position) - 2) / 2;
-  },
-  mounted: function () {
-    window.Echo.private('sugoroku-started-channel.' + this.room.id)
-      .listen('SugorokuStarted',response => {
-        this.logs.push('ゲームスタート！');
+    },
+    mounted: function () {
+        window.Echo.private('member-added-channel.' + this.room.id).listen('MemberAdded',response => {
+            // response.userId
+            // response.roomId
+            // これを使ってユーザ名取得&this.membersに追加
+        });
+
+        window.Echo.private('sugoroku-started-channel.' + this.room.id).listen('SugorokuStarted',response => {
+            this.logs.push('ゲームスタート！');
             this.gameStart()
-      });
+        });
   },
   methods: {
     getSpaceName: function (id) { // 特殊マスの名前を返す
