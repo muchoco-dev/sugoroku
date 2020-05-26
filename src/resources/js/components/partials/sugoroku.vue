@@ -51,10 +51,14 @@
                     </td>
                 </tr>
             </table>
-            <a href="#" @click="movePiece(2, 10)">user2で10すすむ</a>
         </div>
-        <div id="members" class="border col-2">
-            <p v-for="member in members">{{ member.name }}</p>
+        <div id="members" class="col-2">
+            <ul class="list-group">
+                <li v-for="member in members" class="list-group-item">
+                    <i v-if="member.aicon" v-bind:class="'fas fa-2x fa-' + member.aicon"></i>
+                    {{ member.name }}
+                </li>
+            </ul>
         </div>
     </div>
 
@@ -84,7 +88,7 @@ export default {
         board: Object,
         spaces: Object,
         room: Object,
-        members: Object,
+        members: Array,
         auth_id: Number,
         room_status_open: Number,
         token: String
@@ -108,34 +112,18 @@ export default {
     },
     created: function () {
       this.col_count = (Number(this.board.goal_position) - 2) / 2;
+    },
+    mounted: function () {
+        window.Echo.private('member-added-channel.' + this.room.id).listen('MemberAdded',response => {
+            // response.userId
+            // response.roomId
+            // これを使ってユーザ名取得&this.membersに追加
+        });
 
-      this.piece_positions = {
-        1: [
-            {
-                user_id: 1,
-                status: 1,
-                aicon: this.piece_icons[0],
-            },
-            {
-                user_id: 2,
-                status: 2,
-                aicon: this.piece_icons[4],
-            },
-            {
-                user_id: 0,
-                status: 2,
-                aicon: this.virus_icon,
-            }
-        ]
-      }; // TODO: 他の実装に合わせてデータ構成調整
-
-      this.readyStart();
-  },
-  mounted: function () {
-    window.Echo.private('sugoroku-started-channel.' + this.room.id)
-      .listen('SugorokuStarted',response => {
-        this.logs.push('ゲームスタート！');
-      });
+        window.Echo.private('sugoroku-started-channel.' + this.room.id).listen('SugorokuStarted',response => {
+            this.logs.push('ゲームスタート！');
+            this.gameStart()
+        });
   },
   methods: {
     getSpaceName: function (id) { // 特殊マスの名前を返す
@@ -144,10 +132,40 @@ export default {
         }
         return '';
     },
-    readyStart: function () { // ゲーム開始準備
+    gameStart: function () { // ゲーム開始準備
+        // メンバー情報の一括更新
+        axios.defaults.headers.common['Authorization'] = "Bearer " + this.token;
+        axios.get('/sugoroku/members/' + this.room.id, {
+            headers: {
+                "Content-Type": "application/json"
+            }
+        }).then(function (response) {
+            if (response.data.status === 'success') {
+                this.members = response.data.members;
+            }
+        }).catch(function(error) {
+            console.log(error);
+        });
+
+
+        // コマの初期設定
+        this.piece_positions[1] = [];
         for (let key in this.members) {
-            console.log(this.members[key]);
+            this.piece_positions[1].push({
+                user_id: this.members[key]['id'],
+                status: 1,
+                aicon: this.piece_icons[key],
+                go: this.members[key]['pivot']['go']
+            });
+            this.members[key]['aicon'] = this.piece_icons[key];
         }
+        this.piece_positions[1].push({
+            user_id: 0,
+            status: 2,
+            go: this.members.length + 1,
+            aicon: this.virus_icon
+        });
+        console.log(this.piece_positions);
     },
     setPiece: function (position) { // マスにコマを配置する
         return this.piece_positions[position];
@@ -176,7 +194,6 @@ export default {
 
                     // 特殊マス
                     for (let i = parseInt(position) + 1;i <= new_position; i++) {
-                        console.log(i);
                         if (this.spaces[i]) {
                             if (this.spaces[i]['effect_id'] === 1) {
                                 users[key]['status'] = this.spaces[i]['effect_num'];
@@ -208,23 +225,21 @@ export default {
       return false;
     },
     start: function () {
-      axios.defaults.headers.common['Authorization'] = "Bearer " + this.token;
-      axios.post(
-        '/api/sugoroku/start',
-        {
-          headers: {
-            "Content-Type": "application/json"
-          },
-          'room_id': this.room.id
+        axios.defaults.headers.common['Authorization'] = "Bearer " + this.token;
+        axios.post('/api/sugoroku/start', {
+            headers: {
+                "Content-Type": "application/json"
+            },
+            'room_id': this.room.id
         }).then(response => {
-          if (response.data.status === 'success') {
-            console.log('ゲームをスタートしました');
-            this.is_started = true;
-          } else {
-            alert(response.data.message);
-          }
+            if (response.data.status === 'success') {
+                console.log('ゲームをスタートしました');
+                this.is_started = true;
+            } else {
+                alert(response.data.message);
+            }
         }).catch(function(error) {
-          console.log(error);
+            console.log(error);
         });
 
     }

@@ -51,4 +51,19 @@ class SugorokuController extends Controller
             'position'   => $komaPositon
         ]);
     }
+
+    public function getMembers($room_id)
+    {
+        $room = Room::find($room_id);
+        if (!$room) {
+            return response()->json([
+                'status' => 'error',
+            ]);
+        }
+
+        return response()->json([
+            'status'    => 'success',
+            'members'   => $room->users
+        ]);
+    }
 }

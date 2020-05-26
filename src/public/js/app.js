@@ -2056,12 +2056,16 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: {
     board: Object,
     spaces: Object,
     room: Object,
-    members: Object,
+    members: Array,
     auth_id: Number,
     room_status_open: Number,
     token: String
@@ -2085,29 +2089,18 @@ __webpack_require__.r(__webpack_exports__);
   },
   created: function created() {
     this.col_count = (Number(this.board.goal_position) - 2) / 2;
-    this.piece_positions = {
-      1: [{
-        user_id: 1,
-        status: 1,
-        aicon: this.piece_icons[0]
-      }, {
-        user_id: 2,
-        status: 2,
-        aicon: this.piece_icons[4]
-      }, {
-        user_id: 0,
-        status: 2,
-        aicon: this.virus_icon
-      }]
-    }; // TODO: 他の実装に合わせてデータ構成調整
-
-    this.readyStart();
   },
   mounted: function mounted() {
     var _this = this;
 
+    window.Echo["private"]('member-added-channel.' + this.room.id).listen('MemberAdded', function (response) {// response.userId
+      // response.roomId
+      // これを使ってユーザ名取得&this.membersに追加
+    });
     window.Echo["private"]('sugoroku-started-channel.' + this.room.id).listen('SugorokuStarted', function (response) {
       _this.logs.push('ゲームスタート！');
+
+      _this.gameStart();
     });
   },
   methods: {
@@ -2119,11 +2112,41 @@ __webpack_require__.r(__webpack_exports__);
 
       return '';
     },
-    readyStart: function readyStart() {
+    gameStart: function gameStart() {
       // ゲーム開始準備
+      // メンバー情報の一括更新
+      axios.defaults.headers.common['Authorization'] = "Bearer " + this.token;
+      axios.get('/sugoroku/members/' + this.room.id, {
+        headers: {
+          "Content-Type": "application/json"
+        }
+      }).then(function (response) {
+        if (response.data.status === 'success') {
+          this.members = response.data.members;
+        }
+      })["catch"](function (error) {
+        console.log(error);
+      }); // コマの初期設定
+
+      this.piece_positions[1] = [];
+
       for (var key in this.members) {
-        console.log(this.members[key]);
+        this.piece_positions[1].push({
+          user_id: this.members[key]['id'],
+          status: 1,
+          aicon: this.piece_icons[key],
+          go: this.members[key]['pivot']['go']
+        });
+        this.members[key]['aicon'] = this.piece_icons[key];
       }
+
+      this.piece_positions[1].push({
+        user_id: 0,
+        status: 2,
+        go: this.members.length + 1,
+        aicon: this.virus_icon
+      });
+      console.log(this.piece_positions);
     },
     setPiece: function setPiece(position) {
       // マスにコマを配置する
@@ -2155,8 +2178,6 @@ __webpack_require__.r(__webpack_exports__);
 
 
             for (var i = parseInt(position) + 1; i <= new_position; i++) {
-              console.log(i);
-
               if (this.spaces[i]) {
                 if (this.spaces[i]['effect_id'] === 1) {
                   users[key]['status'] = this.spaces[i]['effect_num'];
@@ -45614,30 +45635,28 @@ var render = function() {
             }),
             0
           )
-        ]),
-        _vm._v(" "),
-        _c(
-          "a",
-          {
-            attrs: { href: "#" },
-            on: {
-              click: function($event) {
-                return _vm.movePiece(2, 10)
-              }
-            }
-          },
-          [_vm._v("user2で10すすむ")]
-        )
+        ])
       ]),
       _vm._v(" "),
-      _c(
-        "div",
-        { staticClass: "border col-2", attrs: { id: "members" } },
-        _vm._l(_vm.members, function(member) {
-          return _c("p", [_vm._v(_vm._s(member.name))])
-        }),
-        0
-      )
+      _c("div", { staticClass: "col-2", attrs: { id: "members" } }, [
+        _c(
+          "ul",
+          { staticClass: "list-group" },
+          _vm._l(_vm.members, function(member) {
+            return _c("li", { staticClass: "list-group-item" }, [
+              member.aicon
+                ? _c("i", { class: "fas fa-2x fa-" + member.aicon })
+                : _vm._e(),
+              _vm._v(
+                "\n                    " +
+                  _vm._s(member.name) +
+                  "\n                "
+              )
+            ])
+          }),
+          0
+        )
+      ])
     ]),
     _vm._v(" "),
     _c("div", { staticClass: "row" }, [
