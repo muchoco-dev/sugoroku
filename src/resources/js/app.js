@@ -27,8 +27,6 @@ window.Vue = require('vue');
 
 Vue.component('create-room-modal', require('./components/partials/createRoomModal.vue').default);
 Vue.component('sugoroku', require('./components/partials/sugoroku.vue').default);
-Vue.component('action', require('./components/partials/action.vue').default);
-Vue.component('logs', require('./components/partials/logs.vue').default);
 
 
 // passport

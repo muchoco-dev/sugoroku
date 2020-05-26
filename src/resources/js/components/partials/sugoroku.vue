@@ -1,78 +1,112 @@
 <template>
-<div id="sugoroku">
-    <table class="bg-white table table-borderless w-100">
-        <tr>
-            <td v-bind:id="n" v-for="n in col_count">
-                <div v-if="n === 1">
-                    Start
-                    <span v-for="piece in setPiece(n)">
-                        <i v-bind:class="'fas fa-2x fa-' + piece.aicon + ' ' + piece_colors[piece.status]"></i>
-                    </span>
+<div>
+    <div class="row mb-5">
+        <div id="sugoroku" class="col-9">
+            <table class="bg-white table table-borderless w-100">
+                <tr>
+                    <td v-bind:id="n" v-for="n in col_count">
+                        <div v-if="n === 1">
+                            Start
+                            <span v-for="piece in setPiece(n)">
+                                <i v-bind:class="'fas fa-2x fa-' + piece.aicon + ' ' + piece_colors[piece.status]"></i>
+                            </span>
+                        </div>
+                        <div v-else-if="getSpaceName(n)">
+                            {{ getSpaceName(n) }}
+                            <span v-for="piece in setPiece(n)">
+                                <i v-bind:class="'fas fa-2x fa-' + piece.aicon + ' ' + piece_colors[piece.status]"></i>
+                            </span>
+                        </div>
+                        <div v-else>
+                            <span v-for="piece in setPiece(n)">
+                                <i v-bind:class="'fas fa-2x fa-' + piece.aicon + ' ' + piece_colors[piece.status] "></i>
+                            </span>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td v-bind:id="board.goal_position">
+                        Goal
+                        <span v-for="piece in setPiece(board.goal_position)">
+                            <i v-bind:class="'fas fa-2x fa-' + piece.aicon + ' ' + piece_colors[piece.status]"></i>
+                        </span>
+                    </td>
+                    <td border="0" v-for="n in (col_count-2)" class="bg-light">
+                        &nbsp;
+                    </td>
+                    <td v-bind:id="col_count+1">
+                        {{ getSpaceName(col_count+1) }}
+                        <span v-for="piece in setPiece(col_count+1)">
+                            <i v-bind:class="'fas fa-2x fa-' + piece.aicon + ' ' + piece_colors[piece.status]"></i>
+                        </span>
+                    </td>
+                </tr>
+                <tr>
+                    <td v-for="n in col_count" v-bind:id="board.goal_position - n">
+                        {{ getSpaceName(board.goal_position - n) }}
+                        <span v-for="piece in setPiece(board.goal_position - n)">
+                            <i v-bind:class="'fas fa-2x fa-' + piece.aicon + ' ' + piece_colors[piece.status]"></i>
+                        </span>
+                        &nbsp;
+                    </td>
+                </tr>
+            </table>
+            <a href="#" @click="movePiece(2, 10)">user2で10すすむ</a>
+        </div>
+        <div id="members" class="border col-2">
+            <p v-for="member in members">{{ member.name }}</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-9">
+            <div id="logs" class="border h-100">
+                <p v-for="log in logs">{{ log }}</p>
+            </div>
+        </div>
+        <div class="col-2">
+            <div id="action">
+                <button class="btn btn-success" v-if="canShowStartButton()" @click="start()">ゲームスタート</button>
+                <div class="input-group mt-4" v-if="!is_started">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">招待URL</span>
+                    </div>
+                    <input class="copy form-control bg-white" type="text" v-model="join_url" :data-clipboard-text="join_url" readonly>
                 </div>
-                <div v-else-if="getSpaceName(n)">
-                    {{ getSpaceName(n) }}
-                    <span v-for="piece in setPiece(n)">
-                        <i v-bind:class="'fas fa-2x fa-' + piece.aicon + ' ' + piece_colors[piece.status]"></i>
-                    </span>
-                </div>
-                <div v-else>
-                    <span v-for="piece in setPiece(n)">
-                        <i v-bind:class="'fas fa-2x fa-' + piece.aicon + ' ' + piece_colors[piece.status] "></i>
-                    </span>
-                </div>
-            </td>
-        </tr>
-        <tr>
-            <td v-bind:id="board.goal_position">
-                Goal
-                <span v-for="piece in setPiece(board.goal_position)">
-                    <i v-bind:class="'fas fa-2x fa-' + piece.aicon + ' ' + piece_colors[piece.status]"></i>
-                </span>
-            </td>
-            <td border="0" v-for="n in (col_count-2)" class="bg-light">
-                &nbsp;
-            </td>
-            <td v-bind:id="col_count+1">
-                {{ getSpaceName(col_count+1) }}
-                <span v-for="piece in setPiece(col_count+1)">
-                    <i v-bind:class="'fas fa-2x fa-' + piece.aicon + ' ' + piece_colors[piece.status]"></i>
-                </span>
-            </td>
-        </tr>
-        <tr>
-            <td v-for="n in col_count" v-bind:id="board.goal_position - n">
-                {{ getSpaceName(board.goal_position - n) }}
-                <span v-for="piece in setPiece(board.goal_position - n)">
-                    <i v-bind:class="'fas fa-2x fa-' + piece.aicon + ' ' + piece_colors[piece.status]"></i>
-                </span>
-                &nbsp;
-            </td>
-        </tr>
-    </table>
-    <a href="#" @click="movePiece(2, 10)">user2で10すすむ</a>
+            </div>
+        </div>
+    </div>
 </div>
 </template>
 <script>
 export default {
-  props: {
-      board: Object,
-      spaces: Object
-  },
-  data() {
-    return {
-      col_count: 0,
-      piece_icons: ['cat', 'crow', 'frog', 'dragon', 'dog'],
-      virus_icon: 'virus',
-      piece_colors: {
-        1: 'text-success',
-        2: 'text-danger',
-        3:  ''
-      },
-      pieces: [],
-      piece_positions: {},
-    }
-  },
-  created: function () {
+    props: {
+        board: Object,
+        spaces: Object,
+        room: Object,
+        members: Object,
+        auth_id: Number,
+        room_status_open: Number,
+        token: String
+    },
+    data() {
+        return {
+            col_count: 0,
+            piece_icons: ['cat', 'crow', 'frog', 'dragon', 'dog'],
+            virus_icon: 'virus',
+            piece_colors: {
+                1: 'text-success',
+                2: 'text-danger',
+                3:  ''
+            },
+            pieces: [],
+            piece_positions: {},
+            logs: [],
+            is_started: false,
+            join_url: location.href + '/join'
+        }
+    },
+    created: function () {
       this.col_count = (Number(this.board.goal_position) - 2) / 2;
 
       this.piece_positions = {
@@ -94,18 +128,31 @@ export default {
             }
         ]
       }; // TODO: 他の実装に合わせてデータ構成調整
-   },
+
+      this.readyStart();
+  },
+  mounted: function () {
+    window.Echo.private('sugoroku-started-channel.' + this.room.id)
+      .listen('SugorokuStarted',response => {
+        this.logs.push('ゲームスタート！');
+      });
+  },
   methods: {
-    getSpaceName: function (id) {
+    getSpaceName: function (id) { // 特殊マスの名前を返す
         if (this.spaces[id]) {
             return this.spaces[id].name;
         }
         return '';
     },
-    setPiece: function (position) {
+    readyStart: function () { // ゲーム開始準備
+        for (let key in this.members) {
+            console.log(this.members[key]);
+        }
+    },
+    setPiece: function (position) { // マスにコマを配置する
         return this.piece_positions[position];
     },
-    movePiece: function (user_id, move_num) {
+    movePiece: function (user_id, move_num) { // コマを移動させる
         let piece_positions_tmp = {};
         for (let position in this.piece_positions) {
             let users = this.piece_positions[position];
@@ -150,6 +197,36 @@ export default {
             }
         }
         this.piece_positions = piece_positions_tmp;
+    },
+    canShowStartButton: function () {
+      if (this.room.owner_id === this.auth_id &&
+            this.room.status === this.room_status_open) {
+        if (!this.is_started) {
+          return true;
+        }
+      }
+      return false;
+    },
+    start: function () {
+      axios.defaults.headers.common['Authorization'] = "Bearer " + this.token;
+      axios.post(
+        '/api/sugoroku/start',
+        {
+          headers: {
+            "Content-Type": "application/json"
+          },
+          'room_id': this.room.id
+        }).then(response => {
+          if (response.data.status === 'success') {
+            console.log('ゲームをスタートしました');
+            this.is_started = true;
+          } else {
+            alert(response.data.message);
+          }
+        }).catch(function(error) {
+          console.log(error);
+        });
+
     }
   }
 }
