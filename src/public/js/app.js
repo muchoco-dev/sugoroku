@@ -2116,7 +2116,7 @@ __webpack_require__.r(__webpack_exports__);
       // ゲーム開始準備
       // メンバー情報の一括更新
       axios.defaults.headers.common['Authorization'] = "Bearer " + this.token;
-      axios.get('/sugoroku/members/' + this.room.id, {
+      axios.get('/api/sugoroku/members/' + this.room.id, {
         headers: {
           "Content-Type": "application/json"
         }
@@ -2146,7 +2146,6 @@ __webpack_require__.r(__webpack_exports__);
         go: this.members.length + 1,
         aicon: this.virus_icon
       });
-      console.log(this.piece_positions);
     },
     setPiece: function setPiece(position) {
       // マスにコマを配置する
