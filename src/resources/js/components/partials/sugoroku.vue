@@ -135,7 +135,7 @@ export default {
     gameStart: function () { // ゲーム開始準備
         // メンバー情報の一括更新
         axios.defaults.headers.common['Authorization'] = "Bearer " + this.token;
-        axios.get('/sugoroku/members/' + this.room.id, {
+        axios.get('/api/sugoroku/members/' + this.room.id, {
             headers: {
                 "Content-Type": "application/json"
             }
@@ -165,7 +165,6 @@ export default {
             go: this.members.length + 1,
             aicon: this.virus_icon
         });
-        console.log(this.piece_positions);
     },
     setPiece: function (position) { // マスにコマを配置する
         return this.piece_positions[position];
