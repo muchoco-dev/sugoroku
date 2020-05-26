@@ -19,3 +19,13 @@ Route::middleware('auth')->get('/home', 'HomeController@index')->name('home');
 Route::middleware('auth')->get('/rooms', 'RoomController@index')->name('rooms');
 Route::middleware('auth')->get('/room/{uname}', 'RoomController@show')->name('room.show');;
 Route::middleware('auth')->get('/room/{uname}/join', 'RoomController@join');
+
+Route::get('/privacy', function() {
+  return view('privacy');
+});
+Route::get('/terms', function() {
+  return view('terms');
+});
+Route::get('/developers', function() {
+  return view('developers');
+});
