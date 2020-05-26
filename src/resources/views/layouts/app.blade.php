@@ -80,4 +80,12 @@
         </main>
     </div>
 </body>
+<footer>
+    <ul>
+      <li><a href="/privacy">プライバシーポリシー</a></li>
+      <li><a href="/terms">利用規約</a></li>
+      <li><a href="/developers">開発者一覧</a></li>
+    </ul>
+    <p><a href="https://commew.net/">©commew</a></p>
+</footer>
 </html>
