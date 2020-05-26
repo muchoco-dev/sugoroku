@@ -1904,66 +1904,9 @@ module.exports = {
   !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/partials/action.vue?vue&type=script&lang=js& ***!
   \**************************************************************************************************************************************************************************/
 /*! exports provided: default */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
+/***/ (function(module, exports) {
 
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-/* harmony default export */ __webpack_exports__["default"] = ({
-  props: {
-    room: Object,
-    user_id: Number,
-    room_status_open: Number,
-    token: String
-  },
-  data: function data() {
-    return {
-      is_started: false,
-      join_url: location.href + '/join'
-    };
-  },
-  methods: {
-    canShowStartButton: function canShowStartButton() {
-      if (this.room.owner_id === this.user_id && this.room.status === this.room_status_open) {
-        if (!this.is_started) {
-          return true;
-        }
-      }
-
-      return false;
-    },
-    start: function start() {
-      var _this = this;
-
-      axios.defaults.headers.common['Authorization'] = "Bearer " + this.token;
-      axios.post('/api/sugoroku/start', {
-        headers: {
-          "Content-Type": "application/json"
-        },
-        'room_id': this.room.id
-      }).then(function (response) {
-        if (response.data.status === 'success') {
-          console.log('ゲームをスタートしました');
-          _this.is_started = true;
-        } else {
-          alert(response.data.message);
-        }
-      })["catch"](function (error) {
-        console.log(error);
-      });
-    }
-  }
-});
+throw new Error("Module build failed (from ./node_modules/babel-loader/lib/index.js):\nSyntaxError: C:\\Users\\private\\work\\sugoroku\\sugoroku\\src\\resources\\js\\components\\partials\\action.vue: Unexpected token, expected \",\" (60:16)\n\n  58 |     // 部屋の削除\n  59 |     delete: function ()  {\n> 60 |       balus(Auth::id())\n     |                 ^\n  61 |     },\n  62 |     getMember: function () {\n  63 |       console.log('aaaaaa');\n    at Parser._raise (C:\\Users\\private\\work\\sugoroku\\sugoroku\\src\\node_modules\\@babel\\parser\\lib\\index.js:742:17)\n    at Parser.raiseWithData (C:\\Users\\private\\work\\sugoroku\\sugoroku\\src\\node_modules\\@babel\\parser\\lib\\index.js:735:17)\n    at Parser.raise (C:\\Users\\private\\work\\sugoroku\\sugoroku\\src\\node_modules\\@babel\\parser\\lib\\index.js:729:17)\n    at Parser.unexpected (C:\\Users\\private\\work\\sugoroku\\sugoroku\\src\\node_modules\\@babel\\parser\\lib\\index.js:8779:16)\n    at Parser.expect (C:\\Users\\private\\work\\sugoroku\\sugoroku\\src\\node_modules\\@babel\\parser\\lib\\index.js:8765:28)\n    at Parser.parseCallExpressionArguments (C:\\Users\\private\\work\\sugoroku\\sugoroku\\src\\node_modules\\@babel\\parser\\lib\\index.js:9792:14)\n    at Parser.parseSubscript (C:\\Users\\private\\work\\sugoroku\\sugoroku\\src\\node_modules\\@babel\\parser\\lib\\index.js:9718:31)\n    at Parser.parseSubscripts (C:\\Users\\private\\work\\sugoroku\\sugoroku\\src\\node_modules\\@babel\\parser\\lib\\index.js:9647:19)\n    at Parser.parseExprSubscripts (C:\\Users\\private\\work\\sugoroku\\sugoroku\\src\\node_modules\\@babel\\parser\\lib\\index.js:9630:17)\n    at Parser.parseMaybeUnary (C:\\Users\\private\\work\\sugoroku\\sugoroku\\src\\node_modules\\@babel\\parser\\lib\\index.js:9604:21)\n    at Parser.parseExprOps (C:\\Users\\private\\work\\sugoroku\\sugoroku\\src\\node_modules\\@babel\\parser\\lib\\index.js:9474:23)\n    at Parser.parseMaybeConditional (C:\\Users\\private\\work\\sugoroku\\sugoroku\\src\\node_modules\\@babel\\parser\\lib\\index.js:9447:23)\n    at Parser.parseMaybeAssign (C:\\Users\\private\\work\\sugoroku\\sugoroku\\src\\node_modules\\@babel\\parser\\lib\\index.js:9402:21)\n    at Parser.parseExpression (C:\\Users\\private\\work\\sugoroku\\sugoroku\\src\\node_modules\\@babel\\parser\\lib\\index.js:9354:23)\n    at Parser.parseStatementContent (C:\\Users\\private\\work\\sugoroku\\sugoroku\\src\\node_modules\\@babel\\parser\\lib\\index.js:11233:23)\n    at Parser.parseStatement (C:\\Users\\private\\work\\sugoroku\\sugoroku\\src\\node_modules\\@babel\\parser\\lib\\index.js:11104:17)\n    at Parser.parseBlockOrModuleBlockBody (C:\\Users\\private\\work\\sugoroku\\sugoroku\\src\\node_modules\\@babel\\parser\\lib\\index.js:11679:25)\n    at Parser.parseBlockBody (C:\\Users\\private\\work\\sugoroku\\sugoroku\\src\\node_modules\\@babel\\parser\\lib\\index.js:11665:10)\n    at Parser.parseBlock (C:\\Users\\private\\work\\sugoroku\\sugoroku\\src\\node_modules\\@babel\\parser\\lib\\index.js:11649:10)\n    at Parser.parseFunctionBody (C:\\Users\\private\\work\\sugoroku\\sugoroku\\src\\node_modules\\@babel\\parser\\lib\\index.js:10656:24)\n    at Parser.parseFunctionBodyAndFinish (C:\\Users\\private\\work\\sugoroku\\sugoroku\\src\\node_modules\\@babel\\parser\\lib\\index.js:10639:10)\n    at C:\\Users\\private\\work\\sugoroku\\sugoroku\\src\\node_modules\\@babel\\parser\\lib\\index.js:11819:12\n    at Parser.withTopicForbiddingContext (C:\\Users\\private\\work\\sugoroku\\sugoroku\\src\\node_modules\\@babel\\parser\\lib\\index.js:10979:14)\n    at Parser.parseFunction (C:\\Users\\private\\work\\sugoroku\\sugoroku\\src\\node_modules\\@babel\\parser\\lib\\index.js:11818:10)\n    at Parser.parseFunctionExpression (C:\\Users\\private\\work\\sugoroku\\sugoroku\\src\\node_modules\\@babel\\parser\\lib\\index.js:10115:17)\n    at Parser.parseExprAtom (C:\\Users\\private\\work\\sugoroku\\sugoroku\\src\\node_modules\\@babel\\parser\\lib\\index.js:10023:21)\n    at Parser.parseExprSubscripts (C:\\Users\\private\\work\\sugoroku\\sugoroku\\src\\node_modules\\@babel\\parser\\lib\\index.js:9624:23)\n    at Parser.parseMaybeUnary (C:\\Users\\private\\work\\sugoroku\\sugoroku\\src\\node_modules\\@babel\\parser\\lib\\index.js:9604:21)\n    at Parser.parseExprOps (C:\\Users\\private\\work\\sugoroku\\sugoroku\\src\\node_modules\\@babel\\parser\\lib\\index.js:9474:23)\n    at Parser.parseMaybeConditional (C:\\Users\\private\\work\\sugoroku\\sugoroku\\src\\node_modules\\@babel\\parser\\lib\\index.js:9447:23)\n    at Parser.parseMaybeAssign (C:\\Users\\private\\work\\sugoroku\\sugoroku\\src\\node_modules\\@babel\\parser\\lib\\index.js:9402:21)\n    at Parser.parseObjectProperty (C:\\Users\\private\\work\\sugoroku\\sugoroku\\src\\node_modules\\@babel\\parser\\lib\\index.js:10534:101)\n    at Parser.parseObjPropValue (C:\\Users\\private\\work\\sugoroku\\sugoroku\\src\\node_modules\\@babel\\parser\\lib\\index.js:10559:101)\n    at Parser.parseObjectMember (C:\\Users\\private\\work\\sugoroku\\sugoroku\\src\\node_modules\\@babel\\parser\\lib\\index.js:10483:10)\n    at Parser.parseObj (C:\\Users\\private\\work\\sugoroku\\sugoroku\\src\\node_modules\\@babel\\parser\\lib\\index.js:10396:25)\n    at Parser.parseExprAtom (C:\\Users\\private\\work\\sugoroku\\sugoroku\\src\\node_modules\\@babel\\parser\\lib\\index.js:10017:28)");
 
 /***/ }),
 
@@ -45377,70 +45320,8 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
-var render = function() {
-  var _vm = this
-  var _h = _vm.$createElement
-  var _c = _vm._self._c || _h
-  return _c("div", { attrs: { id: "action" } }, [
-    _vm.canShowStartButton()
-      ? _c(
-          "button",
-          {
-            staticClass: "btn btn-success",
-            on: {
-              click: function($event) {
-                return _vm.start()
-              }
-            }
-          },
-          [_vm._v("ゲームスタート")]
-        )
-      : _vm._e(),
-    _vm._v(" "),
-    !_vm.is_started
-      ? _c("div", { staticClass: "input-group mt-4" }, [
-          _vm._m(0),
-          _vm._v(" "),
-          _c("input", {
-            directives: [
-              {
-                name: "model",
-                rawName: "v-model",
-                value: _vm.join_url,
-                expression: "join_url"
-              }
-            ],
-            staticClass: "copy form-control bg-white",
-            attrs: {
-              type: "text",
-              "data-clipboard-text": _vm.join_url,
-              readonly: ""
-            },
-            domProps: { value: _vm.join_url },
-            on: {
-              input: function($event) {
-                if ($event.target.composing) {
-                  return
-                }
-                _vm.join_url = $event.target.value
-              }
-            }
-          })
-        ])
-      : _vm._e()
-  ])
-}
-var staticRenderFns = [
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "input-group-prepend" }, [
-      _c("span", { staticClass: "input-group-text" }, [_vm._v("招待URL")])
-    ])
-  }
-]
-render._withStripped = true
+var render = function () {}
+var staticRenderFns = []
 
 
 
@@ -45590,7 +45471,9 @@ var render = function() {
               ? _c(
                   "div",
                   [
-                    _vm._v("\n                    Start\n                    "),
+                    _vm._v(
+                      "\r\n                    Start\r\n                    "
+                    ),
                     _vm._l(_vm.setPiece(n), function(piece) {
                       return _c("span", [
                         _c("i", {
@@ -45610,9 +45493,9 @@ var render = function() {
                   "div",
                   [
                     _vm._v(
-                      "\n                    " +
+                      "\r\n                    " +
                         _vm._s(_vm.getSpaceName(n)) +
-                        "\n                    "
+                        "\r\n                    "
                     ),
                     _vm._l(_vm.setPiece(n), function(piece) {
                       return _c("span", [
@@ -45655,7 +45538,7 @@ var render = function() {
             "td",
             { attrs: { id: _vm.board.goal_position } },
             [
-              _vm._v("\n                Goal\n                "),
+              _vm._v("\r\n                Goal\r\n                "),
               _vm._l(_vm.setPiece(_vm.board.goal_position), function(piece) {
                 return _c("span", [
                   _c("i", {
@@ -45675,7 +45558,7 @@ var render = function() {
             return _c(
               "td",
               { staticClass: "bg-light", attrs: { border: "0" } },
-              [_vm._v("\n                 \n            ")]
+              [_vm._v("\r\n                 \r\n            ")]
             )
           }),
           _vm._v(" "),
@@ -45684,9 +45567,9 @@ var render = function() {
             { attrs: { id: _vm.col_count + 1 } },
             [
               _vm._v(
-                "\n                " +
+                "\r\n                " +
                   _vm._s(_vm.getSpaceName(_vm.col_count + 1)) +
-                  "\n                "
+                  "\r\n                "
               ),
               _vm._l(_vm.setPiece(_vm.col_count + 1), function(piece) {
                 return _c("span", [
@@ -45714,9 +45597,9 @@ var render = function() {
             { attrs: { id: _vm.board.goal_position - n } },
             [
               _vm._v(
-                "\n                " +
+                "\r\n                " +
                   _vm._s(_vm.getSpaceName(_vm.board.goal_position - n)) +
-                  "\n                "
+                  "\r\n                "
               ),
               _vm._l(_vm.setPiece(_vm.board.goal_position - n), function(
                 piece
@@ -45731,7 +45614,7 @@ var render = function() {
                   })
                 ])
               }),
-              _vm._v("\n                 \n            ")
+              _vm._v("\r\n                 \r\n            ")
             ],
             2
           )
@@ -59238,8 +59121,8 @@ window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 window.Pusher = __webpack_require__(/*! pusher-js */ "./node_modules/pusher-js/dist/web/pusher.js");
 window.Echo = new laravel_echo__WEBPACK_IMPORTED_MODULE_0__["default"]({
   broadcaster: 'pusher',
-  key: "ff887ae07fb558e2739e",
-  cluster: "ap3",
+  key: "",
+  cluster: "mt1",
   encrypted: true
 });
 
@@ -59249,14 +59132,15 @@ window.Echo = new laravel_echo__WEBPACK_IMPORTED_MODULE_0__["default"]({
 /*!*****************************************************!*\
   !*** ./resources/js/components/partials/action.vue ***!
   \*****************************************************/
-/*! exports provided: default */
+/*! no static exports found */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _action_vue_vue_type_template_id_44c962d8___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./action.vue?vue&type=template&id=44c962d8& */ "./resources/js/components/partials/action.vue?vue&type=template&id=44c962d8&");
 /* harmony import */ var _action_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./action.vue?vue&type=script&lang=js& */ "./resources/js/components/partials/action.vue?vue&type=script&lang=js&");
-/* empty/unused harmony star reexport *//* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+/* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _action_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _action_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__[key]; }) }(__WEBPACK_IMPORT_KEY__));
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
 
 
 
@@ -59286,7 +59170,7 @@ component.options.__file = "resources/js/components/partials/action.vue"
 /*!******************************************************************************!*\
   !*** ./resources/js/components/partials/action.vue?vue&type=script&lang=js& ***!
   \******************************************************************************/
-/*! exports provided: default */
+/*! no static exports found */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -59800,8 +59684,8 @@ __webpack_require__.r(__webpack_exports__);
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! /var/www/html/sugoroku.commew.net/sugoroku/src/resources/js/app.js */"./resources/js/app.js");
-module.exports = __webpack_require__(/*! /var/www/html/sugoroku.commew.net/sugoroku/src/resources/sass/app.scss */"./resources/sass/app.scss");
+__webpack_require__(/*! C:\Users\private\work\sugoroku\sugoroku\src\resources\js\app.js */"./resources/js/app.js");
+module.exports = __webpack_require__(/*! C:\Users\private\work\sugoroku\sugoroku\src\resources\sass\app.scss */"./resources/sass/app.scss");
 
 
 /***/ })

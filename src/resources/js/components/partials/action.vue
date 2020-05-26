@@ -58,6 +58,21 @@ export default {
     // 部屋の削除
     delete: function ()  {
       balus(Auth::id())
+    },
+    getMember: function () {
+      console.log('aaaaaa');
+        axios.defaults.headers.common['Authorization'] = "Bearer " + this.token;
+        axios.get(
+         '/api/get_member' + this.room.id + '/' + this.user_id,
+          {
+            headers: {
+              "Content-Type": "application/json"
+          },
+      }).then(function(response) {
+          console.log(response.data)
+      }).catch(function(error) {
+          console.log(error);
+      });
     }
   }
 }
