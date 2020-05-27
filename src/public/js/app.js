@@ -2061,6 +2061,7 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: {
     board: Object,
@@ -2089,7 +2090,27 @@ __webpack_require__.r(__webpack_exports__);
     };
   },
   created: function created() {
-    this.col_count = (Number(this.board.goal_position) - 2) / 2;
+    this.col_count = (Number(this.board.goal_position) - 2) / 2; // コマの現在地を取得
+
+    this.resetMembers();
+    this.piece_positions[1] = [];
+
+    for (var key in this.members) {
+      this.piece_positions[1].push({
+        user_id: this.members[key]['id'],
+        status: 1,
+        aicon: this.piece_icons[key],
+        go: this.members[key]['pivot']['go']
+      });
+      this.members[key]['aicon'] = this.piece_icons[key];
+    }
+
+    this.piece_positions[1].push({
+      user_id: 0,
+      status: 2,
+      go: this.members.length + 1,
+      aicon: this.virus_icon
+    });
   },
   mounted: function mounted() {
     var _this = this;
@@ -2101,7 +2122,7 @@ __webpack_require__.r(__webpack_exports__);
     window.Echo["private"]('sugoroku-started-channel.' + this.room.id).listen('SugorokuStarted', function (response) {
       _this.logs.push('ゲームスタート！');
 
-      _this.gameStart();
+      _this.readyStart();
     });
     window.Echo["private"]('dice-rolled-channel.' + this.room.id).listen('DiceRolled', function (response) {
       _this.logs.push(_this.getMemberName(response.userId) + 'さんがサイコロをふって' + response.number + '進みました');
@@ -2125,8 +2146,7 @@ __webpack_require__.r(__webpack_exports__);
 
       return '';
     },
-    gameStart: function gameStart() {
-      // ゲーム開始準備
+    resetMembers: function resetMembers() {
       // メンバー情報の一括更新
       axios.defaults.headers.common['Authorization'] = "Bearer " + this.token;
       axios.get('/api/sugoroku/members/' + this.room.id, {
@@ -2139,7 +2159,11 @@ __webpack_require__.r(__webpack_exports__);
         }
       })["catch"](function (error) {
         console.log(error);
-      }); // コマの初期設定
+      });
+    },
+    readyStart: function readyStart() {
+      // ゲーム開始準備
+      this.resetMembers(); // コマの初期設定
 
       this.piece_positions[1] = [];
 
@@ -2234,7 +2258,6 @@ __webpack_require__.r(__webpack_exports__);
         'room_id': this.room.id
       }).then(function (response) {
         if (response.data.status === 'success') {
-          console.log('ゲームをスタートしました');
           _this2.is_started = true;
         } else {
           alert(response.data.message);
@@ -45688,8 +45711,11 @@ var render = function() {
               _vm._v(
                 "\n                    " +
                   _vm._s(member.name) +
-                  "\n                "
-              )
+                  "\n                    "
+              ),
+              member.pivot.go
+                ? _c("span", [_vm._v("(" + _vm._s(member.pivot.go) + ")")])
+                : _vm._e()
             ])
           }),
           0

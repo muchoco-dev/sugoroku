@@ -57,6 +57,7 @@
                 <li v-for="member in members" class="list-group-item">
                     <i v-if="member.aicon" v-bind:class="'fas fa-2x fa-' + member.aicon"></i>
                     {{ member.name }}
+                    <span v-if="member.pivot.go">({{ member.pivot.go }})</span>
                 </li>
             </ul>
         </div>
@@ -112,7 +113,27 @@ export default {
         }
     },
     created: function () {
-      this.col_count = (Number(this.board.goal_position) - 2) / 2;
+        this.col_count = (Number(this.board.goal_position) - 2) / 2;
+
+        // コマの現在地を取得
+        this.resetMembers();
+        this.piece_positions[1] = [];
+        for (let key in this.members) {
+            this.piece_positions[1].push({
+                user_id: this.members[key]['id'],
+                status: 1,
+                aicon: this.piece_icons[key],
+                go: this.members[key]['pivot']['go']
+            });
+            this.members[key]['aicon'] = this.piece_icons[key];
+        }
+        this.piece_positions[1].push({
+            user_id: 0,
+            status: 2,
+            go: this.members.length + 1,
+            aicon: this.virus_icon
+        });
+
     },
     mounted: function () {
         window.Echo.private('member-added-channel.' + this.room.id).listen('MemberAdded', response => {
@@ -123,7 +144,7 @@ export default {
 
         window.Echo.private('sugoroku-started-channel.' + this.room.id).listen('SugorokuStarted', response => {
             this.logs.push('ゲームスタート！');
-            this.gameStart();
+            this.readyStart();
         });
 
         window.Echo.private('dice-rolled-channel.' + this.room.id).listen('DiceRolled', response => {
@@ -145,8 +166,8 @@ export default {
         }
         return '';
     },
-    gameStart: function () { // ゲーム開始準備
-        // メンバー情報の一括更新
+    resetMembers: function () {
+         // メンバー情報の一括更新
         axios.defaults.headers.common['Authorization'] = "Bearer " + this.token;
         axios.get('/api/sugoroku/members/' + this.room.id, {
             headers: {
@@ -159,7 +180,9 @@ export default {
         }).catch(function(error) {
             console.log(error);
         });
-
+    },
+    readyStart: function () { // ゲーム開始準備
+        this.resetMembers();
 
         // コマの初期設定
         this.piece_positions[1] = [];
@@ -245,7 +268,6 @@ export default {
             'room_id': this.room.id
         }).then(response => {
             if (response.data.status === 'success') {
-                console.log('ゲームをスタートしました');
                 this.is_started = true;
             } else {
                 alert(response.data.message);
