@@ -2,16 +2,22 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Room;
-use Illuminate\Http\Request;
-use App\Events\SugorokuStarted;
+use App\Http\Requests\StartGameRequest;
+use App\Http\Requests\SaveLogRequest;
 use App\Repositories\RoomRepository;
 use Illuminate\Support\Facades\Auth;
-use App\Http\Requests\StartGameRequest;
+use App\Events\SugorokuStarted;
+use Illuminate\Http\Request;
+use App\Events\DiceRolled;
+use App\Models\Room;
+
 
 class SugorokuController extends Controller
 {
-    public function gameStart(StartGameRequest $request)
+    /**
+     * ゲーム開始処理
+     */
+    public function startGame(StartGameRequest $request)
     {
         $validated = $request->validated();
         $room = Room::find($validated['room_id']);
@@ -26,7 +32,7 @@ class SugorokuController extends Controller
         }
 
         $repository = new RoomRepository;
-        $repository->gameStart($room->id);
+        $repository->startGame($room->id);
 
         event(new SugorokuStarted($room->id));
 
@@ -34,6 +40,39 @@ class SugorokuController extends Controller
             'status'    => 'success'
         ]);
     }
+
+    /**
+     * コマの変化記録
+     */
+    public function saveLog(SaveLogRequest $request)
+    {
+        $repository = new RoomRepository;
+
+        $validated = $request->validated();
+        $room = Room::find($validated['room_id']);
+
+        // 部屋が存在しない
+        // ユーザが部屋のメンバではない
+        if (!$room || !$repository->isMember($room, Auth::id(), $room->id)) {
+            return response()->json([
+                'status' => 'error',
+            ]);
+        }
+
+        switch ($validated['action_id']) {
+            case config('const.action_by_dice'):
+                event(new DiceRolled($room->id, Auth::id(), $validated['effect_num']));
+                break;
+            case config('const.action_by_space'):
+                break;
+        }
+
+        return response()->json([
+            'status' => 'success'
+        ]);
+
+    }
+
 
     public function getKomaPosition($user_id, $room_id)
     {

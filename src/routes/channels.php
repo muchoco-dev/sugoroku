@@ -22,3 +22,7 @@ Broadcast::channel('member-added-channel.{id}', function ($user, $roomId) {
     // TODO: 部屋の参加者ならtrueにするか考え中
     return true;
 });
+Broadcast::channel('dice-rolled-channel.{id}', function ($user, $roomId) {
+    // TODO: 部屋の参加者ならtrueにするか考え中
+    return true;
+});

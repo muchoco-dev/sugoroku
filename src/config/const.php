@@ -15,6 +15,7 @@ return [
 
     // マップ効果
     'effect_change_status'          => 1,
+    'effect_move_forward'           => 2,
 
     // アクションID
     'action_by_dice'                => 1,

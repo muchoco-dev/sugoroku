@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Repositories\RoomRepository;
 use App\Events\SugorokuStarted;
+use App\Events\DiceRolled;
 use App\Models\Board;
 use App\Models\Space;
 use App\Models\User;
@@ -183,7 +184,7 @@ class SugorokuTest extends TestCase
     /**
      * 存在しない部屋のコマの現在地はエラーが返る
      */
-    public function testUserCannotGetKomaPosition() 
+    public function testUserCannotGetKomaPosition()
     {
         Passport::actingAs($this->owner);
         $response = $this->get("/api/sugoroku/position/{$this->owner->id}/99");
@@ -191,6 +192,24 @@ class SugorokuTest extends TestCase
         $response->assertJson([
             'status'   => 'error',
         ]);
+    }
+
+    /**
+     * サイコロを振ったログを保存しようとするとイベントがディスパッチされる
+     */
+    public function testDispatchEventAfterSaveRollDiceLog()
+    {
+        Event::fake();
+
+        Passport::actingAs($this->owner);
+        $response = $this->post('/api/sugoroku/save_log', [
+            'room_id'   => $this->room->id,
+            'action_id' => config('const.action_by_dice') ,
+            'effect_id' => config('const.effect_move_forward'),
+            'effect_num'=> 3
+        ]);
+
+        Event::assertDispatched(DiceRolled::class);
     }
 
 }

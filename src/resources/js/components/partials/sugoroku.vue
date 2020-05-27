@@ -80,6 +80,7 @@
             </div>
         </div>
     </div>
+    <a href="#" @click="saveLog(1, 2, 3)">user1がサイコロをふって3だす</a>
 </div>
 </template>
 <script>
@@ -114,18 +115,30 @@ export default {
       this.col_count = (Number(this.board.goal_position) - 2) / 2;
     },
     mounted: function () {
-        window.Echo.private('member-added-channel.' + this.room.id).listen('MemberAdded',response => {
+        window.Echo.private('member-added-channel.' + this.room.id).listen('MemberAdded', response => {
             // response.userId
             // response.roomId
             // これを使ってユーザ名取得&this.membersに追加
         });
 
-        window.Echo.private('sugoroku-started-channel.' + this.room.id).listen('SugorokuStarted',response => {
+        window.Echo.private('sugoroku-started-channel.' + this.room.id).listen('SugorokuStarted', response => {
             this.logs.push('ゲームスタート！');
-            this.gameStart()
+            this.gameStart();
+        });
+
+        window.Echo.private('dice-rolled-channel.' + this.room.id).listen('DiceRolled', response => {
+            this.logs.push(this.getMemberName(response.userId) + 'さんがサイコロをふって' + response.number + '進みました');
+            this.movePiece(response.userId, response.number);
         });
   },
   methods: {
+    getMemberName: function (id) {
+        for (let key in this.members) {
+            if (this.members[key]['id']) {
+                return this.members[key]['name'];
+            }
+        }
+    },
     getSpaceName: function (id) { // 特殊マスの名前を返す
         if (this.spaces[id]) {
             return this.spaces[id].name;
@@ -240,7 +253,26 @@ export default {
         }).catch(function(error) {
             console.log(error);
         });
-
+    },
+    saveLog: function (action_id, effect_id, effect_num) {
+        axios.defaults.headers.common['Authorization'] = "Bearer " + this.token;
+        axios.post('/api/sugoroku/save_log', {
+            headers: {
+                "Content-Type": "application/json"
+            },
+            'room_id': this.room.id,
+            'action_id': action_id,
+            'effect_id': effect_id,
+            'effect_num': effect_num
+        }).then(response => {
+            if (response.data.status === 'success') {
+                // 成功
+            } else {
+                alert(失敗しました);
+            }
+        }).catch(function(error) {
+            console.log(error);
+        });
     }
   }
 }

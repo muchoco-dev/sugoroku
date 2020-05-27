@@ -2060,6 +2060,7 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: {
     board: Object,
@@ -2102,8 +2103,20 @@ __webpack_require__.r(__webpack_exports__);
 
       _this.gameStart();
     });
+    window.Echo["private"]('dice-rolled-channel.' + this.room.id).listen('DiceRolled', function (response) {
+      _this.logs.push(_this.getMemberName(response.userId) + 'さんがサイコロをふって' + response.number + '進みました');
+
+      _this.movePiece(response.userId, response.number);
+    });
   },
   methods: {
+    getMemberName: function getMemberName(id) {
+      for (var key in this.members) {
+        if (this.members[key]['id']) {
+          return this.members[key]['name'];
+        }
+      }
+    },
     getSpaceName: function getSpaceName(id) {
       // 特殊マスの名前を返す
       if (this.spaces[id]) {
@@ -2225,6 +2238,25 @@ __webpack_require__.r(__webpack_exports__);
           _this2.is_started = true;
         } else {
           alert(response.data.message);
+        }
+      })["catch"](function (error) {
+        console.log(error);
+      });
+    },
+    saveLog: function saveLog(action_id, effect_id, effect_num) {
+      axios.defaults.headers.common['Authorization'] = "Bearer " + this.token;
+      axios.post('/api/sugoroku/save_log', {
+        headers: {
+          "Content-Type": "application/json"
+        },
+        'room_id': this.room.id,
+        'action_id': action_id,
+        'effect_id': effect_id,
+        'effect_num': effect_num
+      }).then(function (response) {
+        if (response.data.status === 'success') {// 成功
+        } else {
+          alert(失敗しました);
         }
       })["catch"](function (error) {
         console.log(error);
@@ -45720,7 +45752,20 @@ var render = function() {
             : _vm._e()
         ])
       ])
-    ])
+    ]),
+    _vm._v(" "),
+    _c(
+      "a",
+      {
+        attrs: { href: "#" },
+        on: {
+          click: function($event) {
+            return _vm.saveLog(1, 2, 3)
+          }
+        }
+      },
+      [_vm._v("user1がサイコロをふって3だす")]
+    )
   ])
 }
 var staticRenderFns = [

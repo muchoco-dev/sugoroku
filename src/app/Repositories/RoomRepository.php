@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Events\MemberAdded;
+use App\Models\RoomUser;
 use App\Models\Room;
 use App\Models\Space;
 use Illuminate\Support\Facades\Auth;
@@ -69,7 +70,7 @@ class RoomRepository
     /**
      * ゲーム開始処理
      */
-    public function gameStart($id)
+    public function startGame($id)
     {
         $room = $this->model::find($id);
         if (!$room) return false;
@@ -90,6 +91,25 @@ class RoomRepository
         }
 
         return true;
+    }
+
+    /**
+     * コマを移動する
+     */
+    public function movePiece($roomId, $userId, $num)
+    {
+        $roomUser = RoomUser::where([
+            'room_id'   => $roomId,
+            'user_id'   => $userId
+        ])->first();
+        
+        if (!$roomUser) {
+            return false;
+        }
+
+        $roomUser->position = $roomUser->position + $num;
+        $roomUser->save();
+        return $roomUser;
 
     }
 
