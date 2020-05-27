@@ -130,6 +130,21 @@ export default {
             this.logs.push(this.getMemberName(response.userId) + 'さんがサイコロをふって' + response.number + '進みました');
             this.movePiece(response.userId, response.number);
         });
+
+        axios.defaults.headers.common['Authorization'] = "Bearer " + this.token;
+        axios.get(
+            '/api/get_member/' + this.room.id + '/' + this.auth_id,
+            {
+                headers: {
+                    "Content-Type": "application/json"
+                },
+            }).then(function(response) {
+            if (response.data.status === 'success') {
+                console.log(response.data.roomUser);
+            }
+        }).catch(function(error) {
+            console.log(error);
+        });
   },
   methods: {
     getMemberName: function (id) {

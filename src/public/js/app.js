@@ -2108,6 +2108,18 @@ __webpack_require__.r(__webpack_exports__);
 
       _this.movePiece(response.userId, response.number);
     });
+    axios.defaults.headers.common['Authorization'] = "Bearer " + this.token;
+    axios.get('/api/get_member/' + this.room.id + '/' + this.auth_id, {
+      headers: {
+        "Content-Type": "application/json"
+      }
+    }).then(function (response) {
+      if (response.data.status === 'success') {
+        console.log(response.data.roomUser);
+      }
+    })["catch"](function (error) {
+      console.log(error);
+    });
   },
   methods: {
     getMemberName: function getMemberName(id) {
@@ -59268,8 +59280,8 @@ window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 window.Pusher = __webpack_require__(/*! pusher-js */ "./node_modules/pusher-js/dist/web/pusher.js");
 window.Echo = new laravel_echo__WEBPACK_IMPORTED_MODULE_0__["default"]({
   broadcaster: 'pusher',
-  key: "ff887ae07fb558e2739e",
-  cluster: "ap3",
+  key: "",
+  cluster: "mt1",
   encrypted: true
 });
 
@@ -59692,8 +59704,8 @@ __webpack_require__.r(__webpack_exports__);
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! /var/www/html/sugoroku.commew.net/sugoroku/src/resources/js/app.js */"./resources/js/app.js");
-module.exports = __webpack_require__(/*! /var/www/html/sugoroku.commew.net/sugoroku/src/resources/sass/app.scss */"./resources/sass/app.scss");
+__webpack_require__(/*! C:\Users\private\work\sugoroku\sugoroku\src\resources\js\app.js */"./resources/js/app.js");
+module.exports = __webpack_require__(/*! C:\Users\private\work\sugoroku\sugoroku\src\resources\sass\app.scss */"./resources/sass/app.scss");
 
 
 /***/ })

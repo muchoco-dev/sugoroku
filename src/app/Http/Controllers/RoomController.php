@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use Barryvdh\Debugbar\Twig\Extension\Debug;
+use Illuminate\Cache\Repository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Repositories\UserRepository;
 use App\Repositories\RoomRepository;
 use App\Http\Requests\StoreRoomRequest;
+use Illuminate\Support\Facades\Log;
 
 class RoomController extends Controller
 {
@@ -96,7 +99,7 @@ class RoomController extends Controller
 
         return view('room.show', compact('room', 'spaces', 'pusher_token'));
     }
-    
+
     public function join($uname) {
         $repository = new RoomRepository();
         $room = $repository->findByUname($uname);
@@ -120,4 +123,14 @@ class RoomController extends Controller
         }
     }
 
+    public function getMember($roomId, $userId)
+    {
+        $repository = new RoomRepository;
+        $roomUser = $repository->getMember($roomId, $userId);
+        
+        return response()->json([
+            'status' => 'success',
+            'roomUser' => $roomUser
+        ]);
+    }
 }
