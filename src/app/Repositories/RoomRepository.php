@@ -29,6 +29,15 @@ class RoomRepository
         ])->first();
     }
 
+    /**
+     * ユーザが入室している部屋を取得
+     */
+    public function getJoinedRoom($userId)
+    {
+        $roomUser = RoomUser::where('user_id', $userId)->first();
+        return $this->model::find($roomUser->room_id);
+    }
+
     public function create($data)
     {
         $room = new Room;
