@@ -71,6 +71,7 @@
         <div class="col-2">
             <div id="action">
                 <button class="btn btn-success" v-if="canShowStartButton()" @click="start()">ゲームスタート</button>
+                <button class="btn" v-if="canShowRollDiceButton()" @click="rollDice()">サイコロを振る</button>
                 <div class="input-group mt-4" v-if="!is_started">
                     <div class="input-group-prepend">
                         <span class="input-group-text">招待URL</span>
@@ -273,6 +274,12 @@ export default {
         }).catch(function(error) {
             console.log(error);
         });
+    },
+    canShowRollDiceButton: function () {
+        if (this.is_started) {
+            return true;
+        }
+        return false;
     }
   }
 }
