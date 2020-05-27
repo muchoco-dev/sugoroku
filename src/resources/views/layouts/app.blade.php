@@ -7,7 +7,7 @@
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'Laravel') }}</title>
+    <title>{{ config('app.name', 'Laravel') }} - @yield('title')</title>
 
     <!-- Scripts -->
     <script src="https://unpkg.com/clipboard@2/dist/clipboard.min.js"></script>
@@ -80,4 +80,24 @@
         </main>
     </div>
 </body>
+<footer>
+    <div class="row text-center">
+        <div class="col-12">
+            <p class="text-center">
+            <small>
+                <a href="/privacy">プライバシーポリシー</a>
+                ・
+                <a href="/terms">利用規約</a>
+                ・
+                <a href="/developers">開発者一覧</a>
+            </small>
+            </p>
+        </div>
+        <div class="col-12">
+            <small>
+                <p><a href="https://commew.net/">©commew</a></p>
+            </small>
+        </div>
+    </div>
+</footer>
 </html>
