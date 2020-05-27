@@ -2261,6 +2261,13 @@ __webpack_require__.r(__webpack_exports__);
       })["catch"](function (error) {
         console.log(error);
       });
+    },
+    canShowRollDiceButton: function canShowRollDiceButton() {
+      if (this.is_started) {
+        return true;
+      }
+
+      return false;
     }
   }
 });
@@ -45719,6 +45726,21 @@ var render = function() {
               )
             : _vm._e(),
           _vm._v(" "),
+          _vm.canShowRollDiceButton()
+            ? _c(
+                "button",
+                {
+                  staticClass: "btn",
+                  on: {
+                    click: function($event) {
+                      return _vm.rollDice()
+                    }
+                  }
+                },
+                [_vm._v("サイコロを振る")]
+              )
+            : _vm._e(),
+          _vm._v(" "),
           !_vm.is_started
             ? _c("div", { staticClass: "input-group mt-4" }, [
                 _vm._m(0),
@@ -45752,20 +45774,7 @@ var render = function() {
             : _vm._e()
         ])
       ])
-    ]),
-    _vm._v(" "),
-    _c(
-      "a",
-      {
-        attrs: { href: "#" },
-        on: {
-          click: function($event) {
-            return _vm.saveLog(1, 2, 3)
-          }
-        }
-      },
-      [_vm._v("user1がサイコロをふって3だす")]
-    )
+    ])
   ])
 }
 var staticRenderFns = [

@@ -81,7 +81,6 @@
             </div>
         </div>
     </div>
-    <a href="#" @click="saveLog(1, 2, 3)">user1がサイコロをふって3だす</a>
 </div>
 </template>
 <script>
