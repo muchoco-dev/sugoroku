@@ -87,6 +87,9 @@ class RoomRepository
         // 部屋のステータス変更
         $this->changeStatus($room->id, config('const.room_status_busy'));
 
+        // メンバーにウイルスを追加
+        $this->addMember(config('const.virus_user_id'), $room->id);
+
         // 参加者のプレイ順をセット
         $users = $room->users;
         $go_list = [];
@@ -131,7 +134,8 @@ class RoomRepository
             'id' => $roomId
         ])->first();
 
-        if ($this->isMemberExceededMaxMember($room)) {
+        if ($userId !== config('const.virus_user_id') && $this->isMemberExceededMaxMember($room)) {
+            // ウイルスは人数に関わらず参加可能
             return false;
         }
 
@@ -139,15 +143,23 @@ class RoomRepository
             return false;
         }
 
+        if ($userId !== config('const.virus_user_id')) {
+            $status = config('const.piece_status_health');
+        } else {
+            $status = config('const.piece_status_sick');
+        }
+
         $room->users()->attach($userId,[
             'go' => 0,
-            'status' => config('const.piece_status_health'),
+            'status' => $status,
             'position' => 1
         ]);
 
         // Roomテーブルのmember_countを1足してDB更新
-        $room->member_count = $room['member_count'] + 1;
-        $room->save();
+        if ($userId !== config('const.virus_user_id')) {
+            $room->member_count = $room['member_count'] + 1;
+            $room->save();
+        }
 
         event(new MemberAdded($userId, $roomId));
 
@@ -255,6 +267,7 @@ class RoomRepository
 
     /**
      * ユーザが参加中の有効な部屋のIDを取得
+     * TODO: バグあり。あとで確認する
      */
     public function getUserJoinActiveRoomId($userId)
     {

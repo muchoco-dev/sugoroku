@@ -14,6 +14,7 @@ use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Event;
 use Laravel\Passport\Passport;
 use Tests\TestCase;
+use UsersTableSeeder;
 
 class SugorokuTest extends TestCase
 {
@@ -28,6 +29,7 @@ class SugorokuTest extends TestCase
     {
         parent::setUp();
         $this->createRoom();
+        $this->seed(UsersTableSeeder::class);
     }
 
     /**

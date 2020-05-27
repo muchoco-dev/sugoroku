@@ -2093,13 +2093,6 @@ __webpack_require__.r(__webpack_exports__);
   created: function created() {
     this.col_count = (Number(this.board.goal_position) - 2) / 2;
     this.resetMembers();
-    /*
-    this.piece_positions[1].push({
-        user_id: 0,
-        status: 2,
-        go: this.v_members.length + 1,
-        aicon: this.virus_icon
-    });*/
   },
   mounted: function mounted() {
     var _this = this;
@@ -2143,54 +2136,38 @@ __webpack_require__.r(__webpack_exports__);
           "Content-Type": "application/json"
         }
       }).then(function (response) {
-        console.log(response);
-
         if (response.data.status === 'success') {
           this.v_members = response.data.members;
+          var aicon_count = 0;
+          var aicon_name = '';
+
+          for (var key in this.v_members) {
+            var position = this.v_members[key]['pivot']['position'];
+
+            if (!this.piece_positions[position]) {
+              this.piece_positions[position] = [];
+            }
+
+            if (this.v_members[key]['id'] === 10000) {
+              aicon_name = this.virus_icon;
+            } else {
+              aicon_name = this.piece_icons[aicon_count];
+              aicon_count++;
+            }
+
+            this.piece_positions[position].push({
+              user_id: this.v_members[key]['id'],
+              status: this.v_members[key]['pivot']['status'],
+              aicon: aicon_name,
+              go: this.v_members[key]['pivot']['go']
+            });
+            this.v_members[key]['aicon'] = aicon_name;
+          }
         }
       }.bind(this))["catch"](function (error) {
         console.log(error);
       });
-
-      for (var key in this.v_members) {
-        var position = this.v_members[key]['pivot']['position'];
-
-        if (!this.piece_positions[position]) {
-          this.piece_positions[position] = [];
-        }
-
-        this.piece_positions[position].push({
-          user_id: this.v_members[key]['id'],
-          status: this.v_members[key]['pivot']['status'],
-          aicon: this.piece_icons[key],
-          go: this.v_members[key]['pivot']['go']
-        });
-        this.v_members[key]['aicon'] = this.piece_icons[key];
-      }
     },
-
-    /*
-    readyStart: function () { // ゲーム開始準備
-      this.resetMembers();
-       // コマの初期設定
-      this.piece_positions[1] = [];
-      for (let key in this.v_members) {
-          this.piece_positions[1].push({
-              user_id: this.v_members[key]['id'],
-              status: 1,
-              aicon: this.piece_icons[key],
-              go: this.v_members[key]['pivot']['go']
-          });
-          this.v_members[key]['aicon'] = this.piece_icons[key];
-      }
-      // ウイルス
-      this.piece_positions[1].push({
-          user_id: 0,
-          status: 2,
-          go: this.v_members.length + 1,
-          aicon: this.virus_icon
-      });
-    },*/
     setPiece: function setPiece(position) {
       // マスにコマを配置する
       return this.piece_positions[position];
