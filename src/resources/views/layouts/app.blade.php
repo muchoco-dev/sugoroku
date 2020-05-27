@@ -81,11 +81,23 @@
     </div>
 </body>
 <footer>
-    <ul>
-      <li><a href="/privacy">プライバシーポリシー</a></li>
-      <li><a href="/terms">利用規約</a></li>
-      <li><a href="/developers">開発者一覧</a></li>
-    </ul>
-    <p><a href="https://commew.net/">©commew</a></p>
+    <div class="row text-center">
+        <div class="col-12">
+            <p class="text-center">
+            <small>
+                <a href="/privacy">プライバシーポリシー</a>
+                ・
+                <a href="/terms">利用規約</a>
+                ・
+                <a href="/developers">開発者一覧</a>
+            </small>
+            </p>
+        </div>
+        <div class="col-12">
+            <small>
+                <p><a href="https://commew.net/">©commew</a></p>
+            </small>
+        </div>
+    </div>
 </footer>
 </html>
