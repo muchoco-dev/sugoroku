@@ -101,9 +101,24 @@ class RoomRepository
 
         foreach ($users as $key => $user) {
             $room->users()->updateExistingPivot($user->id, ['go' => $go_list[$key]]);
+
+            if ($user->id === config('const.virus_user_id') && $go_list[$key] === 1) {
+                // ウィルスが1番手の場合は、最初の手番をここで消化する
+                $this->moveVirus($room->id);
+            }
         }
 
         return true;
+    }
+
+    /**
+     * ウィルスのターン
+     */
+    public function moveVirus($roomId)
+    {
+        $dice_num = rand(1, 6);
+        $this->movePiece($roomId, config('const.virus_user_id'), $dice_num);
+        event(new DiceRolled($roomId, config('const.virus_user_id'), $dice_num));
     }
 
     /**
@@ -115,7 +130,7 @@ class RoomRepository
             'room_id'   => $roomId,
             'user_id'   => $userId
         ])->first();
-        
+
         if (!$roomUser) {
             return false;
         }
@@ -123,7 +138,6 @@ class RoomRepository
         $roomUser->position = $roomUser->position + $num;
         $roomUser->save();
         return $roomUser;
-
     }
 
     /**
