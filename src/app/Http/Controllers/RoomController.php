@@ -125,9 +125,15 @@ class RoomController extends Controller
         $repository = new RoomRepository();
         $roomUser = $repository->getMember($roomId, $userId);
 
-        return response()->json([
-            'status'   => 'success',
-            'roomUser' => $roomUser
-        ]);
+        if ($roomUser) {
+            return response()->json([
+                'status'   => 'success',
+                'roomUser' => $roomUser
+            ]);
+        } else {
+            return response()->json([
+                'status'   => 'error'
+            ]);
+        }
     }
 }

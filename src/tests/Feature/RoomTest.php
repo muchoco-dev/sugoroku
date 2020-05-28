@@ -944,5 +944,16 @@ class RoomTest extends TestCase
             'room_id' => $room->id,
             'user_id' => $user->id
         ]);
+
+        if ($roomUser) {
+            return response()->json([
+                'status'   => 'success',
+                'roomUser' => $roomUser
+            ]);
+        } else {
+            return response()->json([
+                'status'   => 'error'
+            ]);
+        }
     }
 }
