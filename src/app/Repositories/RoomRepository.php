@@ -299,9 +299,16 @@ class RoomRepository
             'owner_id'      => $userId,
         ])->first();
 
-        // ゲーム中の場合はバルス不可
+        // ゲーム中かつ全員ゴールしていない場合はバルス不可
         if ($room->status == config('const.room_status_busy')) {
-            return false;
+            $user = RoomUser::where([
+                ['room_id', '=', $room->id],
+                ['status', '!=', config('const.piece_status_finished')],
+                ['user_id', '!=', config('const.virus_user_id')]
+            ])->first();
+            if ($user) {
+                return false;
+            }
         }
 
         // room_userテーブルの物理削除

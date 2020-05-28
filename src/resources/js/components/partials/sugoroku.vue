@@ -112,7 +112,7 @@ export default {
             is_started: false,
             join_url: location.href + '/join',
             v_members: this.members,
-            next_go: 1
+            next_go: 1,
         }
     },
     created: function () {
@@ -237,6 +237,7 @@ console.log(this.v_members);
                         // ゴール
                         new_position = this.board.goal_position;
                         users[key]['status'] = this.const.piece_status_finished;
+
                     } else if (new_position > this.board.goal_position) {
                         new_position = new_position - this.board.goal_position;
                     }
@@ -331,13 +332,20 @@ console.log(this.v_members);
         return false;
     },
     canShowDeleteRoomButton: function () {
-      if (this.room.owner_id === this.auth_id &&
-            this.room.status === this.const.room_status_open) {
-        if (!this.is_started) {
-          return true;
+        if (this.room.owner_id === this.auth_id) {
+
+            let finished_member_count = 0;
+            for (let key in this.v_members) {
+                if (this.v_members[key]['pivot']['status'] === this.const.piece_status_finished) {
+                    finished_member_count++;
+                }
+            }
+            if(this.room.status === this.const.room_status_open ||
+                finished_member_count >= this.v_members.length - 1) {
+                return true;
+            }
         }
-      }
-      return false;
+        return false;
     },
     deleteRoom: function () {
         axios.defaults.headers.common['Authorization'] = "Bearer " + this.token;

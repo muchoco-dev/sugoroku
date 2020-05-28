@@ -2316,8 +2316,16 @@ __webpack_require__.r(__webpack_exports__);
       return false;
     },
     canShowDeleteRoomButton: function canShowDeleteRoomButton() {
-      if (this.room.owner_id === this.auth_id && this.room.status === this["const"].room_status_open) {
-        if (!this.is_started) {
+      if (this.room.owner_id === this.auth_id) {
+        var finished_member_count = 0;
+
+        for (var key in this.v_members) {
+          if (this.v_members[key]['pivot']['status'] === this["const"].piece_status_finished) {
+            finished_member_count++;
+          }
+        }
+
+        if (this.room.status === this["const"].room_status_open || finished_member_count >= this.v_members.length - 1) {
           return true;
         }
       }
@@ -59359,8 +59367,8 @@ window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 window.Pusher = __webpack_require__(/*! pusher-js */ "./node_modules/pusher-js/dist/web/pusher.js");
 window.Echo = new laravel_echo__WEBPACK_IMPORTED_MODULE_0__["default"]({
   broadcaster: 'pusher',
-  key: "",
-  cluster: "mt1",
+  key: "ff887ae07fb558e2739e",
+  cluster: "ap3",
   encrypted: true
 });
 
@@ -59783,8 +59791,8 @@ __webpack_require__.r(__webpack_exports__);
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! /Users/cube3110/Project/lachelier/sugoroku/src/resources/js/app.js */"./resources/js/app.js");
-module.exports = __webpack_require__(/*! /Users/cube3110/Project/lachelier/sugoroku/src/resources/sass/app.scss */"./resources/sass/app.scss");
+__webpack_require__(/*! /var/www/html/sugoroku.commew.net/sugoroku/src/resources/js/app.js */"./resources/js/app.js");
+module.exports = __webpack_require__(/*! /var/www/html/sugoroku.commew.net/sugoroku/src/resources/sass/app.scss */"./resources/sass/app.scss");
 
 
 /***/ })
