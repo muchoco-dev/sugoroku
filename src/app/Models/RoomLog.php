@@ -15,7 +15,7 @@ class RoomLog extends Model
 
     public function room()
     {
-        return $this->belongsTo('App\Models\Room', 'id')
+        return $this->belongsTo('App\Models\Room', 'id');
     }
 
 }
