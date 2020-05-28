@@ -352,7 +352,7 @@ class RoomRepository
         $lastLog = RoomLog::where('room_id', $roomId)
             ->orderBy('created_at', 'desc')
             ->first();
-        if (!$lastLog) return 0;
+        if (!$lastLog) return 1;
 
         $roomUser = RoomUser::where([
             'user_id'   => $lastLog->user_id,

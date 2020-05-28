@@ -163,7 +163,6 @@ export default {
                 "Content-Type": "application/json"
             }
         }).then(function (response) {
-            console.log(response);
             if (response.data.status === 'success') {
                 this.next_go = response.data.next_go;
             }
