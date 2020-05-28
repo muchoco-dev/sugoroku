@@ -340,6 +340,13 @@ class RoomRepository
         return $room->users()->find($userId)->pivot['position'];
     }
 
+    public function getMember(int $roomId, int $userId)
+    {
+        return RoomUser::where('room_id', $roomId)
+            ->where('user_id', $userId)
+            ->first();
+    }
+
     public function getNextGo($roomId)
     {
         $lastLog = RoomLog::where('room_id', $roomId)

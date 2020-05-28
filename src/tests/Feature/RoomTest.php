@@ -909,4 +909,80 @@ class RoomTest extends TestCase
             'uname'    => $room->uname
         ]);
     }
+
+    /**
+     * メンバーを取得できるか
+     */
+    public function testCanGetMember()
+    {
+        $repository = new RoomRepository();
+
+        $user = factory(User::class)->create();
+        Passport::actingAs($user);
+        $board = $this->createBoard();
+
+        $room = factory(Room::class)->create([
+            'uname'     => uniqid(),
+            'name'      => 'first room',
+            'owner_id'  => $user->id,
+            'board_id'  => $board->id,
+            'max_member_count'  => 10,
+            'member_count'      => 0,
+            'status'    => config('const.room_status_open'),
+        ]);
+
+        // 中間(room_user)テーブルの作成
+        $room->users()->attach($user->id, [
+            'go' => 0,
+            'status' => config('const.piece_status_health'),
+            'position' => 1
+        ]);
+
+        $roomUser = $repository->getMember($room->id, $user->id);
+        $this->assertIsObject($roomUser);
+
+        $response = $this->get("/api/get_member/{$room->id}/{$user->id}");
+
+        $response->assertJson([
+            'status'   => 'success',
+            'roomUser' => $roomUser->toArray()
+        ]);
+    }
+
+    public function testIsNotRoomUser()
+    {
+        $repository = new RoomRepository();
+
+        $user = factory(User::class)->create();
+        Passport::actingAs($user);
+        $board = $this->createBoard();
+
+        $room = factory(Room::class)->create([
+            'uname'     => uniqid(),
+            'name'      => 'first room',
+            'owner_id'  => $user->id,
+            'board_id'  => $board->id,
+            'max_member_count'  => 10,
+            'member_count'      => 0,
+            'status'    => config('const.room_status_open'),
+        ]);
+
+        // 中間(room_user)テーブルの作成
+        $room->users()->attach($user->id, [
+            'go' => 0,
+            'status' => config('const.piece_status_health'),
+            'position' => 1
+        ]);
+
+        $roomUser = $repository->getMember(0, 0);
+        $this->assertIsNotObject($roomUser);
+
+        $response = $this->get("/api/get_member/0/0");
+
+        if (!$roomUser) {
+            $response->assertJson([
+               'status' => 'error'
+            ]);
+        }
+    }
 }

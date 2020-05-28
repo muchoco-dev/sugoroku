@@ -17,6 +17,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 Route::middleware('auth:api')->post('/room/create', 'RoomController@store');
+Route::middleware('auth:api')->get('/get_member/{room_id}/{user_id}', 'RoomController@getMember');
 
 Route::middleware('auth:api')->post('/sugoroku/start', 'SugorokuController@startGame');
 Route::middleware('auth:api')->post('/sugoroku/save_log', 'SugorokuController@saveLog');
