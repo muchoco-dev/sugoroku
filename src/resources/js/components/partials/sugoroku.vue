@@ -111,7 +111,7 @@ export default {
             is_started: false,
             join_url: location.href + '/join',
             v_members: this.members,
-            last_go: 0
+            next_go: 1
         }
     },
     created: function () {
@@ -122,7 +122,7 @@ export default {
         }
 
         this.resetMembers();
-        this.setLastGo();
+        this.setNextGo();
     },
     mounted: function () {
         window.Echo.private('member-added-channel.' + this.room.id).listen('MemberAdded', response => {
@@ -139,13 +139,13 @@ export default {
         window.Echo.private('dice-rolled-channel.' + this.room.id).listen('DiceRolled', response => {
             this.logs.push(this.getMemberName(response.userId) + 'さんがサイコロをふって' + response.number + '進みました');
             this.movePiece(response.userId, response.number);
-            this.setLastGo();
+            this.setNextGo();
         });
   },
   methods: {
     getMemberName: function (id) {
         for (let key in this.v_members) {
-            if (this.v_members[key]['id']) {
+            if (this.v_members[key]['id'] === id) {
                 return this.v_members[key]['name'];
             }
         }
@@ -156,15 +156,16 @@ export default {
         }
         return '';
     },
-    setLastGo: function () {
+    setNextGo: function () {
         axios.defaults.headers.common['Authorization'] = "Bearer " + this.token;
-        axios.get('/api/sugoroku/last_go/' + this.room.id, {
+        axios.get('/api/sugoroku/next_go/' + this.room.id, {
             headers: {
                 "Content-Type": "application/json"
             }
         }).then(function (response) {
+            console.log(response);
             if (response.data.status === 'success') {
-                this.last_go = response.data.last_go;
+                this.next_go = response.data.next_go;
             }
         }.bind(this)).catch(function(error) {
             console.log(error);
@@ -181,7 +182,6 @@ export default {
         }).then(function (response) {
             if (response.data.status === 'success') { 
                 this.v_members = response.data.members;
-                console.log(this.v_members);
 
                 let aicon_count = 0;
                 let aicon_name = '';
@@ -316,7 +316,7 @@ export default {
     canShowRollDiceButton: function () {
         if (this.is_started) {
             for (let key in this.v_members) {
-                if (this.v_members[key]['pivot']['go'] === parseInt(this.last_go) + 1 &&
+                if (this.v_members[key]['pivot']['go'] === parseInt(this.next_go) &&
                     this.v_members[key]['id'] === this.auth_id) {
                     return true;
                 }

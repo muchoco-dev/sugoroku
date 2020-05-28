@@ -2088,7 +2088,7 @@ __webpack_require__.r(__webpack_exports__);
       is_started: false,
       join_url: location.href + '/join',
       v_members: this.members,
-      last_go: 0
+      next_go: 1
     };
   },
   created: function created() {
@@ -2099,7 +2099,7 @@ __webpack_require__.r(__webpack_exports__);
     }
 
     this.resetMembers();
-    this.setLastGo();
+    this.setNextGo();
   },
   mounted: function mounted() {
     var _this = this;
@@ -2118,13 +2118,13 @@ __webpack_require__.r(__webpack_exports__);
 
       _this.movePiece(response.userId, response.number);
 
-      _this.setLastGo();
+      _this.setNextGo();
     });
   },
   methods: {
     getMemberName: function getMemberName(id) {
       for (var key in this.v_members) {
-        if (this.v_members[key]['id']) {
+        if (this.v_members[key]['id'] === id) {
           return this.v_members[key]['name'];
         }
       }
@@ -2137,15 +2137,17 @@ __webpack_require__.r(__webpack_exports__);
 
       return '';
     },
-    setLastGo: function setLastGo() {
+    setNextGo: function setNextGo() {
       axios.defaults.headers.common['Authorization'] = "Bearer " + this.token;
-      axios.get('/api/sugoroku/last_go/' + this.room.id, {
+      axios.get('/api/sugoroku/next_go/' + this.room.id, {
         headers: {
           "Content-Type": "application/json"
         }
       }).then(function (response) {
+        console.log(response);
+
         if (response.data.status === 'success') {
-          this.last_go = response.data.last_go;
+          this.next_go = response.data.next_go;
         }
       }.bind(this))["catch"](function (error) {
         console.log(error);
@@ -2161,7 +2163,6 @@ __webpack_require__.r(__webpack_exports__);
       }).then(function (response) {
         if (response.data.status === 'success') {
           this.v_members = response.data.members;
-          console.log(this.v_members);
           var aicon_count = 0;
           var aicon_name = '';
 
@@ -2301,7 +2302,7 @@ __webpack_require__.r(__webpack_exports__);
     canShowRollDiceButton: function canShowRollDiceButton() {
       if (this.is_started) {
         for (var key in this.v_members) {
-          if (this.v_members[key]['pivot']['go'] === parseInt(this.last_go) + 1 && this.v_members[key]['id'] === this.auth_id) {
+          if (this.v_members[key]['pivot']['go'] === parseInt(this.next_go) && this.v_members[key]['id'] === this.auth_id) {
             return true;
           }
         }

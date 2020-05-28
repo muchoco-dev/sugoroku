@@ -23,4 +23,4 @@ Route::middleware('auth:api')->post('/sugoroku/save_log', 'SugorokuController@sa
 
 Route::middleware('auth:api')->get('/sugoroku/position/{user_id}/{room_id}', 'SugorokuController@getKomaPosition');
 Route::middleware('auth:api')->get('/sugoroku/members/{room_id}', 'SugorokuController@getMembers');
-Route::middleware('auth:api')->get('/sugoroku/last_go/{room_id}', 'SugorokuController@getLastGo');
+Route::middleware('auth:api')->get('/sugoroku/next_go/{room_id}', 'SugorokuController@getNextGo');

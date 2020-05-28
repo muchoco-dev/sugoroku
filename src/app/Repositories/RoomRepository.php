@@ -3,7 +3,9 @@
 namespace App\Repositories;
 
 use App\Events\MemberAdded;
+use App\Events\DiceRolled;
 use App\Models\RoomUser;
+use App\Models\RoomLog;
 use App\Models\Room;
 use App\Models\Space;
 use Illuminate\Support\Facades\Auth;
@@ -112,6 +114,20 @@ class RoomRepository
     }
 
     /**
+     * ログ保存
+     */
+    public function saveLog($userId, $roomId, $actionId, $effectId, $effectNum)
+    {
+        $log = new RoomLog;
+        $log->user_id = $userId;
+        $log->room_id = $roomId;
+        $log->action_id = $actionId;
+        $log->effect_id = $effectId;
+        $log->effect_num = $effectNum;
+        $log->save();
+    }
+
+    /**
      * ウィルスのターン
      */
     public function moveVirus($roomId)
@@ -119,6 +135,7 @@ class RoomRepository
         $dice_num = rand(1, 6);
         $this->movePiece($roomId, config('const.virus_user_id'), $dice_num);
         event(new DiceRolled($roomId, config('const.virus_user_id'), $dice_num));
+        $this->saveLog(config('const.virus_user_id'), $roomId, config('const.action_by_dice'), config('const.effect_move_forward'), $dice_num);
     }
 
     /**
@@ -323,10 +340,38 @@ class RoomRepository
         return $room->users()->find($userId)->pivot['position'];
     }
 
-    public function getLastGo($roomId)
+    public function getNextGo($roomId)
     {
+        $lastLog = RoomLog::where('room_id', $roomId)
+            ->orderBy('created_at', 'desc')
+            ->first();
+        if (!$lastLog) return 0;
 
+        $roomUser = RoomUser::where([
+            'user_id'   => $lastLog->user_id,
+            'room_id'   => $lastLog->room_id
+        ])->first();
 
+        // 次の番
+        $room = Room::find($roomId);
+        if ($roomUser->go === $room->member_count+1)
+        {
+            $next_go = 1;
+        } else {
+            $next_go = $roomUser->go + 1;
+        }
+
+        // 次がウィルスの番のときは、ここで手番を消化する
+        $virus = RoomUser::where([
+            'user_id'   => config('const.virus_user_id'),
+            'room_id'   => $roomId
+        ])->first();
+        if ($virus->go === $next_go) {
+            $this->moveVirus($roomId);
+            return $this->getNextGo($roomId);
+        }
+
+        return $next_go;
     }
 }
 

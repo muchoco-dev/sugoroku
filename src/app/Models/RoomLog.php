@@ -6,16 +6,16 @@ use Illuminate\Database\Eloquent\Model;
 
 class RoomLog extends Model
 {
-    const CREATED_AT = null;
+    const UPDATED_AT = null;
 
     public function user()
     {
-        return $this->belongsTo('App\Models\User', 'id');
+        return $this->belongsTo('App\Models\User');
     }
 
     public function room()
     {
-        return $this->belongsTo('App\Models\Room', 'id');
+        return $this->belongsTo('App\Models\Room');
     }
 
 }
