@@ -308,6 +308,12 @@ class RoomRepository
 
         return $room->users()->find($userId)->pivot['position'];
     }
+
+    public function getLastGo($roomId)
+    {
+
+
+    }
 }
 
 

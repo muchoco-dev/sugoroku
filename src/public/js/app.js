@@ -2099,6 +2099,7 @@ __webpack_require__.r(__webpack_exports__);
     }
 
     this.resetMembers();
+    this.setLastGo();
   },
   mounted: function mounted() {
     var _this = this;
@@ -2136,7 +2137,20 @@ __webpack_require__.r(__webpack_exports__);
 
       return '';
     },
-    setLastGo: function setLastGo() {},
+    setLastGo: function setLastGo() {
+      axios.defaults.headers.common['Authorization'] = "Bearer " + this.token;
+      axios.get('/api/sugoroku/last_go/' + this.room.id, {
+        headers: {
+          "Content-Type": "application/json"
+        }
+      }).then(function (response) {
+        if (response.data.status === 'success') {
+          this.last_go = response.data.last_go;
+        }
+      }.bind(this))["catch"](function (error) {
+        console.log(error);
+      });
+    },
     resetMembers: function resetMembers() {
       // メンバー情報及びコマ情報の一括更新
       axios.defaults.headers.common['Authorization'] = "Bearer " + this.token;

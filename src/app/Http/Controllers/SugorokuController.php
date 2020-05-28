@@ -74,8 +74,9 @@ class SugorokuController extends Controller
 
     }
 
-    public function getLastUserId($roomId)
+    public function getLastGo($roomId)
     {
+        $repository = new RoomRepository;
         $room = Room::find($roomId);
 
         // 部屋が存在しない
@@ -86,8 +87,10 @@ class SugorokuController extends Controller
             ]);
         }
 
-
-
+        return response()->json([
+            'status'    => 'success',
+            'last_go'   => 1
+        ]);
     }
 
 

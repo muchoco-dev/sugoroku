@@ -122,6 +122,7 @@ export default {
         }
 
         this.resetMembers();
+        this.setLastGo();
     },
     mounted: function () {
         window.Echo.private('member-added-channel.' + this.room.id).listen('MemberAdded', response => {
@@ -156,8 +157,19 @@ export default {
         return '';
     },
     setLastGo: function () {
-        
- 
+        axios.defaults.headers.common['Authorization'] = "Bearer " + this.token;
+        axios.get('/api/sugoroku/last_go/' + this.room.id, {
+            headers: {
+                "Content-Type": "application/json"
+            }
+        }).then(function (response) {
+            if (response.data.status === 'success') {
+                this.last_go = response.data.last_go;
+            }
+        }.bind(this)).catch(function(error) {
+            console.log(error);
+        });
+
     },
     resetMembers: function () {
         // メンバー情報及びコマ情報の一括更新
