@@ -154,7 +154,21 @@ class RoomRepository
 
         $roomUser->position = $roomUser->position + $num;
         $roomUser->save();
+        // とりあえずメソッド追加
+        $this->updateStatusSick($roomId, $roomUser->position);
         return $roomUser;
+    }
+
+    /**
+     * コマの移動中に感染中コマとすれ違ったらステータス（感染中）に更新する
+     */
+    public function updateStatusSick($roomId, $roomUserPosition)
+    {
+        //【感染中のコマの動き】
+        RoomUser::where([
+            'room_id' => $roomId,
+            'position', '=>', $roomUserPosition
+        ])->update(['status' => 'const.piece_status_sick']);
     }
 
     /**
