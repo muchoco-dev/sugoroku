@@ -171,7 +171,7 @@ class SugorokuTest extends TestCase
     /**
      * ログイン済みのユーザのみコマの現在地が取得できる
      */
-    public function testUserGetKomaPosition() 
+    public function testUserGetKomaPosition()
     {
         Passport::actingAs($this->owner);
         $response = $this->get("/api/sugoroku/position/{$this->owner->id}/{$this->room->id}");
@@ -212,6 +212,21 @@ class SugorokuTest extends TestCase
         ]);
 
         Event::assertDispatched(DiceRolled::class);
+    }
+
+    /**
+     * 部屋の削除
+     */
+    public function testOwnerDeleteRoom()
+    {
+        Passport::actingAs($this->owner);
+        $response = $this->post('/api/sugoroku/delete', [
+            'room_id'   => $this->room->id,
+        ]);
+
+        $this->assertSoftDeleted('rooms', [
+            'owner_id'      => $this->room->owner_id
+        ]);
     }
 
 }

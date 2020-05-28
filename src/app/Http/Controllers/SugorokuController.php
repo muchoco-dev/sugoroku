@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StartGameRequest;
 use App\Http\Requests\SaveLogRequest;
+use App\Http\Requests\DeleteRoomRequest;
 use App\Repositories\RoomRepository;
 use App\Events\SugorokuStarted;
 use App\Events\DiceRolled;
@@ -125,6 +126,31 @@ class SugorokuController extends Controller
         return response()->json([
             'status'    => 'success',
             'members'   => $room->users
+        ]);
+    }
+
+    /**
+     * 部屋を削除
+     */
+    public function deleteRoom(DeleteRoomRequest $request)
+    {
+        $validated = $request->validated();
+        $room = Room::find($validated['room_id']);
+
+        // 部屋が存在しない
+        // ユーザが部屋の所有者ではない
+        if (!$room || $room->owner_id !== Auth::id()) {
+            return response()->json([
+                'status'    => 'error'
+            ]);
+
+        }
+
+        $repository = new RoomRepository;
+        $repository->balus($room->owner_id);
+
+        return response()->json([
+            'status'    => 'success'
         ]);
     }
 }
