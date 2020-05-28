@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Events\MemberAdded;
+use App\Events\DiceRolled;
 use App\Models\RoomUser;
 use App\Models\RoomLog;
 use App\Models\Room;
@@ -339,7 +340,7 @@ class RoomRepository
         return $room->users()->find($userId)->pivot['position'];
     }
 
-    public function getLastGo($roomId)
+    public function getNextGo($roomId)
     {
         $lastLog = RoomLog::where('room_id', $roomId)
             ->orderBy('created_at', 'desc')
@@ -350,7 +351,27 @@ class RoomRepository
             'user_id'   => $lastLog->user_id,
             'room_id'   => $lastLog->room_id
         ])->first();
-        return $roomUser->go;
+
+        // 次の番
+        $room = Room::find($roomId);
+        if ($roomUser->go === $room->member_count+1)
+        {
+            $next_go = 1;
+        } else {
+            $next_go = $roomUser->go + 1;
+        }
+
+        // 次がウィルスの番のときは、ここで手番を消化する
+        $virus = RoomUser::where([
+            'user_id'   => config('const.virus_user_id'),
+            'room_id'   => $roomId
+        ])->first();
+        if ($virus->go === $next_go) {
+            $this->moveVirus($roomId);
+            return $this->getNextGo($roomId);
+        }
+
+        return $next_go;
     }
 }
 

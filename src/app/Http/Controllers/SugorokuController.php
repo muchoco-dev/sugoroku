@@ -76,7 +76,7 @@ class SugorokuController extends Controller
 
     }
 
-    public function getLastGo($roomId)
+    public function getNextGo($roomId)
     {
         $repository = new RoomRepository;
         $room = Room::find($roomId);
@@ -91,7 +91,7 @@ class SugorokuController extends Controller
 
         return response()->json([
             'status'    => 'success',
-            'last_go'   => $repository->getLastGo($room->id)
+            'next_go'   => $repository->getNextGo($room->id)
         ]);
     }
 
