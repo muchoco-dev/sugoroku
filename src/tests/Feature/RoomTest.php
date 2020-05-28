@@ -979,10 +979,8 @@ class RoomTest extends TestCase
 
         $response = $this->get("/api/get_member/0/0");
 
-        if (!$roomUser) {
-            $response->assertJson([
-               'status' => 'error'
-            ]);
-        }
+        $response->assertJson([
+           'status' => 'error'
+        ]);
     }
 }
