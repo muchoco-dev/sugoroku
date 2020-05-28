@@ -145,7 +145,7 @@ export default {
   methods: {
     getMemberName: function (id) {
         for (let key in this.v_members) {
-            if (this.v_members[key]['id']) {
+            if (this.v_members[key]['id'] === id) {
                 return this.v_members[key]['name'];
             }
         }
