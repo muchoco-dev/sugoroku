@@ -2062,6 +2062,7 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: {
     board: Object,
@@ -2308,6 +2309,31 @@ __webpack_require__.r(__webpack_exports__);
       }
 
       return false;
+    },
+    canShowDeleteRoomButton: function canShowDeleteRoomButton() {
+      if (this.room.owner_id === this.auth_id && this.room.status === this["const"].room_status_open) {
+        if (!this.is_started) {
+          return true;
+        }
+      }
+
+      return false;
+    },
+    deleteRoom: function deleteRoom() {
+      axios.defaults.headers.common['Authorization'] = "Bearer " + this.token;
+      axios.post('/api/sugoroku/delete', {
+        headers: {
+          "Content-Type": "application/json"
+        },
+        'room_id': this.room.id
+      }).then(function (response) {
+        if (response.data.status === 'success') {// 成功
+        } else {
+          alert(失敗しました);
+        }
+      })["catch"](function (error) {
+        console.log(error);
+      });
     }
   }
 });
@@ -45784,6 +45810,21 @@ var render = function() {
               )
             : _vm._e(),
           _vm._v(" "),
+          _vm.canShowDeleteRoomButton()
+            ? _c(
+                "button",
+                {
+                  staticClass: "btn btn-primary",
+                  on: {
+                    click: function($event) {
+                      return _vm.deleteRoom()
+                    }
+                  }
+                },
+                [_vm._v("削除")]
+              )
+            : _vm._e(),
+          _vm._v(" "),
           !_vm.is_started
             ? _c("div", { staticClass: "input-group mt-4" }, [
                 _vm._m(0),
@@ -59311,8 +59352,8 @@ window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 window.Pusher = __webpack_require__(/*! pusher-js */ "./node_modules/pusher-js/dist/web/pusher.js");
 window.Echo = new laravel_echo__WEBPACK_IMPORTED_MODULE_0__["default"]({
   broadcaster: 'pusher',
-  key: "ff887ae07fb558e2739e",
-  cluster: "ap3",
+  key: "",
+  cluster: "mt1",
   encrypted: true
 });
 
@@ -59735,8 +59776,8 @@ __webpack_require__.r(__webpack_exports__);
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! /var/www/html/sugoroku.commew.net/sugoroku/src/resources/js/app.js */"./resources/js/app.js");
-module.exports = __webpack_require__(/*! /var/www/html/sugoroku.commew.net/sugoroku/src/resources/sass/app.scss */"./resources/sass/app.scss");
+__webpack_require__(/*! /Users/cube3110/Project/lachelier/sugoroku/src/resources/js/app.js */"./resources/js/app.js");
+module.exports = __webpack_require__(/*! /Users/cube3110/Project/lachelier/sugoroku/src/resources/sass/app.scss */"./resources/sass/app.scss");
 
 
 /***/ })

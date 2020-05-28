@@ -73,6 +73,7 @@
             <div id="action">
                 <button class="btn btn-success" v-if="canShowStartButton()" @click="start()">ゲームスタート</button>
                 <button class="btn btn-primary" v-if="canShowRollDiceButton()" @click="rollDice()">サイコロを振る</button>
+                <button class="btn btn-primary" v-if="canShowDeleteRoomButton()" @click="deleteRoom()">削除</button>
                 <div class="input-group mt-4" v-if="!is_started">
                     <div class="input-group-prepend">
                         <span class="input-group-text">招待URL</span>
@@ -116,7 +117,6 @@ export default {
     },
     created: function () {
         this.col_count = (parseInt(this.board.goal_position) - 2) / 2;
-        
         if (this.room.status === this.const.room_status_busy) {
             this.is_started = true;
         }
@@ -179,7 +179,7 @@ export default {
                 "Content-Type": "application/json"
             }
         }).then(function (response) {
-            if (response.data.status === 'success') { 
+            if (response.data.status === 'success') {
                 this.v_members = response.data.members;
                 console.log(this.v_members);
 
@@ -264,7 +264,7 @@ export default {
         let min = 1;
         let max = 6;
         let dice = Math.floor( Math.random() * (max + 1 - min) ) + min ;
-        
+
         this.saveLog(this.const.action_by_dice, this.const.effect_move_forward, dice);
     },
     canShowStartButton: function () {
@@ -324,7 +324,33 @@ export default {
         }
 
         return false;
-    }
+    },
+    canShowDeleteRoomButton: function () {
+      if (this.room.owner_id === this.auth_id &&
+            this.room.status === this.const.room_status_open) {
+        if (!this.is_started) {
+          return true;
+        }
+      }
+      return false;
+    },
+    deleteRoom: function () {
+        axios.defaults.headers.common['Authorization'] = "Bearer " + this.token;
+        axios.post('/api/sugoroku/delete', {
+            headers: {
+                "Content-Type": "application/json"
+            },
+            'room_id': this.room.id,
+        }).then(response => {
+            if (response.data.status === 'success') {
+                // 成功
+            } else {
+                alert(失敗しました);
+            }
+        }).catch(function(error) {
+            console.log(error);
+        });
+    },
   }
 }
 </script>
