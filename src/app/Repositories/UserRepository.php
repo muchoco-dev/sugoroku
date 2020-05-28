@@ -2,8 +2,8 @@
 
 namespace App\Repositories;
 
-use App\Models\Room;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Room;
 
 class UserRepository
 {

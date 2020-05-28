@@ -61,6 +61,7 @@ class SugorokuController extends Controller
 
         switch ($validated['action_id']) {
             case config('const.action_by_dice'):
+                $repository->movePiece($room->id, Auth::id(), $validated['effect_num']);
                 event(new DiceRolled($room->id, Auth::id(), $validated['effect_num']));
                 break;
             case config('const.action_by_space'):
@@ -71,6 +72,25 @@ class SugorokuController extends Controller
             'status' => 'success'
         ]);
 
+    }
+
+    public function getLastGo($roomId)
+    {
+        $repository = new RoomRepository;
+        $room = Room::find($roomId);
+
+        // 部屋が存在しない
+        // ユーザが部屋のメンバではない
+        if (!$room || !$repository->isMember($room, Auth::id(), $room->id)) {
+            return response()->json([
+                'status' => 'error',
+            ]);
+        }
+
+        return response()->json([
+            'status'    => 'success',
+            'last_go'   => 1
+        ]);
     }
 
 
