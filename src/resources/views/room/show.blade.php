@@ -7,7 +7,7 @@
     :members="{{ $room->users }}"
     :spaces="{{ json_encode($spaces) }}"
     :auth_id="{{ Auth::id() }}"
-    :room_status_open="{{ config('const.room_status_open') }}"
+    :const="{{ json_encode(config('const')) }}"
     token="{{ $pusher_token }}"></sugoroku>
   </div>
 @endsection

@@ -21,5 +21,5 @@ return [
     'action_by_dice'                => 1,
     'action_by_space'               => 2,
 
-    'virus_user_id'           => 10000,
+    'virus_user_id'                 => 10000,
 ];

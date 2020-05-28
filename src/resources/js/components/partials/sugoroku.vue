@@ -72,7 +72,7 @@
         <div class="col-2">
             <div id="action">
                 <button class="btn btn-success" v-if="canShowStartButton()" @click="start()">ゲームスタート</button>
-                <button class="btn" v-if="canShowRollDiceButton()" @click="rollDice()">サイコロを振る</button>
+                <button class="btn btn-primary" v-if="canShowRollDiceButton()" @click="rollDice()">サイコロを振る</button>
                 <div class="input-group mt-4" v-if="!is_started">
                     <div class="input-group-prepend">
                         <span class="input-group-text">招待URL</span>
@@ -92,7 +92,7 @@ export default {
         room: Object,
         members: Array,
         auth_id: Number,
-        room_status_open: Number,
+        const: Array,
         token: String
     },
     data() {
@@ -110,11 +110,17 @@ export default {
             logs: [],
             is_started: false,
             join_url: location.href + '/join',
-            v_members: this.members
+            v_members: this.members,
+            last_go: 0
         }
     },
     created: function () {
-        this.col_count = (Number(this.board.goal_position) - 2) / 2;
+        this.col_count = (parseInt(this.board.goal_position) - 2) / 2;
+        
+        if (this.room.status === this.const.room_status_busy) {
+            this.is_started = true;
+        }
+
         this.resetMembers();
     },
     mounted: function () {
@@ -132,6 +138,7 @@ export default {
         window.Echo.private('dice-rolled-channel.' + this.room.id).listen('DiceRolled', response => {
             this.logs.push(this.getMemberName(response.userId) + 'さんがサイコロをふって' + response.number + '進みました');
             this.movePiece(response.userId, response.number);
+//            this.last_go
         });
   },
   methods: {
@@ -150,7 +157,6 @@ export default {
     },
     resetMembers: function () {
         // メンバー情報及びコマ情報の一括更新
-
         axios.defaults.headers.common['Authorization'] = "Bearer " + this.token;
         axios.get('/api/sugoroku/members/' + this.room.id, {
             headers: {
@@ -168,7 +174,7 @@ export default {
                         this.piece_positions[position] = [];
                     }
 
-                    if (this.v_members[key]['id'] === 10000) {
+                    if (this.v_members[key]['id'] === this.const.virus_user_id) {
                         aicon_name = this.virus_icon;
                     } else {
                         aicon_name = this.piece_icons[aicon_count];
@@ -179,7 +185,6 @@ export default {
                         user_id: this.v_members[key]['id'],
                         status: this.v_members[key]['pivot']['status'],
                         aicon: aicon_name,
-                        go: this.v_members[key]['pivot']['go']
                     });
                     this.v_members[key]['aicon'] = aicon_name;
                 }
@@ -238,9 +243,16 @@ export default {
         }
         this.piece_positions = piece_positions_tmp;
     },
+    rollDice: function () {
+        let min = 1;
+        let max = 6;
+        let dice = Math.floor( Math.random() * (max + 1 - min) ) + min ;
+        
+        this.saveLog(this.const.action_by_dice, this.const.effect_move_forward, dice);
+    },
     canShowStartButton: function () {
       if (this.room.owner_id === this.auth_id &&
-            this.room.status === this.room_status_open) {
+            this.room.status === this.const.room_status_open) {
         if (!this.is_started) {
           return true;
         }
@@ -286,8 +298,14 @@ export default {
     },
     canShowRollDiceButton: function () {
         if (this.is_started) {
-            return true;
+            for (let key in this.v_members) {
+                if (this.v_members[key]['pivot']['go'] === parseInt(this.last_go) + 1 &&
+                    this.v_members[key]['id'] === this.auth_id) {
+                    return true;
+                }
+            }
         }
+
         return false;
     }
   }

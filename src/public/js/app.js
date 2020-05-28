@@ -2069,7 +2069,7 @@ __webpack_require__.r(__webpack_exports__);
     room: Object,
     members: Array,
     auth_id: Number,
-    room_status_open: Number,
+    "const": Array,
     token: String
   },
   data: function data() {
@@ -2087,11 +2087,17 @@ __webpack_require__.r(__webpack_exports__);
       logs: [],
       is_started: false,
       join_url: location.href + '/join',
-      v_members: this.members
+      v_members: this.members,
+      last_go: 0
     };
   },
   created: function created() {
-    this.col_count = (Number(this.board.goal_position) - 2) / 2;
+    this.col_count = (parseInt(this.board.goal_position) - 2) / 2;
+
+    if (this.room.status === this["const"].room_status_busy) {
+      this.is_started = true;
+    }
+
     this.resetMembers();
   },
   mounted: function mounted() {
@@ -2109,7 +2115,8 @@ __webpack_require__.r(__webpack_exports__);
     window.Echo["private"]('dice-rolled-channel.' + this.room.id).listen('DiceRolled', function (response) {
       _this.logs.push(_this.getMemberName(response.userId) + 'さんがサイコロをふって' + response.number + '進みました');
 
-      _this.movePiece(response.userId, response.number);
+      _this.movePiece(response.userId, response.number); //            this.last_go
+
     });
   },
   methods: {
@@ -2148,7 +2155,7 @@ __webpack_require__.r(__webpack_exports__);
               this.piece_positions[position] = [];
             }
 
-            if (this.v_members[key]['id'] === 10000) {
+            if (this.v_members[key]['id'] === this["const"].virus_user_id) {
               aicon_name = this.virus_icon;
             } else {
               aicon_name = this.piece_icons[aicon_count];
@@ -2158,8 +2165,7 @@ __webpack_require__.r(__webpack_exports__);
             this.piece_positions[position].push({
               user_id: this.v_members[key]['id'],
               status: this.v_members[key]['pivot']['status'],
-              aicon: aicon_name,
-              go: this.v_members[key]['pivot']['go']
+              aicon: aicon_name
             });
             this.v_members[key]['aicon'] = aicon_name;
           }
@@ -2222,8 +2228,14 @@ __webpack_require__.r(__webpack_exports__);
 
       this.piece_positions = piece_positions_tmp;
     },
+    rollDice: function rollDice() {
+      var min = 1;
+      var max = 6;
+      var dice = Math.floor(Math.random() * (max + 1 - min)) + min;
+      this.saveLog(this["const"].action_by_dice, this["const"].effect_move_forward, dice);
+    },
     canShowStartButton: function canShowStartButton() {
-      if (this.room.owner_id === this.auth_id && this.room.status === this.room_status_open) {
+      if (this.room.owner_id === this.auth_id && this.room.status === this["const"].room_status_open) {
         if (!this.is_started) {
           return true;
         }
@@ -2271,7 +2283,11 @@ __webpack_require__.r(__webpack_exports__);
     },
     canShowRollDiceButton: function canShowRollDiceButton() {
       if (this.is_started) {
-        return true;
+        for (var key in this.v_members) {
+          if (this.v_members[key]['pivot']['go'] === parseInt(this.last_go) + 1 && this.v_members[key]['id'] === this.auth_id) {
+            return true;
+          }
+        }
       }
 
       return false;
@@ -45740,7 +45756,7 @@ var render = function() {
             ? _c(
                 "button",
                 {
-                  staticClass: "btn",
+                  staticClass: "btn btn-primary",
                   on: {
                     click: function($event) {
                       return _vm.rollDice()
