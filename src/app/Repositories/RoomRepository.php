@@ -102,7 +102,7 @@ class RoomRepository
             'room_id'   => $roomId,
             'user_id'   => $userId
         ])->first();
-        
+
         if (!$roomUser) {
             return false;
         }
@@ -284,6 +284,13 @@ class RoomRepository
         }
 
         return $room->users()->find($userId)->pivot['position'];
+    }
+
+    public function getMember(int $roomId, int $userId)
+    {
+        return RoomUser::where('room_id', $roomId)
+            ->where('user_id', $userId)
+            ->first();
     }
 }
 

@@ -96,7 +96,7 @@ class RoomController extends Controller
 
         return view('room.show', compact('room', 'spaces', 'pusher_token'));
     }
-    
+
     public function join($uname) {
         $repository = new RoomRepository();
         $room = $repository->findByUname($uname);
@@ -120,4 +120,14 @@ class RoomController extends Controller
         }
     }
 
+    public function getMember(int $roomId, int $userId)
+    {
+        $repository = new RoomRepository();
+        $roomUser = $repository->getMember($roomId, $userId);
+
+        return response()->json([
+            'status'   => 'success',
+            'roomUser' => $roomUser
+        ]);
+    }
 }
