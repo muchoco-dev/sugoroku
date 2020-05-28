@@ -3,7 +3,9 @@
 namespace App\Repositories;
 
 use App\Events\MemberAdded;
+use App\Events\DiceRolled;
 use App\Models\RoomUser;
+use App\Models\RoomLog;
 use App\Models\Room;
 use App\Models\Space;
 use Illuminate\Support\Facades\Auth;
@@ -27,6 +29,16 @@ class RoomRepository
             'owner_id'  => $userId,
             'status'    => config('const.room_status_open')
         ])->first();
+    }
+
+    /**
+     * ユーザが入室している部屋を取得
+     */
+    public function getJoinedRoom($userId)
+    {
+        $roomUser = RoomUser::where('user_id', $userId)->first();
+        if (!$roomUser) return false;
+        return $this->model::find($roomUser->room_id);
     }
 
     public function create($data)
@@ -78,6 +90,9 @@ class RoomRepository
         // 部屋のステータス変更
         $this->changeStatus($room->id, config('const.room_status_busy'));
 
+        // メンバーにウイルスを追加
+        $this->addMember(config('const.virus_user_id'), $room->id);
+
         // 参加者のプレイ順をセット
         $users = $room->users;
         $go_list = [];
@@ -88,9 +103,39 @@ class RoomRepository
 
         foreach ($users as $key => $user) {
             $room->users()->updateExistingPivot($user->id, ['go' => $go_list[$key]]);
+
+            if ($user->id === config('const.virus_user_id') && $go_list[$key] === 1) {
+                // ウィルスが1番手の場合は、最初の手番をここで消化する
+                $this->moveVirus($room->id);
+            }
         }
 
         return true;
+    }
+
+    /**
+     * ログ保存
+     */
+    public function saveLog($userId, $roomId, $actionId, $effectId, $effectNum)
+    {
+        $log = new RoomLog;
+        $log->user_id = $userId;
+        $log->room_id = $roomId;
+        $log->action_id = $actionId;
+        $log->effect_id = $effectId;
+        $log->effect_num = $effectNum;
+        $log->save();
+    }
+
+    /**
+     * ウィルスのターン
+     */
+    public function moveVirus($roomId)
+    {
+        $dice_num = rand(1, 6);
+        $this->movePiece($roomId, config('const.virus_user_id'), $dice_num);
+        event(new DiceRolled($roomId, config('const.virus_user_id'), $dice_num));
+        $this->saveLog(config('const.virus_user_id'), $roomId, config('const.action_by_dice'), config('const.effect_move_forward'), $dice_num);
     }
 
     /**
@@ -110,7 +155,6 @@ class RoomRepository
         $roomUser->position = $roomUser->position + $num;
         $roomUser->save();
         return $roomUser;
-
     }
 
     /**
@@ -122,7 +166,8 @@ class RoomRepository
             'id' => $roomId
         ])->first();
 
-        if ($this->isMemberExceededMaxMember($room)) {
+        if ($userId !== config('const.virus_user_id') && $this->isMemberExceededMaxMember($room)) {
+            // ウイルスは人数に関わらず参加可能
             return false;
         }
 
@@ -130,15 +175,23 @@ class RoomRepository
             return false;
         }
 
+        if ($userId !== config('const.virus_user_id')) {
+            $status = config('const.piece_status_health');
+        } else {
+            $status = config('const.piece_status_sick');
+        }
+
         $room->users()->attach($userId,[
             'go' => 0,
-            'status' => config('const.piece_status_health'),
+            'status' => $status,
             'position' => 1
         ]);
 
         // Roomテーブルのmember_countを1足してDB更新
-        $room->member_count = $room['member_count'] + 1;
-        $room->save();
+        if ($userId !== config('const.virus_user_id')) {
+            $room->member_count = $room['member_count'] + 1;
+            $room->save();
+        }
 
         event(new MemberAdded($userId, $roomId));
 
@@ -246,6 +299,7 @@ class RoomRepository
 
     /**
      * ユーザが参加中の有効な部屋のIDを取得
+     * TODO: バグあり。あとで確認する
      */
     public function getUserJoinActiveRoomId($userId)
     {
@@ -291,6 +345,40 @@ class RoomRepository
         return RoomUser::where('room_id', $roomId)
             ->where('user_id', $userId)
             ->first();
+    }
+
+    public function getNextGo($roomId)
+    {
+        $lastLog = RoomLog::where('room_id', $roomId)
+            ->orderBy('created_at', 'desc')
+            ->first();
+        if (!$lastLog) return 0;
+
+        $roomUser = RoomUser::where([
+            'user_id'   => $lastLog->user_id,
+            'room_id'   => $lastLog->room_id
+        ])->first();
+
+        // 次の番
+        $room = Room::find($roomId);
+        if ($roomUser->go === $room->member_count+1)
+        {
+            $next_go = 1;
+        } else {
+            $next_go = $roomUser->go + 1;
+        }
+
+        // 次がウィルスの番のときは、ここで手番を消化する
+        $virus = RoomUser::where([
+            'user_id'   => config('const.virus_user_id'),
+            'room_id'   => $roomId
+        ])->first();
+        if ($virus->go === $next_go) {
+            $this->moveVirus($roomId);
+            return $this->getNextGo($roomId);
+        }
+
+        return $next_go;
     }
 }
 

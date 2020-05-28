@@ -2061,6 +2061,7 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: {
     board: Object,
@@ -2068,7 +2069,7 @@ __webpack_require__.r(__webpack_exports__);
     room: Object,
     members: Array,
     auth_id: Number,
-    room_status_open: Number,
+    "const": Object,
     token: String
   },
   data: function data() {
@@ -2085,35 +2086,46 @@ __webpack_require__.r(__webpack_exports__);
       piece_positions: {},
       logs: [],
       is_started: false,
-      join_url: location.href + '/join'
+      join_url: location.href + '/join',
+      v_members: this.members,
+      next_go: 1
     };
   },
   created: function created() {
-    this.col_count = (Number(this.board.goal_position) - 2) / 2;
+    this.col_count = (parseInt(this.board.goal_position) - 2) / 2;
+
+    if (this.room.status === this["const"].room_status_busy) {
+      this.is_started = true;
+    }
+
+    this.resetMembers();
+    this.setNextGo();
   },
   mounted: function mounted() {
     var _this = this;
 
     window.Echo["private"]('member-added-channel.' + this.room.id).listen('MemberAdded', function (response) {// response.userId
       // response.roomId
-      // これを使ってユーザ名取得&this.membersに追加
+      // これを使ってユーザ名取得&this.v_membersに追加
     });
     window.Echo["private"]('sugoroku-started-channel.' + this.room.id).listen('SugorokuStarted', function (response) {
       _this.logs.push('ゲームスタート！');
 
-      _this.gameStart();
+      _this.resetMembers();
     });
     window.Echo["private"]('dice-rolled-channel.' + this.room.id).listen('DiceRolled', function (response) {
       _this.logs.push(_this.getMemberName(response.userId) + 'さんがサイコロをふって' + response.number + '進みました');
 
       _this.movePiece(response.userId, response.number);
+
+      _this.setNextGo();
     });
   },
   methods: {
     getMemberName: function getMemberName(id) {
-      for (var key in this.members) {
-        if (this.members[key]['id']) {
-          return this.members[key]['name'];
+      for (var key in this.v_members) {
+        if (this.v_members[key]['id'] === id) {
+          return this.v_members[key]['name'];
         }
       }
     },
@@ -2125,9 +2137,24 @@ __webpack_require__.r(__webpack_exports__);
 
       return '';
     },
-    gameStart: function gameStart() {
-      // ゲーム開始準備
-      // メンバー情報の一括更新
+    setNextGo: function setNextGo() {
+      axios.defaults.headers.common['Authorization'] = "Bearer " + this.token;
+      axios.get('/api/sugoroku/next_go/' + this.room.id, {
+        headers: {
+          "Content-Type": "application/json"
+        }
+      }).then(function (response) {
+        console.log(response);
+
+        if (response.data.status === 'success') {
+          this.next_go = response.data.next_go;
+        }
+      }.bind(this))["catch"](function (error) {
+        console.log(error);
+      });
+    },
+    resetMembers: function resetMembers() {
+      // メンバー情報及びコマ情報の一括更新
       axios.defaults.headers.common['Authorization'] = "Bearer " + this.token;
       axios.get('/api/sugoroku/members/' + this.room.id, {
         headers: {
@@ -2135,29 +2162,34 @@ __webpack_require__.r(__webpack_exports__);
         }
       }).then(function (response) {
         if (response.data.status === 'success') {
-          this.members = response.data.members;
+          this.v_members = response.data.members;
+          var aicon_count = 0;
+          var aicon_name = '';
+
+          for (var key in this.v_members) {
+            var position = this.v_members[key]['pivot']['position'];
+
+            if (!this.piece_positions[position]) {
+              this.piece_positions[position] = [];
+            }
+
+            if (this.v_members[key]['id'] === this["const"].virus_user_id) {
+              aicon_name = this.virus_icon;
+            } else {
+              aicon_name = this.piece_icons[aicon_count];
+              aicon_count++;
+            }
+
+            this.piece_positions[position].push({
+              user_id: this.v_members[key]['id'],
+              status: this.v_members[key]['pivot']['status'],
+              aicon: aicon_name
+            });
+            this.v_members[key]['aicon'] = aicon_name;
+          }
         }
-      })["catch"](function (error) {
+      }.bind(this))["catch"](function (error) {
         console.log(error);
-      }); // コマの初期設定
-
-      this.piece_positions[1] = [];
-
-      for (var key in this.members) {
-        this.piece_positions[1].push({
-          user_id: this.members[key]['id'],
-          status: 1,
-          aicon: this.piece_icons[key],
-          go: this.members[key]['pivot']['go']
-        });
-        this.members[key]['aicon'] = this.piece_icons[key];
-      }
-
-      this.piece_positions[1].push({
-        user_id: 0,
-        status: 2,
-        go: this.members.length + 1,
-        aicon: this.virus_icon
       });
     },
     setPiece: function setPiece(position) {
@@ -2214,8 +2246,14 @@ __webpack_require__.r(__webpack_exports__);
 
       this.piece_positions = piece_positions_tmp;
     },
+    rollDice: function rollDice() {
+      var min = 1;
+      var max = 6;
+      var dice = Math.floor(Math.random() * (max + 1 - min)) + min;
+      this.saveLog(this["const"].action_by_dice, this["const"].effect_move_forward, dice);
+    },
     canShowStartButton: function canShowStartButton() {
-      if (this.room.owner_id === this.auth_id && this.room.status === this.room_status_open) {
+      if (this.room.owner_id === this.auth_id && this.room.status === this["const"].room_status_open) {
         if (!this.is_started) {
           return true;
         }
@@ -2234,7 +2272,6 @@ __webpack_require__.r(__webpack_exports__);
         'room_id': this.room.id
       }).then(function (response) {
         if (response.data.status === 'success') {
-          console.log('ゲームをスタートしました');
           _this2.is_started = true;
         } else {
           alert(response.data.message);
@@ -2264,7 +2301,11 @@ __webpack_require__.r(__webpack_exports__);
     },
     canShowRollDiceButton: function canShowRollDiceButton() {
       if (this.is_started) {
-        return true;
+        for (var key in this.v_members) {
+          if (this.v_members[key]['pivot']['go'] === parseInt(this.next_go) && this.v_members[key]['id'] === this.auth_id) {
+            return true;
+          }
+        }
       }
 
       return false;
@@ -45680,7 +45721,7 @@ var render = function() {
         _c(
           "ul",
           { staticClass: "list-group" },
-          _vm._l(_vm.members, function(member) {
+          _vm._l(_vm.v_members, function(member) {
             return _c("li", { staticClass: "list-group-item" }, [
               member.aicon
                 ? _c("i", { class: "fas fa-2x fa-" + member.aicon })
@@ -45688,8 +45729,11 @@ var render = function() {
               _vm._v(
                 "\n                    " +
                   _vm._s(member.name) +
-                  "\n                "
-              )
+                  "\n                    "
+              ),
+              member.pivot.go
+                ? _c("span", [_vm._v("(" + _vm._s(member.pivot.go) + ")")])
+                : _vm._e()
             ])
           }),
           0
@@ -45730,7 +45774,7 @@ var render = function() {
             ? _c(
                 "button",
                 {
-                  staticClass: "btn",
+                  staticClass: "btn btn-primary",
                   on: {
                     click: function($event) {
                       return _vm.rollDice()

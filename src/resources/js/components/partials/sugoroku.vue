@@ -54,9 +54,10 @@
         </div>
         <div id="members" class="col-2">
             <ul class="list-group">
-                <li v-for="member in members" class="list-group-item">
+                <li v-for="member in v_members" class="list-group-item">
                     <i v-if="member.aicon" v-bind:class="'fas fa-2x fa-' + member.aicon"></i>
                     {{ member.name }}
+                    <span v-if="member.pivot.go">({{ member.pivot.go }})</span>
                 </li>
             </ul>
         </div>
@@ -71,7 +72,7 @@
         <div class="col-2">
             <div id="action">
                 <button class="btn btn-success" v-if="canShowStartButton()" @click="start()">ゲームスタート</button>
-                <button class="btn" v-if="canShowRollDiceButton()" @click="rollDice()">サイコロを振る</button>
+                <button class="btn btn-primary" v-if="canShowRollDiceButton()" @click="rollDice()">サイコロを振る</button>
                 <div class="input-group mt-4" v-if="!is_started">
                     <div class="input-group-prepend">
                         <span class="input-group-text">招待URL</span>
@@ -91,7 +92,7 @@ export default {
         room: Object,
         members: Array,
         auth_id: Number,
-        room_status_open: Number,
+        const: Object,
         token: String
     },
     data() {
@@ -108,34 +109,44 @@ export default {
             piece_positions: {},
             logs: [],
             is_started: false,
-            join_url: location.href + '/join'
+            join_url: location.href + '/join',
+            v_members: this.members,
+            next_go: 1
         }
     },
     created: function () {
-      this.col_count = (Number(this.board.goal_position) - 2) / 2;
+        this.col_count = (parseInt(this.board.goal_position) - 2) / 2;
+        
+        if (this.room.status === this.const.room_status_busy) {
+            this.is_started = true;
+        }
+
+        this.resetMembers();
+        this.setNextGo();
     },
     mounted: function () {
         window.Echo.private('member-added-channel.' + this.room.id).listen('MemberAdded', response => {
             // response.userId
             // response.roomId
-            // これを使ってユーザ名取得&this.membersに追加
+            // これを使ってユーザ名取得&this.v_membersに追加
         });
 
         window.Echo.private('sugoroku-started-channel.' + this.room.id).listen('SugorokuStarted', response => {
             this.logs.push('ゲームスタート！');
-            this.gameStart();
+            this.resetMembers();
         });
 
         window.Echo.private('dice-rolled-channel.' + this.room.id).listen('DiceRolled', response => {
             this.logs.push(this.getMemberName(response.userId) + 'さんがサイコロをふって' + response.number + '進みました');
             this.movePiece(response.userId, response.number);
+            this.setNextGo();
         });
   },
   methods: {
     getMemberName: function (id) {
-        for (let key in this.members) {
-            if (this.members[key]['id']) {
-                return this.members[key]['name'];
+        for (let key in this.v_members) {
+            if (this.v_members[key]['id'] === id) {
+                return this.v_members[key]['name'];
             }
         }
     },
@@ -145,39 +156,61 @@ export default {
         }
         return '';
     },
-    gameStart: function () { // ゲーム開始準備
-        // メンバー情報の一括更新
+    setNextGo: function () {
+        axios.defaults.headers.common['Authorization'] = "Bearer " + this.token;
+        axios.get('/api/sugoroku/next_go/' + this.room.id, {
+            headers: {
+                "Content-Type": "application/json"
+            }
+        }).then(function (response) {
+            console.log(response);
+            if (response.data.status === 'success') {
+                this.next_go = response.data.next_go;
+            }
+        }.bind(this)).catch(function(error) {
+            console.log(error);
+        });
+
+    },
+    resetMembers: function () {
+        // メンバー情報及びコマ情報の一括更新
         axios.defaults.headers.common['Authorization'] = "Bearer " + this.token;
         axios.get('/api/sugoroku/members/' + this.room.id, {
             headers: {
                 "Content-Type": "application/json"
             }
         }).then(function (response) {
-            if (response.data.status === 'success') {
-                this.members = response.data.members;
+            if (response.data.status === 'success') { 
+                this.v_members = response.data.members;
+
+                let aicon_count = 0;
+                let aicon_name = '';
+                for (let key in this.v_members) {
+                    let position = this.v_members[key]['pivot']['position'];
+                    if (!this.piece_positions[position]) {
+                        this.piece_positions[position] = [];
+                    }
+
+                    if (this.v_members[key]['id'] === this.const.virus_user_id) {
+                        aicon_name = this.virus_icon;
+                    } else {
+                        aicon_name = this.piece_icons[aicon_count];
+                        aicon_count++;
+                    }
+
+                    this.piece_positions[position].push({
+                        user_id: this.v_members[key]['id'],
+                        status: this.v_members[key]['pivot']['status'],
+                        aicon: aicon_name,
+                    });
+                    this.v_members[key]['aicon'] = aicon_name;
+                }
+
             }
-        }).catch(function(error) {
+        }.bind(this)).catch(function(error) {
             console.log(error);
         });
 
-
-        // コマの初期設定
-        this.piece_positions[1] = [];
-        for (let key in this.members) {
-            this.piece_positions[1].push({
-                user_id: this.members[key]['id'],
-                status: 1,
-                aicon: this.piece_icons[key],
-                go: this.members[key]['pivot']['go']
-            });
-            this.members[key]['aicon'] = this.piece_icons[key];
-        }
-        this.piece_positions[1].push({
-            user_id: 0,
-            status: 2,
-            go: this.members.length + 1,
-            aicon: this.virus_icon
-        });
     },
     setPiece: function (position) { // マスにコマを配置する
         return this.piece_positions[position];
@@ -227,9 +260,16 @@ export default {
         }
         this.piece_positions = piece_positions_tmp;
     },
+    rollDice: function () {
+        let min = 1;
+        let max = 6;
+        let dice = Math.floor( Math.random() * (max + 1 - min) ) + min ;
+        
+        this.saveLog(this.const.action_by_dice, this.const.effect_move_forward, dice);
+    },
     canShowStartButton: function () {
       if (this.room.owner_id === this.auth_id &&
-            this.room.status === this.room_status_open) {
+            this.room.status === this.const.room_status_open) {
         if (!this.is_started) {
           return true;
         }
@@ -245,7 +285,6 @@ export default {
             'room_id': this.room.id
         }).then(response => {
             if (response.data.status === 'success') {
-                console.log('ゲームをスタートしました');
                 this.is_started = true;
             } else {
                 alert(response.data.message);
@@ -276,8 +315,14 @@ export default {
     },
     canShowRollDiceButton: function () {
         if (this.is_started) {
-            return true;
+            for (let key in this.v_members) {
+                if (this.v_members[key]['pivot']['go'] === parseInt(this.next_go) &&
+                    this.v_members[key]['id'] === this.auth_id) {
+                    return true;
+                }
+            }
         }
+
         return false;
     }
   }
