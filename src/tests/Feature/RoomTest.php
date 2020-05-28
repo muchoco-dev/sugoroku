@@ -945,12 +945,46 @@ class RoomTest extends TestCase
             'user_id' => $user->id
         ]);
 
-        if ($roomUser) {
-            return response()->json([
-                'status'   => 'success',
-                'roomUser' => $roomUser
-            ]);
-        } else {
+
+        return response()->json([
+            'status'   => 'success',
+            'roomUser' => $roomUser
+        ]);
+    }
+
+    public function testIsNotRoomUser()
+    {
+        $repository = new RoomRepository();
+
+        $user = factory(User::class)->create();
+        $board = $this->createBoard();
+
+        $room = factory(Room::class)->create([
+            'uname'     => uniqid(),
+            'name'      => 'first room',
+            'owner_id'  => $user->id,
+            'board_id'  => $board->id,
+            'max_member_count'  => 10,
+            'member_count'      => 0,
+            'status'    => config('const.room_status_open'),
+        ]);
+
+        // 中間(room_user)テーブルの作成
+        $room->users()->attach($user->id, [
+            'go' => 0,
+            'status' => config('const.piece_status_health'),
+            'position' => 1
+        ]);
+
+        $roomUser = $repository->getMember(0, 0);
+        $this->assertIsNotObject($roomUser);
+
+        $this->get('/api/get_member/{room_id}/{user_id}', [
+            'room_id' => $room->id,
+            'user_id' => $user->id
+        ]);
+
+        if (!$roomUser) {
             return response()->json([
                 'status'   => 'error'
             ]);
