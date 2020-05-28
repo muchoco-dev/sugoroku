@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Events\MemberAdded;
 use App\Models\RoomUser;
+use App\Models\RoomLog;
 use App\Models\Room;
 use App\Models\Space;
 use Illuminate\Support\Facades\Auth;
@@ -112,6 +113,20 @@ class RoomRepository
     }
 
     /**
+     * ログ保存
+     */
+    public function saveLog($userId, $roomId, $actionId, $effectId, $effectNum)
+    {
+        $log = new RoomLog;
+        $log->user_id = $userId;
+        $log->room_id = $roomId;
+        $log->action_id = $actionId;
+        $log->effect_id = $effectId;
+        $log->effect_num = $effectNum;
+        $log->save();
+    }
+
+    /**
      * ウィルスのターン
      */
     public function moveVirus($roomId)
@@ -119,6 +134,7 @@ class RoomRepository
         $dice_num = rand(1, 6);
         $this->movePiece($roomId, config('const.virus_user_id'), $dice_num);
         event(new DiceRolled($roomId, config('const.virus_user_id'), $dice_num));
+        $this->saveLog(config('const.virus_user_id'), $roomId, config('const.action_by_dice'), config('const.effect_move_forward'), $dice_num);
     }
 
     /**
@@ -325,8 +341,16 @@ class RoomRepository
 
     public function getLastGo($roomId)
     {
+        $lastLog = RoomLog::where('room_id', $roomId)
+            ->orderBy('created_at', 'desc')
+            ->first();
+        if (!$lastLog) return 0;
 
-
+        $roomUser = RoomUser::where([
+            'user_id'   => $lastLog->user_id,
+            'room_id'   => $lastLog->room_id
+        ])->first();
+        return $roomUser->go;
     }
 }
 

@@ -5,12 +5,12 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StartGameRequest;
 use App\Http\Requests\SaveLogRequest;
 use App\Repositories\RoomRepository;
-use Illuminate\Support\Facades\Auth;
 use App\Events\SugorokuStarted;
-use Illuminate\Http\Request;
 use App\Events\DiceRolled;
+use App\Models\RoomLog;
 use App\Models\Room;
-
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 
 class SugorokuController extends Controller
 {
@@ -59,6 +59,8 @@ class SugorokuController extends Controller
             ]);
         }
 
+        $repository->saveLog(Auth::id(), $room->id, $validated['action_id'], $validated['effect_id'], $validated['effect_num']);
+
         switch ($validated['action_id']) {
             case config('const.action_by_dice'):
                 $repository->movePiece($room->id, Auth::id(), $validated['effect_num']);
@@ -89,7 +91,7 @@ class SugorokuController extends Controller
 
         return response()->json([
             'status'    => 'success',
-            'last_go'   => 1
+            'last_go'   => $repository->getLastGo($room->id)
         ]);
     }
 

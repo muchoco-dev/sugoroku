@@ -2144,6 +2144,8 @@ __webpack_require__.r(__webpack_exports__);
           "Content-Type": "application/json"
         }
       }).then(function (response) {
+        console.log(response);
+
         if (response.data.status === 'success') {
           this.last_go = response.data.last_go;
         }
@@ -2161,7 +2163,6 @@ __webpack_require__.r(__webpack_exports__);
       }).then(function (response) {
         if (response.data.status === 'success') {
           this.v_members = response.data.members;
-          console.log(this.v_members);
           var aicon_count = 0;
           var aicon_name = '';
 

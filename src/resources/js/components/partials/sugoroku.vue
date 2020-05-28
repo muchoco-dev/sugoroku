@@ -163,6 +163,7 @@ export default {
                 "Content-Type": "application/json"
             }
         }).then(function (response) {
+            console.log(response);
             if (response.data.status === 'success') {
                 this.last_go = response.data.last_go;
             }
@@ -181,7 +182,6 @@ export default {
         }).then(function (response) {
             if (response.data.status === 'success') { 
                 this.v_members = response.data.members;
-                console.log(this.v_members);
 
                 let aicon_count = 0;
                 let aicon_name = '';
