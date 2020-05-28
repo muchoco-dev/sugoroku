@@ -918,6 +918,7 @@ class RoomTest extends TestCase
         $repository = new RoomRepository();
 
         $user = factory(User::class)->create();
+        Passport::actingAs($user);
         $board = $this->createBoard();
 
         $room = factory(Room::class)->create([
@@ -940,15 +941,11 @@ class RoomTest extends TestCase
         $roomUser = $repository->getMember($room->id, $user->id);
         $this->assertIsObject($roomUser);
 
-        $this->get('/api/get_member/{room_id}/{user_id}', [
-            'room_id' => $room->id,
-            'user_id' => $user->id
-        ]);
+        $response = $this->get("/api/get_member/{$room->id}/{$user->id}");
 
-
-        return response()->json([
+        $response->assertJson([
             'status'   => 'success',
-            'roomUser' => $roomUser
+            'roomUser' => $roomUser->toArray()
         ]);
     }
 
@@ -957,6 +954,7 @@ class RoomTest extends TestCase
         $repository = new RoomRepository();
 
         $user = factory(User::class)->create();
+        Passport::actingAs($user);
         $board = $this->createBoard();
 
         $room = factory(Room::class)->create([
@@ -979,14 +977,11 @@ class RoomTest extends TestCase
         $roomUser = $repository->getMember(0, 0);
         $this->assertIsNotObject($roomUser);
 
-        $this->get('/api/get_member/{room_id}/{user_id}', [
-            'room_id' => $room->id,
-            'user_id' => $user->id
-        ]);
+        $response = $this->get("/api/get_member/0/0");
 
         if (!$roomUser) {
-            return response()->json([
-                'status'   => 'error'
+            $response->assertJson([
+               'status' => 'error'
             ]);
         }
     }
