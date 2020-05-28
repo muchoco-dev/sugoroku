@@ -154,21 +154,55 @@ class RoomRepository
 
         $roomUser->position = $roomUser->position + $num;
         $roomUser->save();
-        // とりあえずメソッド追加
-        $this->updateStatusSick($roomId, $roomUser->position);
+        // 感染処理呼び出し　TODOテストコードどうすれば良いかわからない
+        $this->updateStatusSick($roomId, $userId, $roomUser->position, $roomUser->status);
         return $roomUser;
     }
 
     /**
-     * コマの移動中に感染中コマとすれ違ったらステータス（感染中）に更新する
+     * 移動してきたコマ情報を元に
+     * コマの移動中に感染中コマとすれ違ったら
+     * ステータスを感染中に更新する
      */
-    public function updateStatusSick($roomId, $roomUserPosition)
+    public function updateStatusSick($roomId, $userId, $position, $status)
     {
-        //【感染中のコマの動き】
-        RoomUser::where([
-            'room_id' => $roomId,
-            'position', '=>', $roomUserPosition
-        ])->update(['status' => 'const.piece_status_sick']);
+        // 移動しているコマユーザ以外の参加ユーザで
+        // 移動しているコマより前にいるコマが対象
+        $roomUsers = RoomUser::where([
+            ['room_id',  '=',  $roomId],
+            ['user_id',  '<>', $userId],
+            ['position', '>',  $position]
+        ])->pluck();
+
+        foreach ($roomUsers as $roomUser) {
+            if ($status === 'const.piece_status_sick') {
+                // 移動してきたコマが感染中の場合
+                if ($position >= $roomUser->position) {
+                    // 移動してきたコマとすれ違ったコマのステータスを確認
+                    if ($status !== $roomUser->status) {
+                        // すれ違ったコマが感染中ではない場合は感染中に更新
+                        RoomUser::where([
+                            ['room_id', '=', $roomId],
+                            ['user_id', '=', $roomUser->user_id]
+                        ])->update(['status' => 'const.piece_status_sick']);                               
+                    }
+                }
+            } else if ($status === 'const.piece_status_health') {
+                // 移動してきたコマが健康状態の場合
+                if ($position >= $roomUser->position) {
+                    // 移動してきたコマとすれ違ったコマのステータスを確認
+                    if ($roomUser->status === 'const.piece_status_sick' && $status !== $roomUser->status) {
+                        // すれ違ったコマが感染中 かつ 
+                        // 移動してきたコマのステータスが感染中ではない場合は
+                        // 移動してきたコマを感染中に更新
+                        RoomUser::where([
+                            ['room_id', '=', $roomId],
+                            ['user_id', '=', $userId],
+                        ])->update(['status' => 'const.piece_status_sick']);                        
+                    }
+                }
+            }
+        }
     }
 
     /**
