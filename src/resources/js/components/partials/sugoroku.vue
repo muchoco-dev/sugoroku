@@ -88,7 +88,7 @@
 export default {
     props: {
         board: Object,
-        spaces: Object,
+        spaces: [Array, Object],
         room: Object,
         members: Array,
         auth_id: Number,
@@ -181,7 +181,7 @@ export default {
         }).then(function (response) {
             if (response.data.status === 'success') { 
                 this.v_members = response.data.members;
-
+console.log(this.v_members);
                 let aicon_count = 0;
                 let aicon_name = '';
                 for (let key in this.v_members) {
@@ -220,7 +220,10 @@ export default {
             let users = this.piece_positions[position];
             for (let key in users) {
                 // ゴール済みのユーザは除外
-                if (users[key]['status'] === 3) {
+                if (users[key]['status'] === this.const.piece_status_finished) {
+                    if (!Array.isArray(piece_positions_tmp[position])) {
+                        piece_positions_tmp[position] = [];
+                    }
                     piece_positions_tmp[position].push(users[key]);
                     continue;
                 }
@@ -228,10 +231,12 @@ export default {
                 if (user_id === users[key]['user_id']) {
                     let new_position = parseInt(position) + parseInt(move_num);
 
-                    // ゴール
-                    if (new_position >= this.board.goal_position && users[key]['status'] === this.board.goal_status) {
+                    if (new_position >= this.board.goal_position &&
+                        users[key]['status'] === this.board.goal_status &&
+                        users[key]['id'] !== this.const.virus_user_id) {
+                        // ゴール
                         new_position = this.board.goal_position;
-                        users[key]['status'] = 3;
+                        users[key]['status'] = this.const.piece_status_finished;
                     } else if (new_position > this.board.goal_position) {
                         new_position = new_position - this.board.goal_position;
                     }
@@ -316,7 +321,8 @@ export default {
         if (this.is_started) {
             for (let key in this.v_members) {
                 if (this.v_members[key]['pivot']['go'] === parseInt(this.next_go) &&
-                    this.v_members[key]['id'] === this.auth_id) {
+                    this.v_members[key]['id'] === this.auth_id &&
+                    this.v_members[key]['pivot']['status'] !== this.const.piece_status_finished) {
                     return true;
                 }
             }

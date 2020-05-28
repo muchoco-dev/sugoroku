@@ -2065,7 +2065,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: {
     board: Object,
-    spaces: Object,
+    spaces: [Array, Object],
     room: Object,
     members: Array,
     auth_id: Number,
@@ -2161,6 +2161,7 @@ __webpack_require__.r(__webpack_exports__);
       }).then(function (response) {
         if (response.data.status === 'success') {
           this.v_members = response.data.members;
+          console.log(this.v_members);
           var aicon_count = 0;
           var aicon_name = '';
 
@@ -2203,17 +2204,22 @@ __webpack_require__.r(__webpack_exports__);
 
         for (var key in users) {
           // ゴール済みのユーザは除外
-          if (users[key]['status'] === 3) {
+          if (users[key]['status'] === this["const"].piece_status_finished) {
+            if (!Array.isArray(piece_positions_tmp[position])) {
+              piece_positions_tmp[position] = [];
+            }
+
             piece_positions_tmp[position].push(users[key]);
             continue;
           }
 
           if (user_id === users[key]['user_id']) {
-            var new_position = parseInt(position) + parseInt(move_num); // ゴール
+            var new_position = parseInt(position) + parseInt(move_num);
 
-            if (new_position >= this.board.goal_position && users[key]['status'] === this.board.goal_status) {
+            if (new_position >= this.board.goal_position && users[key]['status'] === this.board.goal_status && users[key]['id'] !== this["const"].virus_user_id) {
+              // ゴール
               new_position = this.board.goal_position;
-              users[key]['status'] = 3;
+              users[key]['status'] = this["const"].piece_status_finished;
             } else if (new_position > this.board.goal_position) {
               new_position = new_position - this.board.goal_position;
             } // 特殊マス
@@ -2300,7 +2306,7 @@ __webpack_require__.r(__webpack_exports__);
     canShowRollDiceButton: function canShowRollDiceButton() {
       if (this.is_started) {
         for (var key in this.v_members) {
-          if (this.v_members[key]['pivot']['go'] === parseInt(this.next_go) && this.v_members[key]['id'] === this.auth_id) {
+          if (this.v_members[key]['pivot']['go'] === parseInt(this.next_go) && this.v_members[key]['id'] === this.auth_id && this.v_members[key]['pivot']['status'] !== this["const"].piece_status_finished) {
             return true;
           }
         }

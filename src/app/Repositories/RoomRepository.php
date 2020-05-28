@@ -6,6 +6,7 @@ use App\Events\MemberAdded;
 use App\Events\DiceRolled;
 use App\Models\RoomUser;
 use App\Models\RoomLog;
+use App\Models\Board;
 use App\Models\Room;
 use App\Models\Space;
 use Illuminate\Support\Facades\Auth;
@@ -152,8 +153,24 @@ class RoomRepository
             return false;
         }
 
-        $roomUser->position = $roomUser->position + $num;
+        $room = Room::find($roomId);
+        $board = Board::find($room->board_id);
+
+        $newPosition = $roomUser->position + $num;
+        if ($newPosition >= $board->goal_position &&
+            $roomUser->status === $board->goal_status &&
+            $roomUser->user_id !== config('const.virus_user_id')
+        ) {
+            // ゴール
+            $roomUser->status = config('const.piece_status_finished');
+            $newPosition = $board->goal_position;
+        } elseif ($newPosition > $board->goal_position) {
+            // もう一周
+            $newPosition = $newPosition - $board->goal_position;
+        }
+        $roomUser->position = $newPosition;
         $roomUser->save();
+
         return $roomUser;
     }
 
