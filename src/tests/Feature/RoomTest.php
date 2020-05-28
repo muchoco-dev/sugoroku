@@ -909,4 +909,40 @@ class RoomTest extends TestCase
             'uname'    => $room->uname
         ]);
     }
+
+    /**
+     * メンバーを取得できるか
+     */
+    public function testCanGetMember()
+    {
+        $repository = new RoomRepository();
+
+        $user = factory(User::class)->create();
+        $board = $this->createBoard();
+
+        $room = factory(Room::class)->create([
+            'uname'     => uniqid(),
+            'name'      => 'first room',
+            'owner_id'  => $user->id,
+            'board_id'  => $board->id,
+            'max_member_count'  => 10,
+            'member_count'      => 0,
+            'status'    => config('const.room_status_open'),
+        ]);
+
+        // 中間(room_user)テーブルの作成
+        $room->users()->attach($user->id, [
+            'go' => 0,
+            'status' => config('const.piece_status_health'),
+            'position' => 1
+        ]);
+
+        $roomUser = $repository->getMember($room->id, $user->id);
+        $this->assertIsObject($roomUser);
+
+        $this->get('/api/get_member/{room_id}/{user_id}', [
+            'room_id' => $room->id,
+            'user_id' => $user->id
+        ]);
+    }
 }
