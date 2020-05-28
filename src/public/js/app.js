@@ -2069,7 +2069,7 @@ __webpack_require__.r(__webpack_exports__);
     room: Object,
     members: Array,
     auth_id: Number,
-    "const": Array,
+    "const": Object,
     token: String
   },
   data: function data() {
@@ -2115,7 +2115,7 @@ __webpack_require__.r(__webpack_exports__);
     window.Echo["private"]('dice-rolled-channel.' + this.room.id).listen('DiceRolled', function (response) {
       _this.logs.push(_this.getMemberName(response.userId) + 'さんがサイコロをふって' + response.number + '進みました');
 
-      _this.movePiece(response.userId, response.number); //            this.last_go
+      _this.movePiece(response.userId, response.number); //this.last_go
 
     });
   },
@@ -2135,6 +2135,11 @@ __webpack_require__.r(__webpack_exports__);
 
       return '';
     },
+
+    /*
+    setLastGo: function () {
+      let last_user_id = 
+    },*/
     resetMembers: function resetMembers() {
       // メンバー情報及びコマ情報の一括更新
       axios.defaults.headers.common['Authorization'] = "Bearer " + this.token;
@@ -2145,6 +2150,7 @@ __webpack_require__.r(__webpack_exports__);
       }).then(function (response) {
         if (response.data.status === 'success') {
           this.v_members = response.data.members;
+          console.log(this.v_members);
           var aicon_count = 0;
           var aicon_name = '';
 

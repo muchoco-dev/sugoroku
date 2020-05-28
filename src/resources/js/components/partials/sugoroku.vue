@@ -92,7 +92,7 @@ export default {
         room: Object,
         members: Array,
         auth_id: Number,
-        const: Array,
+        const: Object,
         token: String
     },
     data() {
@@ -138,7 +138,7 @@ export default {
         window.Echo.private('dice-rolled-channel.' + this.room.id).listen('DiceRolled', response => {
             this.logs.push(this.getMemberName(response.userId) + 'さんがサイコロをふって' + response.number + '進みました');
             this.movePiece(response.userId, response.number);
-//            this.last_go
+            //this.last_go
         });
   },
   methods: {
@@ -155,6 +155,11 @@ export default {
         }
         return '';
     },
+      /*
+    setLastGo: function () {
+        let last_user_id = 
+ 
+    },*/
     resetMembers: function () {
         // メンバー情報及びコマ情報の一括更新
         axios.defaults.headers.common['Authorization'] = "Bearer " + this.token;
@@ -165,6 +170,7 @@ export default {
         }).then(function (response) {
             if (response.data.status === 'success') { 
                 this.v_members = response.data.members;
+                console.log(this.v_members);
 
                 let aicon_count = 0;
                 let aicon_name = '';
