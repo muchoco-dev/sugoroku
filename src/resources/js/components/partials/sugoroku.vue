@@ -138,7 +138,7 @@ export default {
         window.Echo.private('dice-rolled-channel.' + this.room.id).listen('DiceRolled', response => {
             this.logs.push(this.getMemberName(response.userId) + 'さんがサイコロをふって' + response.number + '進みました');
             this.movePiece(response.userId, response.number);
-            //this.last_go
+            this.setLastGo();
         });
   },
   methods: {
@@ -155,11 +155,10 @@ export default {
         }
         return '';
     },
-      /*
     setLastGo: function () {
-        let last_user_id = 
+        
  
-    },*/
+    },
     resetMembers: function () {
         // メンバー情報及びコマ情報の一括更新
         axios.defaults.headers.common['Authorization'] = "Bearer " + this.token;

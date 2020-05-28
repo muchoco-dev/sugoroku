@@ -35,6 +35,7 @@ class RoomRepository
     public function getJoinedRoom($userId)
     {
         $roomUser = RoomUser::where('user_id', $userId)->first();
+        if (!$roomUser) return false;
         return $this->model::find($roomUser->room_id);
     }
 

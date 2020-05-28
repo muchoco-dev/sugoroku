@@ -2115,8 +2115,9 @@ __webpack_require__.r(__webpack_exports__);
     window.Echo["private"]('dice-rolled-channel.' + this.room.id).listen('DiceRolled', function (response) {
       _this.logs.push(_this.getMemberName(response.userId) + 'さんがサイコロをふって' + response.number + '進みました');
 
-      _this.movePiece(response.userId, response.number); //this.last_go
+      _this.movePiece(response.userId, response.number);
 
+      _this.setLastGo();
     });
   },
   methods: {
@@ -2135,11 +2136,7 @@ __webpack_require__.r(__webpack_exports__);
 
       return '';
     },
-
-    /*
-    setLastGo: function () {
-      let last_user_id = 
-    },*/
+    setLastGo: function setLastGo() {},
     resetMembers: function resetMembers() {
       // メンバー情報及びコマ情報の一括更新
       axios.defaults.headers.common['Authorization'] = "Bearer " + this.token;
