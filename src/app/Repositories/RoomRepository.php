@@ -152,32 +152,35 @@ class RoomRepository
             return false;
         }
 
+        // コマを動かす前のpositionを格納
+        $beforePosition = $roomUser->position;
+
         $roomUser->position = $roomUser->position + $num;
         $roomUser->save();
         // 感染処理呼び出し　TODOテストコードどうすれば良いかわからない
-        $this->updateStatusSick($roomId, $userId, $roomUser->position, $roomUser->status);
+        $this->updateStatusSick($roomId, $userId, $beforePosition, $roomUser->position, $roomUser->status);
         return $roomUser;
     }
 
     /**
-     * 移動してきたコマ情報を元に
+     * 移動対象のコマ情報を元に
      * コマの移動中に感染中コマとすれ違ったら
      * ステータスを感染中に更新する
      */
-    public function updateStatusSick($roomId, $userId, $position, $status)
+    public function updateStatusSick($roomId, $userId, $beforePosition, $afterPosition, $status)
     {
-        // 移動しているコマユーザ以外の参加ユーザで
-        // 移動しているコマより前にいるコマが対象
+        // 移動対象のコマユーザ以外の参加ユーザで
+        // 移動対象のコマより前にいるコマが対象
         $roomUsers = RoomUser::where([
             ['room_id',  '=',  $roomId],
             ['user_id',  '<>', $userId],
-            ['position', '>',  $position]
+            ['position', '>',  $beforePosition]
         ])->pluck();
 
         foreach ($roomUsers as $roomUser) {
             if ($status === 'const.piece_status_sick') {
                 // 移動してきたコマが感染中の場合
-                if ($position >= $roomUser->position) {
+                if ($afterPosition >= $roomUser->position) {
                     // コマがすれ違った場合
                     if ($status !== $roomUser->status) {
                         // すれ違ったコマが感染中ではない場合は感染中に更新
@@ -189,7 +192,7 @@ class RoomRepository
                 }
             } else if ($status === 'const.piece_status_health') {
                 // 移動してきたコマが健康状態の場合
-                if ($position >= $roomUser->position) {
+                if ($afterPosition >= $roomUser->position) {
                     // コマがすれ違った場合
                     if ($roomUser->status === 'const.piece_status_sick') {
                         // すれ違ったコマが感染中の場合は
