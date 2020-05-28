@@ -2327,7 +2327,9 @@ __webpack_require__.r(__webpack_exports__);
         },
         'room_id': this.room.id
       }).then(function (response) {
-        if (response.data.status === 'success') {// 成功
+        if (response.data.status === 'success') {
+          // 成功
+          window.location.href = '/rooms';
         } else {
           alert(失敗しました);
         }

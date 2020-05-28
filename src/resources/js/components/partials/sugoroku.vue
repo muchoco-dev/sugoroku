@@ -344,6 +344,7 @@ export default {
         }).then(response => {
             if (response.data.status === 'success') {
                 // 成功
+                window.location.href = '/rooms';
             } else {
                 alert(失敗しました);
             }
