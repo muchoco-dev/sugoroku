@@ -191,9 +191,8 @@ class RoomRepository
                 // 移動してきたコマが健康状態の場合
                 if ($position >= $roomUser->position) {
                     // 移動してきたコマとすれ違ったコマのステータスを確認
-                    if ($roomUser->status === 'const.piece_status_sick' && $status !== $roomUser->status) {
-                        // すれ違ったコマが感染中 かつ 
-                        // 移動してきたコマのステータスが感染中ではない場合は
+                    if ($roomUser->status === 'const.piece_status_sick') {
+                        // すれ違ったコマが感染中の場合は
                         // 移動してきたコマを感染中に更新
                         RoomUser::where([
                             ['room_id', '=', $roomId],
