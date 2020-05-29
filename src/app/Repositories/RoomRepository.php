@@ -175,7 +175,9 @@ class RoomRepository
             ['room_id',  '=',  $roomId],
             ['user_id',  '<>', $userId],
             ['position', '>',  $beforePosition]
-        ])->pluck();
+        ])->get();
+
+        echo var_dump($roomUsers);
 
         foreach ($roomUsers as $roomUser) {
             if ($status === 'const.piece_status_sick') {
