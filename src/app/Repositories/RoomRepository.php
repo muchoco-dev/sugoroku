@@ -177,8 +177,6 @@ class RoomRepository
             ['position', '>',  $beforePosition]
         ])->get();
 
-        echo var_dump($roomUsers);
-
         foreach ($roomUsers as $roomUser) {
             if ($status === 'const.piece_status_sick') {
                 // 移動してきたコマが感染中の場合
