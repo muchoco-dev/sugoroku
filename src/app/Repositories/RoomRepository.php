@@ -157,9 +157,12 @@ class RoomRepository
 
         $roomUser->position = $roomUser->position + $num;
         $roomUser->save();
-        // 感染処理呼び出し
-        $this->updateStatusSick($roomId, $userId, $roomUser, $beforePosition);
-        
+
+        // 感染してたら感染処理呼び出し
+        if ($roomUser->status == config('const.piece_status_sick')) {
+            $this->updateStatusSick($roomId, $userId, $roomUser, $beforePosition);
+        }
+
         return $roomUser;
     }
 
@@ -179,13 +182,11 @@ class RoomRepository
             ['status', config('const.piece_status_health')]
         ])->get();
 
-        // 自分が感染者で感染対象のユーザーがいたら感染させる
+        // 感染対象のユーザーを感染させる
         foreach ($targetUsers as $targetUser) {
-            if ($roomUser->status == config('const.piece_status_sick')) {
-                $targetUser->update([
-                    'status' => config('const.piece_status_sick')
-                ]);
-            }
+            $targetUser->update([
+                'status' => config('const.piece_status_sick')
+            ]);
         }
     }
 
