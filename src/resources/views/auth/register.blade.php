@@ -61,6 +61,14 @@
                             </div>
                         </div>
 
+                        <div class="text-center is-invalid">
+                            <input type="checkbox" name="agree_privacy_terms" id="agree" required="required"/>
+                            <label for="agree">利用規約・プライバシーポリシーへ同意する</label>
+                            @if($errors->has('agree_privacy_terms'))
+                                <div class="text-danger">利用規約・プライバシーポリシーへの同意は必須です</div>
+                            @endif
+                        </div>
+
                         <div class="form-group row mb-0">
                             <div class="col-md-6 offset-md-4">
                                 <button type="submit" class="btn btn-primary">
@@ -68,6 +76,7 @@
                                 </button>
                             </div>
                         </div>
+
                     </form>
                 </div>
             </div>
