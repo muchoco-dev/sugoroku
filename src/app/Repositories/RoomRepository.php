@@ -178,7 +178,7 @@ class RoomRepository
         ])->get();
 
         foreach ($roomUsers as $roomUser) {
-            if ($status === 'const.piece_status_sick') {
+            if ($status === config('const.piece_status_sick')) {
                 // 移動してきたコマが感染中の場合
                 if ($afterPosition >= $roomUser->position) {
                     // コマがすれ違った場合
@@ -187,20 +187,20 @@ class RoomRepository
                         RoomUser::where([
                             ['room_id', '=', $roomId],
                             ['user_id', '=', $roomUser->user_id]
-                        ])->update(['status' => 'const.piece_status_sick']);                               
+                        ])->update(['status' => config('const.piece_status_sick')]);                               
                     }
                 }
-            } else if ($status === 'const.piece_status_health') {
+            } else if ($status === config('const.piece_status_health')) {
                 // 移動してきたコマが健康状態の場合
                 if ($afterPosition >= $roomUser->position) {
                     // コマがすれ違った場合
-                    if ($roomUser->status === 'const.piece_status_sick') {
+                    if ($roomUser->status === config('const.piece_status_sick')) {
                         // すれ違ったコマが感染中の場合は
                         // 移動してきたコマを感染中に更新
                         RoomUser::where([
                             ['room_id', '=', $roomId],
                             ['user_id', '=', $userId],
-                        ])->update(['status' => 'const.piece_status_sick']);                        
+                        ])->update(['status' => config('const.piece_status_sick')]);                        
                     }
                 }
             }
