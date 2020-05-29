@@ -3,7 +3,7 @@
     <div class="row mb-5">
         <div id="sugoroku" class="col-9">
             <table class="bg-white table table-borderless w-100">
-                <tr>
+                <tr class="horizontal-line">
                     <td v-bind:id="n" v-for="n in col_count">
                         <div v-if="n === 1">
                             Start
@@ -24,7 +24,7 @@
                         </div>
                     </td>
                 </tr>
-                <tr>
+                <tr class="horizontal-line">
                     <td v-bind:id="board.goal_position">
                         Goal
                         <span v-for="piece in setPiece(board.goal_position)">
@@ -41,7 +41,7 @@
                         </span>
                     </td>
                 </tr>
-                <tr>
+                <tr class="horizontal-line">
                     <td v-for="n in col_count" v-bind:id="board.goal_position - n">
                         {{ getSpaceName(board.goal_position - n) }}
                         <span v-for="piece in setPiece(board.goal_position - n)">

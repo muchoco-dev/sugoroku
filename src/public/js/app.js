@@ -45580,6 +45580,7 @@ var render = function() {
         _c("table", { staticClass: "bg-white table table-borderless w-100" }, [
           _c(
             "tr",
+            { staticClass: "horizontal-line" },
             _vm._l(_vm.col_count, function(n) {
               return _c("td", { attrs: { id: n } }, [
                 n === 1
@@ -45648,6 +45649,7 @@ var render = function() {
           _vm._v(" "),
           _c(
             "tr",
+            { staticClass: "horizontal-line" },
             [
               _c(
                 "td",
@@ -45710,6 +45712,7 @@ var render = function() {
           _vm._v(" "),
           _c(
             "tr",
+            { staticClass: "horizontal-line" },
             _vm._l(_vm.col_count, function(n) {
               return _c(
                 "td",
@@ -59777,8 +59780,8 @@ __webpack_require__.r(__webpack_exports__);
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! /Users/cube3110/Project/lachelier/sugoroku/src/resources/js/app.js */"./resources/js/app.js");
-module.exports = __webpack_require__(/*! /Users/cube3110/Project/lachelier/sugoroku/src/resources/sass/app.scss */"./resources/sass/app.scss");
+__webpack_require__(/*! C:\Users\private\work\sugoroku\sugoroku\src\resources\js\app.js */"./resources/js/app.js");
+module.exports = __webpack_require__(/*! C:\Users\private\work\sugoroku\sugoroku\src\resources\sass\app.scss */"./resources/sass/app.scss");
 
 
 /***/ })
