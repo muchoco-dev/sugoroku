@@ -138,7 +138,7 @@ export default {
 
         window.Echo.private('dice-rolled-channel.' + this.room.id).listen('DiceRolled', response => {
             this.logs.push(this.getMemberName(response.userId) + 'さんがサイコロをふって' + response.number + '進みました');
-            this.movePiece(response.userId, response.number);
+            this.resetMembers();
             this.setNextGo();
         });
   },
@@ -181,7 +181,7 @@ export default {
         }).then(function (response) {
             if (response.data.status === 'success') {
                 this.v_members = response.data.members;
-console.log(this.v_members);
+                this.piece_positions = [];
                 let aicon_count = 0;
                 let aicon_name = '';
                 for (let key in this.v_members) {
@@ -213,57 +213,6 @@ console.log(this.v_members);
     },
     setPiece: function (position) { // マスにコマを配置する
         return this.piece_positions[position];
-    },
-    movePiece: function (user_id, move_num) { // コマを移動させる
-        let piece_positions_tmp = {};
-        for (let position in this.piece_positions) {
-            let users = this.piece_positions[position];
-            for (let key in users) {
-                // ゴール済みのユーザは除外
-                if (users[key]['status'] === this.const.piece_status_finished) {
-                    if (!Array.isArray(piece_positions_tmp[position])) {
-                        piece_positions_tmp[position] = [];
-                    }
-                    piece_positions_tmp[position].push(users[key]);
-                    continue;
-                }
-
-                if (user_id === users[key]['user_id']) {
-                    let new_position = parseInt(position) + parseInt(move_num);
-
-                    if (new_position >= this.board.goal_position &&
-                        users[key]['status'] === this.board.goal_status &&
-                        users[key]['id'] !== this.const.virus_user_id) {
-                        // ゴール
-                        new_position = this.board.goal_position;
-                        users[key]['status'] = this.const.piece_status_finished;
-
-                    } else if (new_position > this.board.goal_position) {
-                        new_position = new_position - this.board.goal_position;
-                    }
-
-                    // 特殊マス
-                    for (let i = parseInt(position) + 1;i <= new_position; i++) {
-                        if (this.spaces[i]) {
-                            if (this.spaces[i]['effect_id'] === 1) {
-                                users[key]['status'] = this.spaces[i]['effect_num'];
-                            }
-                        }
-                    }
-
-                    if (!Array.isArray(piece_positions_tmp[new_position])) {
-                        piece_positions_tmp[new_position] = [];
-                    }
-                    piece_positions_tmp[new_position].push(users[key]);
-                } else {
-                    if (!Array.isArray(piece_positions_tmp[position])) {
-                        piece_positions_tmp[position] = [];
-                    }
-                    piece_positions_tmp[position].push(users[key]);
-                }
-            }
-        }
-        this.piece_positions = piece_positions_tmp;
     },
     rollDice: function () {
         let min = 1;

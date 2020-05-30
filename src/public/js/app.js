@@ -2162,7 +2162,7 @@ __webpack_require__.r(__webpack_exports__);
       }).then(function (response) {
         if (response.data.status === 'success') {
           this.v_members = response.data.members;
-          console.log(this.v_members);
+          this.piece_positions = [];
           var aicon_count = 0;
           var aicon_name = '';
 
@@ -2198,6 +2198,8 @@ __webpack_require__.r(__webpack_exports__);
     },
     movePiece: function movePiece(user_id, move_num) {
       // コマを移動させる
+      this.resetMembers();
+      return;
       var piece_positions_tmp = {};
 
       for (var position in this.piece_positions) {
@@ -2223,13 +2225,16 @@ __webpack_require__.r(__webpack_exports__);
               users[key]['status'] = this["const"].piece_status_finished;
             } else if (new_position > this.board.goal_position) {
               new_position = new_position - this.board.goal_position;
-            } // 特殊マス
+            }
 
-
-            for (var i = parseInt(position) + 1; i <= new_position; i++) {
-              if (this.spaces[i]) {
-                if (this.spaces[i]['effect_id'] === 1) {
-                  users[key]['status'] = this.spaces[i]['effect_num'];
+            if (users[key]['id'] !== this["const"].virus_user_id) {// 感染
+            } else {
+              // 特殊マス
+              for (var i = parseInt(position) + 1; i <= new_position; i++) {
+                if (this.spaces[i]) {
+                  if (this.spaces[i]['effect_id'] === 1) {
+                    users[key]['status'] = this.spaces[i]['effect_num'];
+                  }
                 }
               }
             }

@@ -175,7 +175,7 @@ class RoomRepository
         $roomUser->save();
 
         // 感染してたら感染処理呼び出し
-        if ($roomUser->status === config('const.piece_status_sick')) {
+        if ($roomUser->user_id === config('const.virus_user_id')) {
             $this->updateStatusSick($roomId, $userId, $roomUser, $beforePosition);
         }
 
