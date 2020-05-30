@@ -26,8 +26,8 @@ class RoomRepository
     public function getOwnOpenRoom($userId)
     {
         return $this->model::where([
-            'owner_id'  => $userId,
-            'status'    => config('const.room_status_open')
+            'owner_id' => $userId,
+            'status' => config('const.room_status_open')
         ])->first();
     }
 
@@ -66,7 +66,7 @@ class RoomRepository
     public function getOpenRooms()
     {
         return $this->model::where([
-            'status'     => config('const.room_status_open')
+            'status' => config('const.room_status_open')
         ])->get();
     }
 
@@ -144,17 +144,50 @@ class RoomRepository
     public function movePiece($roomId, $userId, $num)
     {
         $roomUser = RoomUser::where([
-            'room_id'   => $roomId,
-            'user_id'   => $userId
+            'room_id' => $roomId,
+            'user_id' => $userId
         ])->first();
 
         if (!$roomUser) {
             return false;
         }
 
+        // コマを動かす前のpositionを格納
+        $beforePosition = $roomUser->position;
+
         $roomUser->position = $roomUser->position + $num;
         $roomUser->save();
+
+        // 感染してたら感染処理呼び出し
+        if ($roomUser->status == config('const.piece_status_sick')) {
+            $this->updateStatusSick($roomId, $userId, $roomUser, $beforePosition);
+        }
+
         return $roomUser;
+    }
+
+    /**
+     * 移動対象のコマ情報を元に
+     * コマの移動中に感染中コマとすれ違ったら
+     * ステータスを感染中に更新する
+     */
+    public function updateStatusSick(int $roomId, int $userId, RoomUser $roomUser, int $beforePosition)
+    {
+        // 感染対象のユーザーを検索
+        $targetUsers = RoomUser::where([
+            ['room_id', $roomId],
+            ['user_id', '!=', $userId],
+            ['position', '>', $beforePosition],
+            ['position', '<=', $roomUser->position],
+            ['status', config('const.piece_status_health')]
+        ])->get();
+
+        // 感染対象のユーザーを感染させる
+        foreach ($targetUsers as $targetUser) {
+            $targetUser->update([
+                'status' => config('const.piece_status_sick')
+            ]);
+        }
     }
 
     /**
@@ -181,7 +214,7 @@ class RoomRepository
             $status = config('const.piece_status_sick');
         }
 
-        $room->users()->attach($userId,[
+        $room->users()->attach($userId, [
             'go' => 0,
             'status' => $status,
             'position' => 1
@@ -279,7 +312,7 @@ class RoomRepository
     {
         // オーナーが作成した部屋を取得
         $room = $this->model::where([
-            'owner_id'      => $userId,
+            'owner_id' => $userId,
         ])->first();
 
         // ゲーム中の場合はバルス不可
@@ -304,11 +337,11 @@ class RoomRepository
     public function getUserJoinActiveRoomId($userId)
     {
         $room = $this->model::where([
-            'status'        => config('const.room_status_open'),
-            'deleted_at'    => NULL
+            'status' => config('const.room_status_open'),
+            'deleted_at' => NULL
         ])->orWhere([
-            'status'        => config('const.room_status_busy'),
-            'deleted_at'    => NULL
+            'status' => config('const.room_status_busy'),
+            'deleted_at' => NULL
         ])->first();
 
         if ($room == null) {
@@ -330,7 +363,7 @@ class RoomRepository
     public function getKomaPosition($userId, $roomId)
     {
         $room = $this->model::where([
-            'id'      => $roomId
+            'id' => $roomId
         ])->first();
 
         if (!$room) {
@@ -355,14 +388,13 @@ class RoomRepository
         if (!$lastLog) return 1;
 
         $roomUser = RoomUser::where([
-            'user_id'   => $lastLog->user_id,
-            'room_id'   => $lastLog->room_id
+            'user_id' => $lastLog->user_id,
+            'room_id' => $lastLog->room_id
         ])->first();
 
         // 次の番
         $room = Room::find($roomId);
-        if ($roomUser->go === $room->member_count+1)
-        {
+        if ($roomUser->go === $room->member_count + 1) {
             $next_go = 1;
         } else {
             $next_go = $roomUser->go + 1;
@@ -370,8 +402,8 @@ class RoomRepository
 
         // 次がウィルスの番のときは、ここで手番を消化する
         $virus = RoomUser::where([
-            'user_id'   => config('const.virus_user_id'),
-            'room_id'   => $roomId
+            'user_id' => config('const.virus_user_id'),
+            'room_id' => $roomId
         ])->first();
         if ($virus->go === $next_go) {
             $this->moveVirus($roomId);
