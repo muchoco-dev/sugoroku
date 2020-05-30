@@ -70,7 +70,7 @@ class RoomRepository
         ])->get();
     }
 
-    private function changeStatus($id, $status)
+    public function changeStatus($id, $status)
     {
         $room = $this->model::find($id);
         if (!$room) return false;
@@ -379,6 +379,15 @@ class RoomRepository
         }
 
         return $next_go;
+    }
+
+    public function getRoomLogs($userId)
+    {
+        $lastLog = RoomLog::where('user_id', $userId)->get();
+        if ($lastLog) {
+            return true;
+        }
+        return false;
     }
 }
 

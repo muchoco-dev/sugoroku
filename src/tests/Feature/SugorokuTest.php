@@ -139,7 +139,7 @@ class SugorokuTest extends TestCase
         ]);
 
         // 部屋のステータスが変わる
-        $this->assertDatabaseHas('rooms', [
+        $result = $this->assertDatabaseHas('rooms', [
             'id'        =>  $this->room->id,
             'status'    =>  config('const.room_status_busy')
         ]);
@@ -171,7 +171,7 @@ class SugorokuTest extends TestCase
     /**
      * ログイン済みのユーザのみコマの現在地が取得できる
      */
-    public function testUserGetKomaPosition() 
+    public function testUserGetKomaPosition()
     {
         Passport::actingAs($this->owner);
         $response = $this->get("/api/sugoroku/position/{$this->owner->id}/{$this->room->id}");
@@ -212,6 +212,31 @@ class SugorokuTest extends TestCase
         ]);
 
         Event::assertDispatched(DiceRolled::class);
+    }
+
+    /**
+     * ウィルスが1番手のときの挙動をテスト
+     */
+    public function testBehavingWhenVirusIsFirst()
+    {
+        Passport::actingAs($this->owner);
+        $response = $this->post('/api/sugoroku/start', [
+            'room_id'   => $this->room->id
+        ]);
+
+        $repository = new RoomRepository();
+        while (1) {
+            // room_logsのユーザーIDがウイルスでない場合、再度実行し直す
+            if ($repository->getRoomLogs(config('const.virus_user_id'))) {
+                break;
+            }
+        }
+
+        $this->assertDatabaseHas('room_logs', [
+            'user_id' => config('const.virus_user_id'),
+            'action_id' => config('const.action_by_dice'),
+            'effect_id' => config('const.effect_move_forward')
+        ]);
     }
 
 }
