@@ -2062,10 +2062,11 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: {
     board: Object,
-    spaces: Object,
+    spaces: [Array, Object],
     room: Object,
     members: Array,
     auth_id: Number,
@@ -2161,6 +2162,7 @@ __webpack_require__.r(__webpack_exports__);
       }).then(function (response) {
         if (response.data.status === 'success') {
           this.v_members = response.data.members;
+          this.piece_positions = [];
           var aicon_count = 0;
           var aicon_name = '';
 
@@ -2196,6 +2198,8 @@ __webpack_require__.r(__webpack_exports__);
     },
     movePiece: function movePiece(user_id, move_num) {
       // コマを移動させる
+      this.resetMembers();
+      return;
       var piece_positions_tmp = {};
 
       for (var position in this.piece_positions) {
@@ -2203,26 +2207,34 @@ __webpack_require__.r(__webpack_exports__);
 
         for (var key in users) {
           // ゴール済みのユーザは除外
-          if (users[key]['status'] === 3) {
+          if (users[key]['status'] === this["const"].piece_status_finished) {
+            if (!Array.isArray(piece_positions_tmp[position])) {
+              piece_positions_tmp[position] = [];
+            }
+
             piece_positions_tmp[position].push(users[key]);
             continue;
           }
 
           if (user_id === users[key]['user_id']) {
-            var new_position = parseInt(position) + parseInt(move_num); // ゴール
+            var new_position = parseInt(position) + parseInt(move_num);
 
-            if (new_position >= this.board.goal_position && users[key]['status'] === this.board.goal_status) {
+            if (new_position >= this.board.goal_position && users[key]['status'] === this.board.goal_status && users[key]['id'] !== this["const"].virus_user_id) {
+              // ゴール
               new_position = this.board.goal_position;
-              users[key]['status'] = 3;
+              users[key]['status'] = this["const"].piece_status_finished;
             } else if (new_position > this.board.goal_position) {
               new_position = new_position - this.board.goal_position;
-            } // 特殊マス
+            }
 
-
-            for (var i = parseInt(position) + 1; i <= new_position; i++) {
-              if (this.spaces[i]) {
-                if (this.spaces[i]['effect_id'] === 1) {
-                  users[key]['status'] = this.spaces[i]['effect_num'];
+            if (users[key]['id'] !== this["const"].virus_user_id) {// 感染
+            } else {
+              // 特殊マス
+              for (var i = parseInt(position) + 1; i <= new_position; i++) {
+                if (this.spaces[i]) {
+                  if (this.spaces[i]['effect_id'] === 1) {
+                    users[key]['status'] = this.spaces[i]['effect_num'];
+                  }
                 }
               }
             }
@@ -2300,13 +2312,48 @@ __webpack_require__.r(__webpack_exports__);
     canShowRollDiceButton: function canShowRollDiceButton() {
       if (this.is_started) {
         for (var key in this.v_members) {
-          if (this.v_members[key]['pivot']['go'] === parseInt(this.next_go) && this.v_members[key]['id'] === this.auth_id) {
+          if (this.v_members[key]['pivot']['go'] === parseInt(this.next_go) && this.v_members[key]['id'] === this.auth_id && this.v_members[key]['pivot']['status'] !== this["const"].piece_status_finished) {
             return true;
           }
         }
       }
 
       return false;
+    },
+    canShowDeleteRoomButton: function canShowDeleteRoomButton() {
+      if (this.room.owner_id === this.auth_id) {
+        var finished_member_count = 0;
+
+        for (var key in this.v_members) {
+          if (this.v_members[key]['pivot']['status'] === this["const"].piece_status_finished) {
+            finished_member_count++;
+          }
+        }
+
+        if (this.room.status === this["const"].room_status_open || finished_member_count >= this.v_members.length - 1) {
+          return true;
+        }
+      }
+
+      return false;
+    },
+    deleteRoom: function deleteRoom() {
+      axios.defaults.headers.common['Authorization'] = "Bearer " + this.token;
+      axios.post('/api/sugoroku/delete', {
+        headers: {
+          "Content-Type": "application/json"
+        },
+        'room_id': this.room.id
+      }).then(function (response) {
+        if (response.data.status === 'success') {
+          // 成功
+          window.location.href = '/rooms';
+        } else {
+          alert(失敗しました);
+        }
+      })["catch"](function (error) {
+        console.log(error);
+      });
     }
   }
 });
@@ -45780,6 +45827,21 @@ var render = function() {
                   }
                 },
                 [_vm._v("サイコロを振る")]
+              )
+            : _vm._e(),
+          _vm._v(" "),
+          _vm.canShowDeleteRoomButton()
+            ? _c(
+                "button",
+                {
+                  staticClass: "btn btn-primary",
+                  on: {
+                    click: function($event) {
+                      return _vm.deleteRoom()
+                    }
+                  }
+                },
+                [_vm._v("削除")]
               )
             : _vm._e(),
           _vm._v(" "),

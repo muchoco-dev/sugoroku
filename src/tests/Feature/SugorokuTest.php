@@ -215,6 +215,21 @@ class SugorokuTest extends TestCase
     }
 
     /**
+     * 部屋の削除
+     */
+    public function testOwnerDeleteRoom()
+    {
+        Passport::actingAs($this->owner);
+        $response = $this->post('/api/sugoroku/delete', [
+            'room_id'   => $this->room->id,
+        ]);
+
+        $this->assertSoftDeleted('rooms', [
+            'owner_id'      => $this->room->owner_id
+        ]);
+    }
+
+    /**
      * ウィルスが1番手のときの挙動をテスト
      */
     public function testBehavingWhenVirusIsFirst()

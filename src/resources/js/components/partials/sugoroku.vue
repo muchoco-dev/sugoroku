@@ -73,6 +73,7 @@
             <div id="action">
                 <button class="btn btn-success" v-if="canShowStartButton()" @click="start()">ゲームスタート</button>
                 <button class="btn btn-primary" v-if="canShowRollDiceButton()" @click="rollDice()">サイコロを振る</button>
+                <button class="btn btn-primary" v-if="canShowDeleteRoomButton()" @click="deleteRoom()">削除</button>
                 <div class="input-group mt-4" v-if="!is_started">
                     <div class="input-group-prepend">
                         <span class="input-group-text">招待URL</span>
@@ -88,7 +89,7 @@
 export default {
     props: {
         board: Object,
-        spaces: Object,
+        spaces: [Array, Object],
         room: Object,
         members: Array,
         auth_id: Number,
@@ -111,12 +112,11 @@ export default {
             is_started: false,
             join_url: location.href + '/join',
             v_members: this.members,
-            next_go: 1
+            next_go: 1,
         }
     },
     created: function () {
         this.col_count = (parseInt(this.board.goal_position) - 2) / 2;
-        
         if (this.room.status === this.const.room_status_busy) {
             this.is_started = true;
         }
@@ -138,7 +138,7 @@ export default {
 
         window.Echo.private('dice-rolled-channel.' + this.room.id).listen('DiceRolled', response => {
             this.logs.push(this.getMemberName(response.userId) + 'さんがサイコロをふって' + response.number + '進みました');
-            this.movePiece(response.userId, response.number);
+            this.resetMembers();
             this.setNextGo();
         });
   },
@@ -179,9 +179,9 @@ export default {
                 "Content-Type": "application/json"
             }
         }).then(function (response) {
-            if (response.data.status === 'success') { 
+            if (response.data.status === 'success') {
                 this.v_members = response.data.members;
-
+                this.piece_positions = [];
                 let aicon_count = 0;
                 let aicon_name = '';
                 for (let key in this.v_members) {
@@ -214,56 +214,11 @@ export default {
     setPiece: function (position) { // マスにコマを配置する
         return this.piece_positions[position];
     },
-    movePiece: function (user_id, move_num) { // コマを移動させる
-        let piece_positions_tmp = {};
-        for (let position in this.piece_positions) {
-            let users = this.piece_positions[position];
-            for (let key in users) {
-                // ゴール済みのユーザは除外
-                if (users[key]['status'] === 3) {
-                    piece_positions_tmp[position].push(users[key]);
-                    continue;
-                }
-
-                if (user_id === users[key]['user_id']) {
-                    let new_position = parseInt(position) + parseInt(move_num);
-
-                    // ゴール
-                    if (new_position >= this.board.goal_position && users[key]['status'] === this.board.goal_status) {
-                        new_position = this.board.goal_position;
-                        users[key]['status'] = 3;
-                    } else if (new_position > this.board.goal_position) {
-                        new_position = new_position - this.board.goal_position;
-                    }
-
-                    // 特殊マス
-                    for (let i = parseInt(position) + 1;i <= new_position; i++) {
-                        if (this.spaces[i]) {
-                            if (this.spaces[i]['effect_id'] === 1) {
-                                users[key]['status'] = this.spaces[i]['effect_num'];
-                            }
-                        }
-                    }
-
-                    if (!Array.isArray(piece_positions_tmp[new_position])) {
-                        piece_positions_tmp[new_position] = [];
-                    }
-                    piece_positions_tmp[new_position].push(users[key]);
-                } else {
-                    if (!Array.isArray(piece_positions_tmp[position])) {
-                        piece_positions_tmp[position] = [];
-                    }
-                    piece_positions_tmp[position].push(users[key]);
-                }
-            }
-        }
-        this.piece_positions = piece_positions_tmp;
-    },
     rollDice: function () {
         let min = 1;
         let max = 6;
         let dice = Math.floor( Math.random() * (max + 1 - min) ) + min ;
-        
+
         this.saveLog(this.const.action_by_dice, this.const.effect_move_forward, dice);
     },
     canShowStartButton: function () {
@@ -316,14 +271,49 @@ export default {
         if (this.is_started) {
             for (let key in this.v_members) {
                 if (this.v_members[key]['pivot']['go'] === parseInt(this.next_go) &&
-                    this.v_members[key]['id'] === this.auth_id) {
+                    this.v_members[key]['id'] === this.auth_id &&
+                    this.v_members[key]['pivot']['status'] !== this.const.piece_status_finished) {
                     return true;
                 }
             }
         }
 
         return false;
-    }
+    },
+    canShowDeleteRoomButton: function () {
+        if (this.room.owner_id === this.auth_id) {
+
+            let finished_member_count = 0;
+            for (let key in this.v_members) {
+                if (this.v_members[key]['pivot']['status'] === this.const.piece_status_finished) {
+                    finished_member_count++;
+                }
+            }
+            if(this.room.status === this.const.room_status_open ||
+                finished_member_count >= this.v_members.length - 1) {
+                return true;
+            }
+        }
+        return false;
+    },
+    deleteRoom: function () {
+        axios.defaults.headers.common['Authorization'] = "Bearer " + this.token;
+        axios.post('/api/sugoroku/delete', {
+            headers: {
+                "Content-Type": "application/json"
+            },
+            'room_id': this.room.id,
+        }).then(response => {
+            if (response.data.status === 'success') {
+                // 成功
+                window.location.href = '/rooms';
+            } else {
+                alert(失敗しました);
+            }
+        }).catch(function(error) {
+            console.log(error);
+        });
+    },
   }
 }
 </script>
