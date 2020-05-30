@@ -2117,7 +2117,7 @@ __webpack_require__.r(__webpack_exports__);
     window.Echo["private"]('dice-rolled-channel.' + this.room.id).listen('DiceRolled', function (response) {
       _this.logs.push(_this.getMemberName(response.userId) + 'さんがサイコロをふって' + response.number + '進みました');
 
-      _this.movePiece(response.userId, response.number);
+      _this.resetMembers();
 
       _this.setNextGo();
     });
@@ -2162,6 +2162,7 @@ __webpack_require__.r(__webpack_exports__);
       }).then(function (response) {
         if (response.data.status === 'success') {
           this.v_members = response.data.members;
+          console.log(this.v_members);
           this.piece_positions = [];
           var aicon_count = 0;
           var aicon_name = '';
@@ -2195,66 +2196,6 @@ __webpack_require__.r(__webpack_exports__);
     setPiece: function setPiece(position) {
       // マスにコマを配置する
       return this.piece_positions[position];
-    },
-    movePiece: function movePiece(user_id, move_num) {
-      // コマを移動させる
-      this.resetMembers();
-      return;
-      var piece_positions_tmp = {};
-
-      for (var position in this.piece_positions) {
-        var users = this.piece_positions[position];
-
-        for (var key in users) {
-          // ゴール済みのユーザは除外
-          if (users[key]['status'] === this["const"].piece_status_finished) {
-            if (!Array.isArray(piece_positions_tmp[position])) {
-              piece_positions_tmp[position] = [];
-            }
-
-            piece_positions_tmp[position].push(users[key]);
-            continue;
-          }
-
-          if (user_id === users[key]['user_id']) {
-            var new_position = parseInt(position) + parseInt(move_num);
-
-            if (new_position >= this.board.goal_position && users[key]['status'] === this.board.goal_status && users[key]['id'] !== this["const"].virus_user_id) {
-              // ゴール
-              new_position = this.board.goal_position;
-              users[key]['status'] = this["const"].piece_status_finished;
-            } else if (new_position > this.board.goal_position) {
-              new_position = new_position - this.board.goal_position;
-            }
-
-            if (users[key]['id'] !== this["const"].virus_user_id) {// 感染
-            } else {
-              // 特殊マス
-              for (var i = parseInt(position) + 1; i <= new_position; i++) {
-                if (this.spaces[i]) {
-                  if (this.spaces[i]['effect_id'] === 1) {
-                    users[key]['status'] = this.spaces[i]['effect_num'];
-                  }
-                }
-              }
-            }
-
-            if (!Array.isArray(piece_positions_tmp[new_position])) {
-              piece_positions_tmp[new_position] = [];
-            }
-
-            piece_positions_tmp[new_position].push(users[key]);
-          } else {
-            if (!Array.isArray(piece_positions_tmp[position])) {
-              piece_positions_tmp[position] = [];
-            }
-
-            piece_positions_tmp[position].push(users[key]);
-          }
-        }
-      }
-
-      this.piece_positions = piece_positions_tmp;
     },
     rollDice: function rollDice() {
       var min = 1;

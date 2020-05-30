@@ -66,7 +66,6 @@ class SugorokuController extends Controller
         switch ($validated['action_id']) {
             case config('const.action_by_dice'):
                 $repository->movePiece($room->id, Auth::id(), $validated['effect_num']);
-                event(new DiceRolled($room->id, Auth::id(), $validated['effect_num']));
                 break;
             case config('const.action_by_space'):
                 break;

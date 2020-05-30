@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Repositories\RoomRepository;
 use App\Events\SugorokuStarted;
 use App\Events\DiceRolled;
+use App\Models\RoomUser;
 use App\Models\Board;
 use App\Models\Space;
 use App\Models\User;
@@ -24,6 +25,7 @@ class SugorokuTest extends TestCase
     private $owner;     // 部屋を所有しているUser
     private $members;   // 部屋に参加しているowner以外のUser
     private $room;      // 部屋
+    private $goal_position = 10;
 
     protected function setUp():void
     {
@@ -50,7 +52,7 @@ class SugorokuTest extends TestCase
 
         $board = factory(Board::class)->create([
             'id'            => 1,
-            'goal_position' => 10
+            'goal_position' => $this->goal_position
         ]);
 
         // すごろくマスの作成
@@ -70,6 +72,7 @@ class SugorokuTest extends TestCase
         ]);
 
         $repository = new RoomRepository();
+        $repository->getSpaces($this->room);
         $repository->addMember($this->owner->id, $this->room->id);
 
         // 参加者は2人（最大人数 - 1）
@@ -228,6 +231,46 @@ class SugorokuTest extends TestCase
 
         $this->assertSoftDeleted('rooms', [
             'owner_id'      => $this->room->owner_id
+        ]);
+    }
+
+    public function testSpaceEffect()
+    {
+        // ゲームスタート
+        Passport::actingAs($this->owner);
+        $this->post('/api/sugoroku/start', [
+            'room_id'   => $this->room->id
+        ]);
+
+        $this->assertDatabaseHas('room_space', [
+            'room_id'   =>  $this->room->id,
+        ]);
+
+        // ユーザの状態を変更
+        $roomUser = RoomUser::where([
+            'user_id'   => $this->owner->id,
+            'room_id'   => $this->room->id
+        ])->first();
+        $roomUser->position = $this->goal_position - 2;
+        $roomUser->status = config('const.piece_status_sick');
+        $roomUser->save();
+
+        // コマを進める
+        Passport::actingAs($this->owner);
+        $response = $this->post('/api/sugoroku/save_log', [
+            'room_id'   => $this->room->id,
+            'action_id' => config('const.action_by_dice'),
+            'effect_id' => config('const.effect_move_forward'),
+            'effect_num'=> 6
+        ]);
+        $response->assertJson([
+            'status'    => 'success'
+        ]);
+
+        $this->assertDatabaseHas('room_user', [
+            'room_id'   => $this->room->id,
+            'user_id'   => $this->owner->id,
+            'status'    => config('const.piece_status_health')
         ]);
     }
 
