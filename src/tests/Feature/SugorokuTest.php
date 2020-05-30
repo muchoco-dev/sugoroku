@@ -286,7 +286,15 @@ class SugorokuTest extends TestCase
 
         $repository = new RoomRepository();
         // ウイルスが一番手になるように意図的に実行
-        $repository->turnChangeWhenTheVirusIsTheFirst($this->room->id);
+        $room = Room::find($this->room->id);
+        $virus = RoomUser::where('user_id', config('const.virus_user_id'))->first();
+        $first = RoomUser::where('go', 1)->first();
+
+        if ($virus['go'] !== 1) {
+            $room->users()->updateExistingPivot($first->userId, ['go' => $virus['go']]);
+            $room->users()->updateExistingPivot(config('const.virus_user_id'), ['go' => 1]);
+        }
+
         $repository->virusFirstTurnCheck($this->room->id);
 
         $this->assertDatabaseHas('room_logs', [

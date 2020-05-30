@@ -123,23 +123,6 @@ class RoomRepository
     }
 
     /**
-     * ウイルスを一番手に意図的に変更する(テスト用)
-     */
-    public function turnChangeWhenTheVirusIsTheFirst($id)
-    {
-        $room = $this->model::find($id);
-        $virus = RoomUser::where('user_id', config('const.virus_user_id'))->first();
-        $first = RoomUser::where('go', 1)->first();
-
-        if ($virus['go'] === 1) {
-            return;
-        } else {
-            $room->users()->updateExistingPivot($first->userId, ['go' => $virus['go']]);
-            $room->users()->updateExistingPivot(config('const.virus_user_id'), ['go' => 1]);
-        }
-    }
-
-    /**
      * ログ保存
      */
     public function saveLog($userId, $roomId, $actionId, $effectId, $effectNum)
