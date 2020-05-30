@@ -74,13 +74,13 @@
             <div id="action">
                 <button class="btn btn-success" v-if="canShowStartButton()" @click="start()">ゲームスタート</button>
                 <button class="btn btn-primary" v-if="canShowRollDiceButton()" @click="rollDice()">サイコロを振る</button>
-                <button class="btn btn-primary" v-if="canShowDeleteRoomButton()" @click="deleteRoom()">削除</button>
                 <div class="input-group mt-4" v-if="!is_started">
                     <div class="input-group-prepend">
                         <span class="input-group-text">招待URL</span>
                     </div>
                     <input class="copy form-control bg-white" type="text" v-model="join_url" :data-clipboard-text="join_url" readonly>
                 </div>
+                <button class="btn btn-outline-danger mt-4" v-if="canShowDeleteRoomButton()" @click="deleteRoom()">削除</button>
             </div>
         </div>
     </div>
