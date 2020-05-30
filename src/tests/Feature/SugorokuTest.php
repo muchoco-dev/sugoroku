@@ -229,4 +229,13 @@ class SugorokuTest extends TestCase
         ]);
     }
 
+
+    /*
+    public function testGetRoomSpaceByPosition()
+    {
+        $repository = new RoomRepository();
+        $repository->startGame($this->room->id);
+
+    }*/
+
 }

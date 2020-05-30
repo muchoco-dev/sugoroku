@@ -169,6 +169,7 @@ export default {
         }.bind(this)).catch(function(error) {
             console.log(error);
         });
+        console.log(this.next_go);
 
     },
     resetMembers: function () {

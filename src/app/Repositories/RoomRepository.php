@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\Events\MemberAdded;
 use App\Events\DiceRolled;
 use App\Models\RoomUser;
+use App\Models\RoomSpace;
 use App\Models\RoomLog;
 use App\Models\Board;
 use App\Models\Room;
@@ -135,7 +136,6 @@ class RoomRepository
     {
         $dice_num = rand(1, 6);
         $this->movePiece($roomId, config('const.virus_user_id'), $dice_num);
-        event(new DiceRolled($roomId, config('const.virus_user_id'), $dice_num));
         $this->saveLog(config('const.virus_user_id'), $roomId, config('const.action_by_dice'), config('const.effect_move_forward'), $dice_num);
     }
 
@@ -160,6 +160,25 @@ class RoomRepository
         $board = Board::find($room->board_id);
 
         $newPosition = $roomUser->position + $num;
+
+        // 特殊マス
+        if ($userId !== config('const.virus_user_id')) {
+            $position_tmp = $roomUser->position;
+            while ($position_tmp <= $newPosition) {
+                $roomSpace = RoomSpace::where([
+                    'room_id'   => $roomId,
+                    'position'  => $position_tmp
+                ])->first();
+                if ($roomSpace) {
+                    $space = Space::find($roomSpace->space_id);
+                    if ($space->effect_id === config('const.effect_change_status')) {
+                        $roomUser->status = $space->effect_num;
+                    }
+                }
+                $position_tmp++;
+            }
+        }
+
         if ($newPosition >= $board->goal_position &&
             $roomUser->status === $board->goal_status &&
             $roomUser->user_id !== config('const.virus_user_id')
@@ -174,11 +193,22 @@ class RoomRepository
         $roomUser->position = $newPosition;
         $roomUser->save();
 
-        // 感染してたら感染処理呼び出し
-        if ($roomUser->user_id === config('const.virus_user_id')) {
-            $this->updateStatusSick($roomId, $userId, $roomUser, $beforePosition);
-        }
+        event(new DiceRolled($roomId, $userId, $num));
 
+        if ($roomUser->user_id === config('const.virus_user_id')) {
+            // 感染処理
+            // TODO: 後にユーザ同士の感染処理を入れる予定があるため、moveVirusではなくここで処理する
+            $this->updateStatusSick($roomId, $userId, $roomUser, $beforePosition);
+        } else {
+            // 次がウィルスの番のときは、ここで手番を消化する
+            $virus = RoomUser::where([
+                'user_id' => config('const.virus_user_id'),
+                'room_id' => $room->id
+            ])->first();
+            if ($virus->go === $this->getNextGo($room->id)) {
+                $this->moveVirus($room->id);
+            }
+        }
         return $roomUser;
     }
 
@@ -406,7 +436,7 @@ class RoomRepository
     public function getNextGo($roomId)
     {
         $lastLog = RoomLog::where('room_id', $roomId)
-            ->orderBy('created_at', 'desc')
+            ->orderBy('id', 'desc')
             ->first();
         if (!$lastLog) return 1;
 
@@ -422,17 +452,6 @@ class RoomRepository
         } else {
             $next_go = $roomUser->go + 1;
         }
-
-        // 次がウィルスの番のときは、ここで手番を消化する
-        $virus = RoomUser::where([
-            'user_id' => config('const.virus_user_id'),
-            'room_id' => $roomId
-        ])->first();
-        if ($virus->go === $next_go) {
-            $this->moveVirus($roomId);
-            return $this->getNextGo($roomId);
-        }
-
         return $next_go;
     }
 }
