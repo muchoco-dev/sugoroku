@@ -126,9 +126,8 @@ export default {
     },
     mounted: function () {
         window.Echo.private('member-added-channel.' + this.room.id).listen('MemberAdded', response => {
-            // response.userId
-            // response.roomId
-            // これを使ってユーザ名取得&this.v_membersに追加
+            this.logs.push('メンバーが追加されました');
+            this.getUserName(response.userId, response.roomId);
         });
 
         window.Echo.private('sugoroku-started-channel.' + this.room.id).listen('SugorokuStarted', response => {
@@ -170,6 +169,20 @@ export default {
             console.log(error);
         });
 
+    },
+    getUserName: function (userId, roomId) {
+        axios.defaults.headers.common['Authorization'] = "Bearer " + this.token;
+        axios.get('/api/get_member/' + this.roomId + this.userId, {
+            headers: {
+                "Content-Type": "application/json"
+            }
+        }).then(function (response) {
+            if (response.data.status === 'success') {
+                this.v_members = response.data.members;
+            }
+        }.bind(this)).catch(function(error) {
+            console.log(error);
+        });
     },
     resetMembers: function () {
         // メンバー情報及びコマ情報の一括更新

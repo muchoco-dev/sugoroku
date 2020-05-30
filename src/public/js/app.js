@@ -2105,9 +2105,10 @@ __webpack_require__.r(__webpack_exports__);
   mounted: function mounted() {
     var _this = this;
 
-    window.Echo["private"]('member-added-channel.' + this.room.id).listen('MemberAdded', function (response) {// response.userId
-      // response.roomId
-      // これを使ってユーザ名取得&this.v_membersに追加
+    window.Echo["private"]('member-added-channel.' + this.room.id).listen('MemberAdded', function (response) {
+      _this.logs.push('メンバーが追加されました');
+
+      _this.getUserName(response.userId, response.roomId);
     });
     window.Echo["private"]('sugoroku-started-channel.' + this.room.id).listen('SugorokuStarted', function (response) {
       _this.logs.push('ゲームスタート！');
@@ -2117,7 +2118,7 @@ __webpack_require__.r(__webpack_exports__);
     window.Echo["private"]('dice-rolled-channel.' + this.room.id).listen('DiceRolled', function (response) {
       _this.logs.push(_this.getMemberName(response.userId) + 'さんがサイコロをふって' + response.number + '進みました');
 
-      _this.movePiece(response.userId, response.number);
+      _this.resetMembers();
 
       _this.setNextGo();
     });
@@ -2147,6 +2148,20 @@ __webpack_require__.r(__webpack_exports__);
       }).then(function (response) {
         if (response.data.status === 'success') {
           this.next_go = response.data.next_go;
+        }
+      }.bind(this))["catch"](function (error) {
+        console.log(error);
+      });
+    },
+    getUserName: function getUserName(userId, roomId) {
+      axios.defaults.headers.common['Authorization'] = "Bearer " + this.token;
+      axios.get('/api/get_member/' + this.roomId + this.userId, {
+        headers: {
+          "Content-Type": "application/json"
+        }
+      }).then(function (response) {
+        if (response.data.status === 'success') {
+          this.v_members = response.data.members;
         }
       }.bind(this))["catch"](function (error) {
         console.log(error);
@@ -2195,66 +2210,6 @@ __webpack_require__.r(__webpack_exports__);
     setPiece: function setPiece(position) {
       // マスにコマを配置する
       return this.piece_positions[position];
-    },
-    movePiece: function movePiece(user_id, move_num) {
-      // コマを移動させる
-      this.resetMembers();
-      return;
-      var piece_positions_tmp = {};
-
-      for (var position in this.piece_positions) {
-        var users = this.piece_positions[position];
-
-        for (var key in users) {
-          // ゴール済みのユーザは除外
-          if (users[key]['status'] === this["const"].piece_status_finished) {
-            if (!Array.isArray(piece_positions_tmp[position])) {
-              piece_positions_tmp[position] = [];
-            }
-
-            piece_positions_tmp[position].push(users[key]);
-            continue;
-          }
-
-          if (user_id === users[key]['user_id']) {
-            var new_position = parseInt(position) + parseInt(move_num);
-
-            if (new_position >= this.board.goal_position && users[key]['status'] === this.board.goal_status && users[key]['id'] !== this["const"].virus_user_id) {
-              // ゴール
-              new_position = this.board.goal_position;
-              users[key]['status'] = this["const"].piece_status_finished;
-            } else if (new_position > this.board.goal_position) {
-              new_position = new_position - this.board.goal_position;
-            }
-
-            if (users[key]['id'] !== this["const"].virus_user_id) {// 感染
-            } else {
-              // 特殊マス
-              for (var i = parseInt(position) + 1; i <= new_position; i++) {
-                if (this.spaces[i]) {
-                  if (this.spaces[i]['effect_id'] === 1) {
-                    users[key]['status'] = this.spaces[i]['effect_num'];
-                  }
-                }
-              }
-            }
-
-            if (!Array.isArray(piece_positions_tmp[new_position])) {
-              piece_positions_tmp[new_position] = [];
-            }
-
-            piece_positions_tmp[new_position].push(users[key]);
-          } else {
-            if (!Array.isArray(piece_positions_tmp[position])) {
-              piece_positions_tmp[position] = [];
-            }
-
-            piece_positions_tmp[position].push(users[key]);
-          }
-        }
-      }
-
-      this.piece_positions = piece_positions_tmp;
     },
     rollDice: function rollDice() {
       var min = 1;
@@ -59372,8 +59327,8 @@ window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 window.Pusher = __webpack_require__(/*! pusher-js */ "./node_modules/pusher-js/dist/web/pusher.js");
 window.Echo = new laravel_echo__WEBPACK_IMPORTED_MODULE_0__["default"]({
   broadcaster: 'pusher',
-  key: "ff887ae07fb558e2739e",
-  cluster: "ap3",
+  key: "",
+  cluster: "mt1",
   encrypted: true
 });
 
@@ -59796,8 +59751,8 @@ __webpack_require__.r(__webpack_exports__);
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! /var/www/html/sugoroku.commew.net/sugoroku/src/resources/js/app.js */"./resources/js/app.js");
-module.exports = __webpack_require__(/*! /var/www/html/sugoroku.commew.net/sugoroku/src/resources/sass/app.scss */"./resources/sass/app.scss");
+__webpack_require__(/*! /Users/cube3110/Project/lachelier/sugoroku/src/resources/js/app.js */"./resources/js/app.js");
+module.exports = __webpack_require__(/*! /Users/cube3110/Project/lachelier/sugoroku/src/resources/sass/app.scss */"./resources/sass/app.scss");
 
 
 /***/ })
