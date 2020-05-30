@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Events\MemberAdded;
 use App\Models\User;
 use App\Models\Room;
+use App\Models\RoomUser;
 use App\Models\Board;
 use App\Models\Space;
 use Illuminate\Support\Facades\Auth;
@@ -982,5 +983,66 @@ class RoomTest extends TestCase
         $response->assertJson([
            'status' => 'error'
         ]);
+    }
+
+    /**
+     * 健康状態のコマが感染しているコマとすれ違ったら
+     * 健康状態のコマが感染状態になる
+     */
+    public function testPassSickKomaToHealthKomaUpdateSickKoma() {
+        $repository = new RoomRepository();
+
+        $sickUser = factory(User::class)->create();
+        $healthUser = factory(User::class)->create();
+
+        Passport::actingAs($sickUser);
+        Passport::actingAs($healthUser);
+
+        $board = $this->createBoard();
+
+        $room = factory(Room::class)->create([
+            'uname'     => uniqid(),
+            'name'      => 'first room',
+            'owner_id'  => $sickUser->id,
+            'board_id'  => $board->id,
+            'max_member_count'  => 10,
+            'member_count'      => 0,
+            'status'    => config('const.room_status_open'),
+        ]);
+
+        // 中間テーブルに感染者データ作成
+        $room->users()->attach($sickUser->id, [
+            'go' => 0,
+            'status' => config('const.piece_status_sick'),
+            'position' => 6
+        ]);
+
+        // 中間(room_user)テーブルの作成 健康状態
+        $room->users()->attach($healthUser->id, [
+            'go' => 0,
+            'status' => config('const.piece_status_health'),
+            'position' => 4
+        ]);
+
+        // 感染者ユーザを取得する
+        $roomUser = RoomUser::where([
+            'room_id' => $room->id,
+            'user_id' => $sickUser->id
+        ])->first();
+        
+        // サイコロ振る前の感染者position
+        $beforePosition = 1;
+
+        // サイコロ目が5とする
+        $repository->updateStatusSick($room->id,$sickUser->id, $roomUser,$beforePosition);
+
+        // 更新後の健康状態だったユーザデータ取得
+        $targetRoomUser = RoomUser::where([
+            'room_id' => $room->id,
+            'user_id' => $healthUser->id
+        ])->first();
+
+        // 健康状態のコマが感染状態になることを確認
+        $this->assertEquals(config('const.piece_status_sick'), $targetRoomUser->status);
     }
 }
