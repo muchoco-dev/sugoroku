@@ -61,6 +61,15 @@
                             </div>
                         </div>
 
+                        <div class="form-group row">
+                            <div class="col-md-6 offset-md-4">
+                                <div class="form-check">
+                                    <input type="checkbox" name="agree_privacy_terms" id="agree" class="form-check-input" required="required"/>
+                                    <label for="agree" class="form-check-label">利用規約・プライバシーポリシーへ同意する</label>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="form-group row mb-0">
                             <div class="col-md-6 offset-md-4">
                                 <button type="submit" class="btn btn-primary">
@@ -68,6 +77,7 @@
                                 </button>
                             </div>
                         </div>
+
                     </form>
                 </div>
             </div>
