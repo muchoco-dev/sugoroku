@@ -139,7 +139,7 @@ class SugorokuTest extends TestCase
         ]);
 
         // 部屋のステータスが変わる
-        $result = $this->assertDatabaseHas('rooms', [
+        $this->assertDatabaseHas('rooms', [
             'id'        =>  $this->room->id,
             'status'    =>  config('const.room_status_busy')
         ]);
@@ -164,6 +164,8 @@ class SugorokuTest extends TestCase
         $response = $this->post('/api/sugoroku/start', [
             'room_id'   => $this->room->id
         ]);
+        $repository = new RoomRepository();
+        $repository->virusFirstTurnCheck($this->room->id);
 
         Event::assertDispatched(SugorokuStarted::class);
     }
@@ -240,12 +242,9 @@ class SugorokuTest extends TestCase
         ]);
 
         $repository = new RoomRepository();
-        while (1) {
-            // room_logsのユーザーIDがウイルスでない場合、再度実行し直す
-            if ($repository->getRoomLogs(config('const.virus_user_id'))) {
-                break;
-            }
-        }
+        // ウイルスが一番手になるように意図的に実行
+        $repository->turnChangeWhenTheVirusIsTheFirst($this->room->id);
+        $repository->virusFirstTurnCheck($this->room->id);
 
         $this->assertDatabaseHas('room_logs', [
             'user_id' => config('const.virus_user_id'),

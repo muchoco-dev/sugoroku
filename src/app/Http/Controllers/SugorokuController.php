@@ -34,6 +34,7 @@ class SugorokuController extends Controller
 
         $repository = new RoomRepository;
         $repository->startGame($room->id);
+        $repository->virusFirstTurnCheck($room->id);
 
         event(new SugorokuStarted($room->id));
 

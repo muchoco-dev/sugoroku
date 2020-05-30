@@ -71,7 +71,7 @@ class RoomRepository
         ])->get();
     }
 
-    public function changeStatus($id, $status)
+    private function changeStatus($id, $status)
     {
         $room = $this->model::find($id);
         if (!$room) return false;
@@ -104,14 +104,38 @@ class RoomRepository
 
         foreach ($users as $key => $user) {
             $room->users()->updateExistingPivot($user->id, ['go' => $go_list[$key]]);
-
-            if ($user->id === config('const.virus_user_id') && $go_list[$key] === 1) {
-                // ウィルスが1番手の場合は、最初の手番をここで消化する
-                $this->moveVirus($room->id);
-            }
         }
 
         return true;
+    }
+
+    /**
+     * ウイルスが一番手かどうかを確認して一番手ならmoveVirusを実行
+     */
+    public function virusFirstTurnCheck($id)
+    {
+        $virus = RoomUser::where('user_id', config('const.virus_user_id'))->first();
+
+        if ($virus['go'] === 1) {
+            $this->moveVirus($id);
+        }
+    }
+
+    /**
+     * ウイルスを一番手に意図的に変更する(テスト用)
+     */
+    public function turnChangeWhenTheVirusIsTheFirst($id)
+    {
+        $room = $this->model::find($id);
+        $virus = RoomUser::where('user_id', config('const.virus_user_id'))->first();
+        $first = RoomUser::where('go', 1)->first();
+
+        if ($virus['go'] === 1) {
+            return;
+        } else {
+            $room->users()->updateExistingPivot($first->userId, ['go' => $virus['go']]);
+            $room->users()->updateExistingPivot(config('const.virus_user_id'), ['go' => 1]);
+        }
     }
 
     /**
@@ -438,8 +462,8 @@ class RoomRepository
 
     public function getRoomLogs($userId)
     {
-        $lastLog = RoomLog::where('user_id', $userId)->get();
-        if ($lastLog) {
+        $lastLog = RoomLog::where('user_id', $userId)->first();
+        if ($lastLog != null) {
             return true;
         }
         return false;
