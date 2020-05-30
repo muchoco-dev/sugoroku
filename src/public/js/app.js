@@ -2151,7 +2151,6 @@ __webpack_require__.r(__webpack_exports__);
       }.bind(this))["catch"](function (error) {
         console.log(error);
       });
-      console.log(this.next_go);
     },
     resetMembers: function resetMembers() {
       // メンバー情報及びコマ情報の一括更新
@@ -2163,6 +2162,7 @@ __webpack_require__.r(__webpack_exports__);
       }).then(function (response) {
         if (response.data.status === 'success') {
           this.v_members = response.data.members;
+          console.log(this.v_members);
           this.piece_positions = [];
           var aicon_count = 0;
           var aicon_name = '';

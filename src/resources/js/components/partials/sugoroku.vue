@@ -169,7 +169,6 @@ export default {
         }.bind(this)).catch(function(error) {
             console.log(error);
         });
-        console.log(this.next_go);
 
     },
     resetMembers: function () {
@@ -182,6 +181,7 @@ export default {
         }).then(function (response) {
             if (response.data.status === 'success') {
                 this.v_members = response.data.members;
+                console.log(this.v_members);
                 this.piece_positions = [];
                 let aicon_count = 0;
                 let aicon_name = '';

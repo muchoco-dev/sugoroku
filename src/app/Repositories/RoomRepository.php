@@ -130,6 +130,36 @@ class RoomRepository
     }
 
     /**
+     * ゴール処理
+     */
+    public function goal($userId, $roomId)
+    {
+        $room = Room::find($roomId);
+
+        // 本人をゴール状態にする
+        $roomUser = RoomUser::where([
+            'user_id'   => $userId,
+            'room_id'   => $roomId
+        ])->first();
+        if (!$roomUser) return false;
+
+        $go = $roomUser->go;
+        $roomUser->status = config('const.piece_status_finished');
+        $roomUser->go = 0;
+        $roomUser = $room->board->goal_position;
+        $roomUser->save();
+
+        // 他の参加者の順を繰り上げる
+        $roomUsers = RoomUser::where('room_id', $roomId)
+            ->where('go', '<', $go)
+            ->get();
+        foreach ($roomUsers as $user) {
+            $user->go = $user->go + 1;
+            $user->save();
+        }
+    }
+
+    /**
      * ウィルスのターン
      */
     public function moveVirus($roomId)
@@ -163,8 +193,12 @@ class RoomRepository
 
         // 特殊マス
         if ($userId !== config('const.virus_user_id')) {
-            $position_tmp = $roomUser->position;
-            while ($position_tmp <= $newPosition) {
+            for ($i = 1; $i <= $num; $i++) {
+                $position_tmp = $roomUser->position + $i;
+                // Goalをまたぐ場合
+                if ($position_tmp > $board->goal_position) {
+                    $position_tmp = $position_tmp - $board->goal_position;
+                }
                 $roomSpace = RoomSpace::where([
                     'room_id'   => $roomId,
                     'position'  => $position_tmp
@@ -175,7 +209,6 @@ class RoomRepository
                         $roomUser->status = $space->effect_num;
                     }
                 }
-                $position_tmp++;
             }
         }
 
@@ -184,14 +217,15 @@ class RoomRepository
             $roomUser->user_id !== config('const.virus_user_id')
         ) {
             // ゴール
-            $roomUser->status = config('const.piece_status_finished');
-            $newPosition = $board->goal_position;
-        } elseif ($newPosition > $board->goal_position) {
-            // もう一周
-            $newPosition = $newPosition - $board->goal_position;
+            $this->goal($roomId, $userId);
+        } else {
+            if ($newPosition > $board->goal_position) {
+                // もう一周
+                $newPosition = $newPosition - $board->goal_position;
+            }
+            $roomUser->position = $newPosition;
+            $roomUser->save();
         }
-        $roomUser->position = $newPosition;
-        $roomUser->save();
 
         event(new DiceRolled($roomId, $userId, $num));
 
@@ -452,6 +486,7 @@ class RoomRepository
         } else {
             $next_go = $roomUser->go + 1;
         }
+
         return $next_go;
     }
 }
