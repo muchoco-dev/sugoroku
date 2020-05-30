@@ -58,6 +58,7 @@
                     <i v-if="member.aicon" v-bind:class="'fas fa-2x fa-' + member.aicon"></i>
                     {{ member.name }}
                     <span v-if="member.pivot.go">({{ member.pivot.go }})</span>
+                    <i class="fas fa-dice" v-if="canShowDiceImage(member)"></i>
                 </li>
             </ul>
         </div>
@@ -280,6 +281,16 @@ export default {
 
         return false;
     },
+    canShowDiceImage: function (member) {
+        if (this.is_started &&
+            member['pivot']['go'] === parseInt(this.next_go) &&
+            member['pivot']['status'] !== this.const.piece_status_finished) {
+                    
+            return true;
+        }
+        return false;
+    },
+
     canShowDeleteRoomButton: function () {
         if (this.room.owner_id === this.auth_id) {
 
