@@ -6,15 +6,20 @@
 
               <div class="modal-body">
                 <slot name="body">
-                <p>部屋名を入力してください</p>
-                <div>名前<input v-model="name"></div>
-                <button @click="doSend">送信</button>
+                    <p>部屋名を入力してください</p>
+                    <div>
+                        <label for="name">名前</label>
+                        <input id="name" class="form-control" v-model="name">
+                    </div>
+                    <div class="text-right mt-2">
+                        <button class="btn btn-primary" @click="doSend">作成</button>
+                    </div>
                 </slot>
               </div>
 
               <div class="modal-footer">
                 <slot name="footer">
-                  <button class="modal-default-button" @click="$emit('close')">
+                  <button class="btn btn-outline-dark modal-default-button" @click="$emit('close')">
                     X
                   </button>
                 </slot>

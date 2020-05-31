@@ -1934,6 +1934,11 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: {
     token: String
@@ -45483,7 +45488,8 @@ var render = function() {
                 _c("p", [_vm._v("部屋名を入力してください")]),
                 _vm._v(" "),
                 _c("div", [
-                  _vm._v("名前"),
+                  _c("label", { attrs: { for: "name" } }, [_vm._v("名前")]),
+                  _vm._v(" "),
                   _c("input", {
                     directives: [
                       {
@@ -45493,6 +45499,8 @@ var render = function() {
                         expression: "name"
                       }
                     ],
+                    staticClass: "form-control",
+                    attrs: { id: "name" },
                     domProps: { value: _vm.name },
                     on: {
                       input: function($event) {
@@ -45505,7 +45513,16 @@ var render = function() {
                   })
                 ]),
                 _vm._v(" "),
-                _c("button", { on: { click: _vm.doSend } }, [_vm._v("送信")])
+                _c("div", { staticClass: "text-right mt-2" }, [
+                  _c(
+                    "button",
+                    {
+                      staticClass: "btn btn-primary",
+                      on: { click: _vm.doSend }
+                    },
+                    [_vm._v("作成")]
+                  )
+                ])
               ])
             ],
             2
@@ -45519,7 +45536,7 @@ var render = function() {
                 _c(
                   "button",
                   {
-                    staticClass: "modal-default-button",
+                    staticClass: "btn btn-outline-dark modal-default-button",
                     on: {
                       click: function($event) {
                         return _vm.$emit("close")
@@ -45572,7 +45589,7 @@ var render = function() {
                       "div",
                       [
                         _vm._v(
-                          "\n                            Start\n                            "
+                          "\r\n                            Start\r\n                            "
                         ),
                         _vm._l(_vm.setPiece(n), function(piece) {
                           return _c("span", [
@@ -45593,9 +45610,9 @@ var render = function() {
                       "div",
                       [
                         _vm._v(
-                          "\n                            " +
+                          "\r\n                            " +
                             _vm._s(_vm.getSpaceName(n)) +
-                            "\n                            "
+                            "\r\n                            "
                         ),
                         _vm._l(_vm.setPiece(n), function(piece) {
                           return _c("span", [
@@ -45639,7 +45656,7 @@ var render = function() {
                 { attrs: { id: _vm.board.goal_position } },
                 [
                   _vm._v(
-                    "\n                        Goal\n                        "
+                    "\r\n                        Goal\r\n                        "
                   ),
                   _vm._l(_vm.setPiece(_vm.board.goal_position), function(
                     piece
@@ -45662,7 +45679,11 @@ var render = function() {
                 return _c(
                   "td",
                   { staticClass: "bg-light", attrs: { border: "0" } },
-                  [_vm._v("\n                         \n                    ")]
+                  [
+                    _vm._v(
+                      "\r\n                         \r\n                    "
+                    )
+                  ]
                 )
               }),
               _vm._v(" "),
@@ -45671,9 +45692,9 @@ var render = function() {
                 { attrs: { id: _vm.col_count + 1 } },
                 [
                   _vm._v(
-                    "\n                        " +
+                    "\r\n                        " +
                       _vm._s(_vm.getSpaceName(_vm.col_count + 1)) +
-                      "\n                        "
+                      "\r\n                        "
                   ),
                   _vm._l(_vm.setPiece(_vm.col_count + 1), function(piece) {
                     return _c("span", [
@@ -45701,9 +45722,9 @@ var render = function() {
                 { attrs: { id: _vm.board.goal_position - n } },
                 [
                   _vm._v(
-                    "\n                        " +
+                    "\r\n                        " +
                       _vm._s(_vm.getSpaceName(_vm.board.goal_position - n)) +
-                      "\n                        "
+                      "\r\n                        "
                   ),
                   _vm._l(_vm.setPiece(_vm.board.goal_position - n), function(
                     piece
@@ -45718,7 +45739,9 @@ var render = function() {
                       })
                     ])
                   }),
-                  _vm._v("\n                         \n                    ")
+                  _vm._v(
+                    "\r\n                         \r\n                    "
+                  )
                 ],
                 2
               )
@@ -45738,9 +45761,9 @@ var render = function() {
                 ? _c("i", { class: "fas fa-2x fa-" + member.aicon })
                 : _vm._e(),
               _vm._v(
-                "\n                    " +
+                "\r\n                    " +
                   _vm._s(member.name) +
-                  "\n                    "
+                  "\r\n                    "
               ),
               member.pivot.go
                 ? _c("span", [_vm._v("(" + _vm._s(member.pivot.go) + ")")])
@@ -59342,8 +59365,8 @@ window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 window.Pusher = __webpack_require__(/*! pusher-js */ "./node_modules/pusher-js/dist/web/pusher.js");
 window.Echo = new laravel_echo__WEBPACK_IMPORTED_MODULE_0__["default"]({
   broadcaster: 'pusher',
-  key: "ff887ae07fb558e2739e",
-  cluster: "ap3",
+  key: "",
+  cluster: "mt1",
   encrypted: true
 });
 
@@ -59766,8 +59789,8 @@ __webpack_require__.r(__webpack_exports__);
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! /var/www/html/sugoroku.commew.net/sugoroku/src/resources/js/app.js */"./resources/js/app.js");
-module.exports = __webpack_require__(/*! /var/www/html/sugoroku.commew.net/sugoroku/src/resources/sass/app.scss */"./resources/sass/app.scss");
+__webpack_require__(/*! C:\Users\private\work\sugoroku\sugoroku\src\resources\js\app.js */"./resources/js/app.js");
+module.exports = __webpack_require__(/*! C:\Users\private\work\sugoroku\sugoroku\src\resources\sass\app.scss */"./resources/sass/app.scss");
 
 
 /***/ })
