@@ -18,8 +18,9 @@ class UserController extends Controller
      */
     public function update(UpdateUserRequest $request, User $user)
     {
-        // /roomsからのアクセスか判定
-        if (url()->previous() != route('rooms') . '/') return redirect()->back();
+        // 遷移元のurlが'/'か'/rooms'からのアクセスか判定
+        if (!url()->previous() == route('rooms') . '/' ||
+            !url()->previous() == route('room.index') . '/') return redirect()->back();
 
         $validated = $request->validated();
         $user->update([
@@ -27,6 +28,6 @@ class UserController extends Controller
             'password' => Hash::make(Arr::get($validated, 'new_password')),
         ]);
 
-        return redirect()->route('rooms');
+        return redirect()->back();
     }
 }
