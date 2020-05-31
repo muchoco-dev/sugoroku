@@ -1,12 +1,12 @@
 <template>
 <div>
     <div class="row mb-5">
-        <div id="sugoroku" class="col-9">
-            <table class="bg-white table table-borderless w-100">
+        <div id="sugoroku" class="col-9" style="word-break: break-all">
+            <table class="bg-white table table-borderless w-100 board">
                 <tr class="horizontal-line">
                     <td v-bind:id="n" v-for="n in col_count">
                         <div v-if="n === 1">
-                            Start
+                            Start<br>
                             <span v-for="piece in setPiece(n)">
                                 <i v-bind:class="'fas fa-2x fa-' + piece.aicon + ' ' + piece_colors[piece.status]"></i>
                             </span>
@@ -26,7 +26,7 @@
                 </tr>
                 <tr class="horizontal-line">
                     <td v-bind:id="board.goal_position">
-                        Goal
+                        Goal<br>
                         <span v-for="piece in setPiece(board.goal_position)">
                             <i v-bind:class="'fas fa-2x fa-' + piece.aicon + ' ' + piece_colors[piece.status]"></i>
                         </span>
@@ -286,7 +286,7 @@ export default {
         if (this.is_started &&
             member['pivot']['go'] === parseInt(this.next_go) &&
             member['pivot']['status'] !== this.const.piece_status_finished) {
-                    
+
             return true;
         }
         return false;

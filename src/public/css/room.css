@@ -67,5 +67,10 @@
   }
 
   .horizontal-line td:nth-child(n+2) {
-      width: 70px;
+      width: 75px;
+  }
+
+  .board i {
+      margin-right: 5px;
+      font-size: 16px;
   }
