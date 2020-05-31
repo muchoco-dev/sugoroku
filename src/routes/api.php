@@ -26,3 +26,4 @@ Route::middleware('auth:api')->post('/sugoroku/delete', 'SugorokuController@dele
 Route::middleware('auth:api')->get('/sugoroku/position/{user_id}/{room_id}', 'SugorokuController@getKomaPosition');
 Route::middleware('auth:api')->get('/sugoroku/members/{room_id}', 'SugorokuController@getMembers');
 Route::middleware('auth:api')->get('/sugoroku/next_go/{room_id}', 'SugorokuController@getNextGo');
+Route::middleware('auth:api')->get('/sugoroku/spaces/{room_id}', 'SugorokuController@getSpaces');

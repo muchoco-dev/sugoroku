@@ -11,6 +11,7 @@ use App\Models\Board;
 use App\Models\Room;
 use App\Models\Space;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class RoomRepository
 {
@@ -135,6 +136,7 @@ class RoomRepository
     public function goal($userId, $roomId)
     {
         $room = Room::find($roomId);
+        $board = Board::find($room->board_id);
 
         // 本人をゴール状態にする
         $roomUser = RoomUser::where([
@@ -146,9 +148,8 @@ class RoomRepository
         $go = $roomUser->go;
         $roomUser->status = config('const.piece_status_finished');
         $roomUser->go = 0;
-        $roomUser = $room->board->goal_position;
+        $roomUser->position = $board->goal_position;
         $roomUser->save();
-
         // 他の参加者の順を繰り上げる
         $roomUsers = RoomUser::where('room_id', $roomId)
             ->where('go', '<', $go)
@@ -167,6 +168,15 @@ class RoomRepository
         $dice_num = rand(1, 6);
         $this->movePiece($roomId, config('const.virus_user_id'), $dice_num);
         $this->saveLog(config('const.virus_user_id'), $roomId, config('const.action_by_dice'), config('const.effect_move_forward'), $dice_num);
+    }
+
+    private function canGoal(RoomUser $roomUser, Board $board)
+    {
+        if ($roomUser->status === $board->goal_status &&
+            $roomUser->user_id !== config('const.virus_user_id')) {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -190,15 +200,18 @@ class RoomRepository
         $board = Board::find($room->board_id);
 
         $newPosition = $roomUser->position + $num;
+        $canGoal = $this->canGoal($roomUser, $board); //現状、ゴール→特殊マスの流れしかないので、効果を受ける前にここで判定しておく（暫定）
 
         // 特殊マス
-        if ($userId !== config('const.virus_user_id')) {
+        if ($userId !== config('const.virus_user_id') &&
+        ($newPosition < $board->goal_position || !$canGoal)) {
             for ($i = 1; $i <= $num; $i++) {
                 $position_tmp = $roomUser->position + $i;
                 // Goalをまたぐ場合
                 if ($position_tmp > $board->goal_position) {
                     $position_tmp = $position_tmp - $board->goal_position;
                 }
+
                 $roomSpace = RoomSpace::where([
                     'room_id'   => $roomId,
                     'position'  => $position_tmp
@@ -212,12 +225,9 @@ class RoomRepository
             }
         }
 
-        if ($newPosition >= $board->goal_position &&
-            $roomUser->status === $board->goal_status &&
-            $roomUser->user_id !== config('const.virus_user_id')
-        ) {
+        if ($newPosition >= $board->goal_position && $canGoal) {
             // ゴール
-            $this->goal($roomId, $userId);
+            $this->goal($userId, $roomId);
         } else {
             if ($newPosition > $board->goal_position) {
                 // もう一周

@@ -96,6 +96,30 @@ class SugorokuController extends Controller
     }
 
 
+    /**
+     * 部屋の特殊マス配置一覧をjsonで取得
+     */
+    public function getSpaces($roomId)
+    {
+        $repository = new RoomRepository;
+        $room = Room::find($roomId);
+
+        // 部屋が存在しない
+        // ユーザが部屋のメンバではない
+        if (!$room || !$repository->isMember($room, Auth::id(), $room->id)) {
+            return response()->json([
+                'status' => 'error',
+            ]);
+        }
+
+        return response()->json([
+            'status'    => 'success',
+            'spaces'    => $repository->getSpaces($room)
+        ]);
+       
+    }
+
+
     public function getKomaPosition($user_id, $room_id)
     {
         $repository = new RoomRepository;
