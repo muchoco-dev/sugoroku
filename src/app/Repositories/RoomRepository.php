@@ -115,7 +115,10 @@ class RoomRepository
      */
     public function virusFirstTurnCheck($id)
     {
-        $virus = RoomUser::where('user_id', config('const.virus_user_id'))->first();
+        $virus = RoomUser::where([
+            'room_id' => $id,
+            'user_id'=> config('const.virus_user_id')
+        ])->first();
 
         if ($virus['go'] === 1) {
             $this->moveVirus($id);
@@ -495,15 +498,6 @@ class RoomRepository
         }
 
         return $next_go;
-    }
-
-    public function getRoomLogs($userId)
-    {
-        $lastLog = RoomLog::where('user_id', $userId)->first();
-        if ($lastLog != null) {
-            return true;
-        }
-        return false;
     }
 }
 
