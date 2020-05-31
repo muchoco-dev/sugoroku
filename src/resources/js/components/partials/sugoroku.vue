@@ -306,6 +306,16 @@ export default {
 
             return true;
         }
+
+        return false;
+    },
+    canShowDiceImage: function (member) {
+        if (this.is_started &&
+            member['pivot']['go'] === parseInt(this.next_go) &&
+            member['pivot']['status'] !== this.const.piece_status_finished) {
+
+            return true;
+        }
         return false;
     },
 

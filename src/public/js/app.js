@@ -1976,6 +1976,10 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+var _methods;
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 //
 //
 //
@@ -2126,7 +2130,7 @@ __webpack_require__.r(__webpack_exports__);
       _this.setNextGo();
     });
   },
-  methods: {
+  methods: (_methods = {
     getMemberName: function getMemberName(id) {
       for (var key in this.v_members) {
         if (this.v_members[key]['id'] === id) {
@@ -2285,43 +2289,47 @@ __webpack_require__.r(__webpack_exports__);
       }
 
       return false;
-    },
-    canShowDeleteRoomButton: function canShowDeleteRoomButton() {
-      if (this.room.owner_id === this.auth_id) {
-        var finished_member_count = 0;
+    }
+  }, _defineProperty(_methods, "canShowDiceImage", function canShowDiceImage(member) {
+    if (this.is_started && member['pivot']['go'] === parseInt(this.next_go) && member['pivot']['status'] !== this["const"].piece_status_finished) {
+      return true;
+    }
 
-        for (var key in this.v_members) {
-          if (this.v_members[key]['pivot']['status'] === this["const"].piece_status_finished) {
-            finished_member_count++;
-          }
-        }
+    return false;
+  }), _defineProperty(_methods, "canShowDeleteRoomButton", function canShowDeleteRoomButton() {
+    if (this.room.owner_id === this.auth_id) {
+      var finished_member_count = 0;
 
-        if (!this.is_started || finished_member_count >= this.v_members.length - 1) {
-          return true;
+      for (var key in this.v_members) {
+        if (this.v_members[key]['pivot']['status'] === this["const"].piece_status_finished) {
+          finished_member_count++;
         }
       }
 
-      return false;
-    },
-    deleteRoom: function deleteRoom() {
-      axios.defaults.headers.common['Authorization'] = "Bearer " + this.token;
-      axios.post('/api/sugoroku/delete', {
-        headers: {
-          "Content-Type": "application/json"
-        },
-        'room_id': this.room.id
-      }).then(function (response) {
-        if (response.data.status === 'success') {
-          // 成功
-          window.location.href = '/rooms';
-        } else {
-          alert(失敗しました);
-        }
-      })["catch"](function (error) {
-        console.log(error);
-      });
+      if (!this.is_started || finished_member_count >= this.v_members.length - 1) {
+        return true;
+      }
     }
-  }
+
+    return false;
+  }), _defineProperty(_methods, "deleteRoom", function deleteRoom() {
+    axios.defaults.headers.common['Authorization'] = "Bearer " + this.token;
+    axios.post('/api/sugoroku/delete', {
+      headers: {
+        "Content-Type": "application/json"
+      },
+      'room_id': this.room.id
+    }).then(function (response) {
+      if (response.data.status === 'success') {
+        // 成功
+        window.location.href = '/rooms';
+      } else {
+        alert(失敗しました);
+      }
+    })["catch"](function (error) {
+      console.log(error);
+    });
+  }), _methods)
 });
 
 /***/ }),
