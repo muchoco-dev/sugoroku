@@ -105,14 +105,24 @@ class RoomRepository
 
         foreach ($users as $key => $user) {
             $room->users()->updateExistingPivot($user->id, ['go' => $go_list[$key]]);
-
-            if ($user->id === config('const.virus_user_id') && $go_list[$key] === 1) {
-                // ウィルスが1番手の場合は、最初の手番をここで消化する
-                $this->moveVirus($room->id);
-            }
         }
 
         return true;
+    }
+
+    /**
+     * ウイルスが一番手かどうかを確認して一番手ならmoveVirusを実行
+     */
+    public function virusFirstTurnCheck($id)
+    {
+        $virus = RoomUser::where([
+            'room_id' => $id,
+            'user_id'=> config('const.virus_user_id')
+        ])->first();
+
+        if ($virus['go'] === 1) {
+            $this->moveVirus($id);
+        }
     }
 
     /**
