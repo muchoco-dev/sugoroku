@@ -13,12 +13,13 @@
 
 Auth::routes();
 
-Route::middleware('auth')->get('/', 'RoomController@index');
+Route::middleware('auth')->get('/', 'RoomController@index')->name('room.index');
 
 Route::middleware('auth')->get('/home', 'HomeController@index')->name('home');
 Route::middleware('auth')->get('/rooms', 'RoomController@index')->name('rooms');
 Route::middleware('auth')->get('/room/{uname}', 'RoomController@show')->name('room.show');;
 Route::middleware('auth')->get('/room/{uname}/join', 'RoomController@join');
+Route::middleware('auth')->put('/user/{user}/update', 'UserController@update')->name('user.update');
 
 Route::get('/privacy', function() {
   return view('privacy');
