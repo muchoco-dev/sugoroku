@@ -2090,6 +2090,7 @@ __webpack_require__.r(__webpack_exports__);
       is_started: false,
       join_url: location.href + '/join',
       v_members: this.members,
+      v_spaces: this.spaces,
       next_go: 1
     };
   },
@@ -2113,6 +2114,8 @@ __webpack_require__.r(__webpack_exports__);
     window.Echo["private"]('sugoroku-started-channel.' + this.room.id).listen('SugorokuStarted', function (response) {
       _this.logs.push('ゲームスタート！');
 
+      _this.setSpaces();
+
       _this.resetMembers();
     });
     window.Echo["private"]('dice-rolled-channel.' + this.room.id).listen('DiceRolled', function (response) {
@@ -2131,10 +2134,24 @@ __webpack_require__.r(__webpack_exports__);
         }
       }
     },
+    setSpaces: function setSpaces() {
+      axios.defaults.headers.common['Authorization'] = "Bearer " + this.token;
+      axios.get('/api/sugoroku/spaces/' + this.room.id, {
+        headers: {
+          "Content-Type": "application/json"
+        }
+      }).then(function (response) {
+        if (response.data.status === 'success') {
+          this.v_spaces = response.data.spaces;
+        }
+      }.bind(this))["catch"](function (error) {
+        console.log(error);
+      });
+    },
     getSpaceName: function getSpaceName(id) {
       // 特殊マスの名前を返す
-      if (this.spaces[id]) {
-        return this.spaces[id].name;
+      if (this.v_spaces[id]) {
+        return this.v_spaces[id].name;
       }
 
       return ' ';
@@ -2163,7 +2180,6 @@ __webpack_require__.r(__webpack_exports__);
       }).then(function (response) {
         if (response.data.status === 'success') {
           this.v_members = response.data.members;
-          console.log(this.v_members);
           this.piece_positions = [];
           var aicon_count = 0;
           var aicon_name = '';
@@ -2248,7 +2264,8 @@ __webpack_require__.r(__webpack_exports__);
           alert(失敗しました);
         }
       })["catch"](function (error) {
-        console.log(error);
+        console.log(error.status);
+        alert('リクエストに耐えきれませんでした、、、時間を置いて再度お試しください');
       });
     },
     canShowRollDiceButton: function canShowRollDiceButton() {
@@ -2279,7 +2296,7 @@ __webpack_require__.r(__webpack_exports__);
           }
         }
 
-        if (this.room.status === this["const"].room_status_open || finished_member_count >= this.v_members.length - 1) {
+        if (!this.is_started || finished_member_count >= this.v_members.length - 1) {
           return true;
         }
       }
@@ -45807,21 +45824,6 @@ var render = function() {
               )
             : _vm._e(),
           _vm._v(" "),
-          _vm.canShowDeleteRoomButton()
-            ? _c(
-                "button",
-                {
-                  staticClass: "btn btn-primary",
-                  on: {
-                    click: function($event) {
-                      return _vm.deleteRoom()
-                    }
-                  }
-                },
-                [_vm._v("削除")]
-              )
-            : _vm._e(),
-          _vm._v(" "),
           !_vm.is_started
             ? _c("div", { staticClass: "input-group mt-4" }, [
                 _vm._m(0),
@@ -45852,6 +45854,21 @@ var render = function() {
                   }
                 })
               ])
+            : _vm._e(),
+          _vm._v(" "),
+          _vm.canShowDeleteRoomButton()
+            ? _c(
+                "button",
+                {
+                  staticClass: "btn btn-outline-danger mt-4",
+                  on: {
+                    click: function($event) {
+                      return _vm.deleteRoom()
+                    }
+                  }
+                },
+                [_vm._v("削除")]
+              )
             : _vm._e()
         ])
       ])

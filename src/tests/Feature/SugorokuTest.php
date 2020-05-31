@@ -167,6 +167,8 @@ class SugorokuTest extends TestCase
         $response = $this->post('/api/sugoroku/start', [
             'room_id'   => $this->room->id
         ]);
+        $repository = new RoomRepository();
+        $repository->virusFirstTurnCheck($this->room->id);
 
         Event::assertDispatched(SugorokuStarted::class);
     }
@@ -253,13 +255,21 @@ class SugorokuTest extends TestCase
         $roomUser->status = config('const.piece_status_sick');
         $roomUser->save();
 
+        // ウィルスを影響のない場所に移動させる
+        $virus = RoomUser::where([
+            'user_id' => config('const.virus_user_id'),
+            'room_id' => $this->room->id
+        ])->first();
+        $virus->position = 3;
+        $virus->save();
+
         // コマを進める
         Passport::actingAs($this->owner);
         $response = $this->post('/api/sugoroku/save_log', [
             'room_id'   => $this->room->id,
             'action_id' => config('const.action_by_dice'),
             'effect_id' => config('const.effect_move_forward'),
-            'effect_num'=> 6
+            'effect_num'=> 5
         ]);
         $response->assertJson([
             'status'    => 'success'
@@ -269,6 +279,36 @@ class SugorokuTest extends TestCase
             'room_id'   => $this->room->id,
             'user_id'   => $this->owner->id,
             'status'    => config('const.piece_status_health')
+        ]);
+    }
+
+    /**
+     * ウィルスが1番手のときの挙動をテスト
+     */
+    public function testBehavingWhenVirusIsFirst()
+    {
+        Passport::actingAs($this->owner);
+        $response = $this->post('/api/sugoroku/start', [
+            'room_id'   => $this->room->id
+        ]);
+
+        $repository = new RoomRepository();
+        // ウイルスが一番手になるように意図的に実行
+        $room = Room::find($this->room->id);
+        $virus = RoomUser::where('user_id', config('const.virus_user_id'))->first();
+        $first = RoomUser::where('go', 1)->first();
+
+        if ($virus['go'] !== 1) {
+            $room->users()->updateExistingPivot($first->userId, ['go' => $virus['go']]);
+            $room->users()->updateExistingPivot(config('const.virus_user_id'), ['go' => 1]);
+        }
+
+        $repository->virusFirstTurnCheck($this->room->id);
+
+        $this->assertDatabaseHas('room_logs', [
+            'user_id' => config('const.virus_user_id'),
+            'action_id' => config('const.action_by_dice'),
+            'effect_id' => config('const.effect_move_forward')
         ]);
     }
 

@@ -65,7 +65,7 @@
                             <div class="col-md-6 offset-md-4">
                                 <div class="form-check">
                                     <input type="checkbox" name="agree_privacy_terms" id="agree" class="form-check-input" required="required"/>
-                                    <label for="agree" class="form-check-label">利用規約・プライバシーポリシーへ同意する</label>
+                                    <label for="agree" class="form-check-label"><a href="{{ url('/terms') }}">利用規約</a>・<a href="{{ url('/privacy') }}">プライバシーポリシー</a>へ同意する</label>
                                 </div>
                             </div>
                         </div>

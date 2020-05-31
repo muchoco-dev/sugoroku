@@ -74,13 +74,13 @@
             <div id="action">
                 <button class="btn btn-success" v-if="canShowStartButton()" @click="start()">ゲームスタート</button>
                 <button class="btn btn-primary" v-if="canShowRollDiceButton()" @click="rollDice()">サイコロを振る</button>
-                <button class="btn btn-primary" v-if="canShowDeleteRoomButton()" @click="deleteRoom()">削除</button>
                 <div class="input-group mt-4" v-if="!is_started">
                     <div class="input-group-prepend">
                         <span class="input-group-text">招待URL</span>
                     </div>
                     <input class="copy form-control bg-white" type="text" v-model="join_url" :data-clipboard-text="join_url" readonly>
                 </div>
+                <button class="btn btn-outline-danger mt-4" v-if="canShowDeleteRoomButton()" @click="deleteRoom()">削除</button>
             </div>
         </div>
     </div>
@@ -113,6 +113,7 @@ export default {
             is_started: false,
             join_url: location.href + '/join',
             v_members: this.members,
+            v_spaces: this.spaces,
             next_go: 1,
         }
     },
@@ -134,6 +135,7 @@ export default {
 
         window.Echo.private('sugoroku-started-channel.' + this.room.id).listen('SugorokuStarted', response => {
             this.logs.push('ゲームスタート！');
+            this.setSpaces();
             this.resetMembers();
         });
 
@@ -151,9 +153,24 @@ export default {
             }
         }
     },
+    setSpaces: function () {
+        axios.defaults.headers.common['Authorization'] = "Bearer " + this.token;
+        axios.get('/api/sugoroku/spaces/' + this.room.id, {
+            headers: {
+                "Content-Type": "application/json"
+            }
+        }).then(function (response) {
+            if (response.data.status === 'success') {
+                this.v_spaces = response.data.spaces;
+            }
+        }.bind(this)).catch(function(error) {
+            console.log(error);
+        });
+
+    },
     getSpaceName: function (id) { // 特殊マスの名前を返す
-        if (this.spaces[id]) {
-            return this.spaces[id].name;
+        if (this.v_spaces[id]) {
+            return this.v_spaces[id].name;
         }
         return ' ';
     },
@@ -182,7 +199,6 @@ export default {
         }).then(function (response) {
             if (response.data.status === 'success') {
                 this.v_members = response.data.members;
-                console.log(this.v_members);
                 this.piece_positions = [];
                 let aicon_count = 0;
                 let aicon_name = '';
@@ -266,7 +282,8 @@ export default {
                 alert(失敗しました);
             }
         }).catch(function(error) {
-            console.log(error);
+            console.log(error.status);
+            alert('リクエストに耐えきれませんでした、、、時間を置いて再度お試しください');
         });
     },
     canShowRollDiceButton: function () {
@@ -301,7 +318,7 @@ export default {
                     finished_member_count++;
                 }
             }
-            if(this.room.status === this.const.room_status_open ||
+            if(!this.is_started ||
                 finished_member_count >= this.v_members.length - 1) {
                 return true;
             }
