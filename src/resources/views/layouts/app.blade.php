@@ -67,7 +67,7 @@
                                     ログアウト
                                 </a>
 
-                                @if(Request::is('rooms'))
+                                @if(Request::is('rooms') || Request::is('/'))
                                     <div id="updateUserModal" class="dropdown-item" data-toggle="modal" data-target="#updateUser"
                                          style="cursor: pointer">
                                         プロフィールの変更
