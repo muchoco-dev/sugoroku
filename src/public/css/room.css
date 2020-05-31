@@ -63,14 +63,13 @@
   }
 
   .horizontal-line {
-      height: 70px;
+      height: 90px;
   }
 
-  .horizontal-line td:nth-child(n+2) {
-      width: 75px;
+  .board {
+      table-layout: fixed;
   }
 
   .board i {
-      margin-right: 5px;
       font-size: 16px;
   }

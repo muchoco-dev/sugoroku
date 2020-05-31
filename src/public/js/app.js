@@ -2137,7 +2137,7 @@ __webpack_require__.r(__webpack_exports__);
         return this.spaces[id].name;
       }
 
-      return '';
+      return ' ';
     },
     setNextGo: function setNextGo() {
       axios.defaults.headers.common['Authorization'] = "Bearer " + this.token;
@@ -45633,9 +45633,9 @@ var render = function() {
                     "td",
                     { attrs: { id: _vm.board.goal_position } },
                     [
-                      _vm._v(
-                        "\n                        Goal\n                        "
-                      ),
+                      _vm._v("\n                        Goal"),
+                      _c("br"),
+                      _vm._v(" "),
                       _vm._l(_vm.setPiece(_vm.board.goal_position), function(
                         piece
                       ) {

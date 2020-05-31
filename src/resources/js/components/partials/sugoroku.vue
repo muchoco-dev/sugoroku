@@ -155,7 +155,7 @@ export default {
         if (this.spaces[id]) {
             return this.spaces[id].name;
         }
-        return '';
+        return ' ';
     },
     setNextGo: function () {
         axios.defaults.headers.common['Authorization'] = "Bearer " + this.token;
