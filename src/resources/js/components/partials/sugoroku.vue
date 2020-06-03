@@ -1,12 +1,12 @@
 <template>
 <div>
     <div class="row mb-5">
-        <div id="sugoroku" class="col-9">
-            <table class="bg-white table table-borderless w-100">
-                <tr>
+        <div id="sugoroku" class="col-9" style="word-break: break-all">
+            <table class="bg-white table table-borderless w-100 board">
+                <tr class="horizontal-line">
                     <td v-bind:id="n" v-for="n in col_count">
                         <div v-if="n === 1">
-                            Start
+                            Start<br>
                             <span v-for="piece in setPiece(n)">
                                 <i v-bind:class="'fas fa-2x fa-' + piece.aicon + ' ' + piece_colors[piece.status]"></i>
                             </span>
@@ -24,9 +24,9 @@
                         </div>
                     </td>
                 </tr>
-                <tr>
+                <tr class="horizontal-line">
                     <td v-bind:id="board.goal_position">
-                        Goal
+                        Goal<br>
                         <span v-for="piece in setPiece(board.goal_position)">
                             <i v-bind:class="'fas fa-2x fa-' + piece.aicon + ' ' + piece_colors[piece.status]"></i>
                         </span>
@@ -41,7 +41,7 @@
                         </span>
                     </td>
                 </tr>
-                <tr>
+                <tr class="horizontal-line">
                     <td v-for="n in col_count" v-bind:id="board.goal_position - n">
                         {{ getSpaceName(board.goal_position - n) }}
                         <span v-for="piece in setPiece(board.goal_position - n)">
@@ -172,7 +172,7 @@ export default {
         if (this.v_spaces[id]) {
             return this.v_spaces[id].name;
         }
-        return '';
+        return ' ';
     },
     setNextGo: function () {
         axios.defaults.headers.common['Authorization'] = "Bearer " + this.token;
@@ -240,7 +240,7 @@ export default {
         this.saveLog(this.const.action_by_dice, this.const.effect_move_forward, dice);
     },
     canShowStartButton: function () {
-      if (this.room.owner_id === this.auth_id &&
+        if (this.room.owner_id === this.auth_id &&
             this.room.status === this.const.room_status_open) {
         if (!this.is_started) {
           return true;
@@ -303,9 +303,10 @@ export default {
         if (this.is_started &&
             member['pivot']['go'] === parseInt(this.next_go) &&
             member['pivot']['status'] !== this.const.piece_status_finished) {
-                    
+
             return true;
         }
+
         return false;
     },
 

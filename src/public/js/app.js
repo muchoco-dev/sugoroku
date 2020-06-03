@@ -2154,7 +2154,7 @@ __webpack_require__.r(__webpack_exports__);
         return this.v_spaces[id].name;
       }
 
-      return '';
+      return ' ';
     },
     setNextGo: function setNextGo() {
       axios.defaults.headers.common['Authorization'] = "Bearer " + this.token;
@@ -45561,59 +45561,101 @@ var render = function() {
   var _c = _vm._self._c || _h
   return _c("div", [
     _c("div", { staticClass: "row mb-5" }, [
-      _c("div", { staticClass: "col-9", attrs: { id: "sugoroku" } }, [
-        _c("table", { staticClass: "bg-white table table-borderless w-100" }, [
+      _c(
+        "div",
+        {
+          staticClass: "col-9",
+          staticStyle: { "word-break": "break-all" },
+          attrs: { id: "sugoroku" }
+        },
+        [
           _c(
-            "tr",
-            _vm._l(_vm.col_count, function(n) {
-              return _c("td", { attrs: { id: n } }, [
-                n === 1
-                  ? _c(
-                      "div",
-                      [
-                        _vm._v(
-                          "\n                            Start\n                            "
-                        ),
-                        _vm._l(_vm.setPiece(n), function(piece) {
-                          return _c("span", [
-                            _c("i", {
-                              class:
-                                "fas fa-2x fa-" +
-                                piece.aicon +
-                                " " +
-                                _vm.piece_colors[piece.status]
+            "table",
+            { staticClass: "bg-white table table-borderless w-100 board" },
+            [
+              _c(
+                "tr",
+                { staticClass: "horizontal-line" },
+                _vm._l(_vm.col_count, function(n) {
+                  return _c("td", { attrs: { id: n } }, [
+                    n === 1
+                      ? _c(
+                          "div",
+                          [
+                            _vm._v("\n                            Start"),
+                            _c("br"),
+                            _vm._v(" "),
+                            _vm._l(_vm.setPiece(n), function(piece) {
+                              return _c("span", [
+                                _c("i", {
+                                  class:
+                                    "fas fa-2x fa-" +
+                                    piece.aicon +
+                                    " " +
+                                    _vm.piece_colors[piece.status]
+                                })
+                              ])
                             })
-                          ])
-                        })
-                      ],
-                      2
-                    )
-                  : _vm.getSpaceName(n)
-                  ? _c(
-                      "div",
-                      [
-                        _vm._v(
-                          "\n                            " +
-                            _vm._s(_vm.getSpaceName(n)) +
-                            "\n                            "
-                        ),
-                        _vm._l(_vm.setPiece(n), function(piece) {
-                          return _c("span", [
-                            _c("i", {
-                              class:
-                                "fas fa-2x fa-" +
-                                piece.aicon +
-                                " " +
-                                _vm.piece_colors[piece.status]
+                          ],
+                          2
+                        )
+                      : _vm.getSpaceName(n)
+                      ? _c(
+                          "div",
+                          [
+                            _vm._v(
+                              "\n                            " +
+                                _vm._s(_vm.getSpaceName(n)) +
+                                "\n                            "
+                            ),
+                            _vm._l(_vm.setPiece(n), function(piece) {
+                              return _c("span", [
+                                _c("i", {
+                                  class:
+                                    "fas fa-2x fa-" +
+                                    piece.aicon +
+                                    " " +
+                                    _vm.piece_colors[piece.status]
+                                })
+                              ])
                             })
-                          ])
-                        })
-                      ],
-                      2
-                    )
-                  : _c(
-                      "div",
-                      _vm._l(_vm.setPiece(n), function(piece) {
+                          ],
+                          2
+                        )
+                      : _c(
+                          "div",
+                          _vm._l(_vm.setPiece(n), function(piece) {
+                            return _c("span", [
+                              _c("i", {
+                                class:
+                                  "fas fa-2x fa-" +
+                                  piece.aicon +
+                                  " " +
+                                  _vm.piece_colors[piece.status]
+                              })
+                            ])
+                          }),
+                          0
+                        )
+                  ])
+                }),
+                0
+              ),
+              _vm._v(" "),
+              _c(
+                "tr",
+                { staticClass: "horizontal-line" },
+                [
+                  _c(
+                    "td",
+                    { attrs: { id: _vm.board.goal_position } },
+                    [
+                      _vm._v("\n                        Goal"),
+                      _c("br"),
+                      _vm._v(" "),
+                      _vm._l(_vm.setPiece(_vm.board.goal_position), function(
+                        piece
+                      ) {
                         return _c("span", [
                           _c("i", {
                             class:
@@ -45623,110 +45665,92 @@ var render = function() {
                               _vm.piece_colors[piece.status]
                           })
                         ])
-                      }),
-                      0
-                    )
-              ])
-            }),
-            0
-          ),
-          _vm._v(" "),
-          _c(
-            "tr",
-            [
-              _c(
-                "td",
-                { attrs: { id: _vm.board.goal_position } },
-                [
-                  _vm._v(
-                    "\n                        Goal\n                        "
-                  ),
-                  _vm._l(_vm.setPiece(_vm.board.goal_position), function(
-                    piece
-                  ) {
-                    return _c("span", [
-                      _c("i", {
-                        class:
-                          "fas fa-2x fa-" +
-                          piece.aicon +
-                          " " +
-                          _vm.piece_colors[piece.status]
                       })
-                    ])
-                  })
+                    ],
+                    2
+                  ),
+                  _vm._v(" "),
+                  _vm._l(_vm.col_count - 2, function(n) {
+                    return _c(
+                      "td",
+                      { staticClass: "bg-light", attrs: { border: "0" } },
+                      [
+                        _vm._v(
+                          "\n                         \n                    "
+                        )
+                      ]
+                    )
+                  }),
+                  _vm._v(" "),
+                  _c(
+                    "td",
+                    { attrs: { id: _vm.col_count + 1 } },
+                    [
+                      _vm._v(
+                        "\n                        " +
+                          _vm._s(_vm.getSpaceName(_vm.col_count + 1)) +
+                          "\n                        "
+                      ),
+                      _vm._l(_vm.setPiece(_vm.col_count + 1), function(piece) {
+                        return _c("span", [
+                          _c("i", {
+                            class:
+                              "fas fa-2x fa-" +
+                              piece.aicon +
+                              " " +
+                              _vm.piece_colors[piece.status]
+                          })
+                        ])
+                      })
+                    ],
+                    2
+                  )
                 ],
                 2
               ),
               _vm._v(" "),
-              _vm._l(_vm.col_count - 2, function(n) {
-                return _c(
-                  "td",
-                  { staticClass: "bg-light", attrs: { border: "0" } },
-                  [_vm._v("\n                         \n                    ")]
-                )
-              }),
-              _vm._v(" "),
               _c(
-                "td",
-                { attrs: { id: _vm.col_count + 1 } },
-                [
-                  _vm._v(
-                    "\n                        " +
-                      _vm._s(_vm.getSpaceName(_vm.col_count + 1)) +
-                      "\n                        "
-                  ),
-                  _vm._l(_vm.setPiece(_vm.col_count + 1), function(piece) {
-                    return _c("span", [
-                      _c("i", {
-                        class:
-                          "fas fa-2x fa-" +
-                          piece.aicon +
-                          " " +
-                          _vm.piece_colors[piece.status]
-                      })
-                    ])
-                  })
-                ],
-                2
+                "tr",
+                { staticClass: "horizontal-line" },
+                _vm._l(_vm.col_count, function(n) {
+                  return _c(
+                    "td",
+                    { attrs: { id: _vm.board.goal_position - n } },
+                    [
+                      _vm._v(
+                        "\n                        " +
+                          _vm._s(
+                            _vm.getSpaceName(_vm.board.goal_position - n)
+                          ) +
+                          "\n                        "
+                      ),
+                      _vm._l(
+                        _vm.setPiece(_vm.board.goal_position - n),
+                        function(piece) {
+                          return _c("span", [
+                            _c("i", {
+                              class:
+                                "fas fa-2x fa-" +
+                                piece.aicon +
+                                " " +
+                                _vm.piece_colors[piece.status]
+                            })
+                          ])
+                        }
+                      ),
+                      _vm._v(
+                        "\n                         \n                    "
+                      )
+                    ],
+                    2
+                  )
+                }),
+                0
               )
-            ],
-            2
-          ),
-          _vm._v(" "),
-          _c(
-            "tr",
-            _vm._l(_vm.col_count, function(n) {
-              return _c(
-                "td",
-                { attrs: { id: _vm.board.goal_position - n } },
-                [
-                  _vm._v(
-                    "\n                        " +
-                      _vm._s(_vm.getSpaceName(_vm.board.goal_position - n)) +
-                      "\n                        "
-                  ),
-                  _vm._l(_vm.setPiece(_vm.board.goal_position - n), function(
-                    piece
-                  ) {
-                    return _c("span", [
-                      _c("i", {
-                        class:
-                          "fas fa-2x fa-" +
-                          piece.aicon +
-                          " " +
-                          _vm.piece_colors[piece.status]
-                      })
-                    ])
-                  }),
-                  _vm._v("\n                         \n                    ")
-                ],
-                2
-              )
-            }),
-            0
+            ]
           )
-        ])
-      ]),
+        ]
+      ),
       _vm._v(" "),
       _c("div", { staticClass: "col-2", attrs: { id: "members" } }, [
         _c(
