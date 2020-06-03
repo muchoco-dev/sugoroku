@@ -1,5 +1,38 @@
 <template>
 <div>
+    <div class="row mb-4">
+        <div class="col-4">
+            <div class="card">
+                <div class="card-header">
+                    <div class="fas fa-2x fa-cat text-success">：緑アイコン</div>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">健康</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="card">
+                <div class="card-header">
+                    <div class="fas fa-2x fa-virus text-danger card-title">：赤ウィルスアイコン</div>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">ウィルスに追いつかれると病気になってしまいます</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="card">
+                <div class="card-header">
+                   <div class="fas fa-2x fa-cat text-danger card-title">：赤アイコン</div>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">病気中はゴールできません。病院に行ってください</p>
+                </div>
+            </div>
+        </div>
+        
+    </div>
     <div class="row mb-5">
         <div id="sugoroku" class="col-9" style="word-break: break-all">
             <table class="bg-white table table-borderless w-100 board">
