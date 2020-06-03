@@ -240,7 +240,7 @@ export default {
         this.saveLog(this.const.action_by_dice, this.const.effect_move_forward, dice);
     },
     canShowStartButton: function () {
-      if (this.room.owner_id === this.auth_id &&
+        if (this.room.owner_id === this.auth_id &&
             this.room.status === this.const.room_status_open) {
         if (!this.is_started) {
           return true;
