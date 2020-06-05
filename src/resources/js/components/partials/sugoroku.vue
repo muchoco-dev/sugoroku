@@ -31,7 +31,7 @@
                 </div>
             </div>
         </div>
-        
+
     </div>
     <div class="row mb-5">
         <div id="sugoroku" class="col-9" style="word-break: break-all">
@@ -99,8 +99,8 @@
 
     <div class="row">
         <div class="col-9">
-            <div id="logs" class="border h-100">
-                <p v-for="log in logs">{{ log }}</p>
+            <div id="logs" class="h-100">
+                <textarea class="logs" rows="5" v-model="logs" readonly></textarea>
             </div>
         </div>
         <div class="col-2">
@@ -167,13 +167,13 @@ export default {
         });
 
         window.Echo.private('sugoroku-started-channel.' + this.room.id).listen('SugorokuStarted', response => {
-            this.logs.push('ゲームスタート！');
+            this.logs.push('ゲームスタート！' + '\n');
             this.setSpaces();
             this.resetMembers();
         });
 
         window.Echo.private('dice-rolled-channel.' + this.room.id).listen('DiceRolled', response => {
-            this.logs.push(this.getMemberName(response.userId) + 'さんがサイコロをふって' + response.number + '進みました');
+            this.logs.unshift(this.getMemberName(response.userId) + 'さんがサイコロをふって' + response.number + '進みました' + '\n');
             this.resetMembers();
             this.setNextGo();
         });

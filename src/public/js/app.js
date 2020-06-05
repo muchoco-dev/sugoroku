@@ -2064,6 +2064,39 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: {
     board: Object,
@@ -2112,14 +2145,14 @@ __webpack_require__.r(__webpack_exports__);
       // これを使ってユーザ名取得&this.v_membersに追加
     });
     window.Echo["private"]('sugoroku-started-channel.' + this.room.id).listen('SugorokuStarted', function (response) {
-      _this.logs.push('ゲームスタート！');
+      _this.logs.push('ゲームスタート！' + '\n');
 
       _this.setSpaces();
 
       _this.resetMembers();
     });
     window.Echo["private"]('dice-rolled-channel.' + this.room.id).listen('DiceRolled', function (response) {
-      _this.logs.push(_this.getMemberName(response.userId) + 'さんがサイコロをふって' + response.number + '進みました');
+      _this.logs.unshift(_this.getMemberName(response.userId) + 'さんがサイコロをふって' + response.number + '進みました' + '\n');
 
       _this.resetMembers();
 
@@ -45560,6 +45593,8 @@ var render = function() {
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
   return _c("div", [
+    _vm._m(0),
+    _vm._v(" "),
     _c("div", { staticClass: "row mb-5" }, [
       _c(
         "div",
@@ -45782,14 +45817,29 @@ var render = function() {
     _vm._v(" "),
     _c("div", { staticClass: "row" }, [
       _c("div", { staticClass: "col-9" }, [
-        _c(
-          "div",
-          { staticClass: "border h-100", attrs: { id: "logs" } },
-          _vm._l(_vm.logs, function(log) {
-            return _c("p", [_vm._v(_vm._s(log))])
-          }),
-          0
-        )
+        _c("div", { staticClass: "h-100", attrs: { id: "logs" } }, [
+          _c("textarea", {
+            directives: [
+              {
+                name: "model",
+                rawName: "v-model",
+                value: _vm.logs,
+                expression: "logs"
+              }
+            ],
+            staticClass: "logs",
+            attrs: { rows: "5", readonly: "" },
+            domProps: { value: _vm.logs },
+            on: {
+              input: function($event) {
+                if ($event.target.composing) {
+                  return
+                }
+                _vm.logs = $event.target.value
+              }
+            }
+          })
+        ])
       ]),
       _vm._v(" "),
       _c("div", { staticClass: "col-2" }, [
@@ -45826,7 +45876,7 @@ var render = function() {
           _vm._v(" "),
           !_vm.is_started
             ? _c("div", { staticClass: "input-group mt-4" }, [
-                _vm._m(0),
+                _vm._m(1),
                 _vm._v(" "),
                 _c("input", {
                   directives: [
@@ -45876,6 +45926,62 @@ var render = function() {
   ])
 }
 var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "row mb-4" }, [
+      _c("div", { staticClass: "col-4" }, [
+        _c("div", { staticClass: "card" }, [
+          _c("div", { staticClass: "card-header" }, [
+            _c("div", { staticClass: "fas fa-2x fa-cat text-success" }, [
+              _vm._v("：緑アイコン")
+            ])
+          ]),
+          _vm._v(" "),
+          _c("div", { staticClass: "card-body" }, [
+            _c("p", { staticClass: "card-text" }, [_vm._v("健康")])
+          ])
+        ])
+      ]),
+      _vm._v(" "),
+      _c("div", { staticClass: "col-4" }, [
+        _c("div", { staticClass: "card" }, [
+          _c("div", { staticClass: "card-header" }, [
+            _c(
+              "div",
+              { staticClass: "fas fa-2x fa-virus text-danger card-title" },
+              [_vm._v("：赤ウィルスアイコン")]
+            )
+          ]),
+          _vm._v(" "),
+          _c("div", { staticClass: "card-body" }, [
+            _c("p", { staticClass: "card-text" }, [
+              _vm._v("ウィルスに追いつかれると病気になってしまいます")
+            ])
+          ])
+        ])
+      ]),
+      _vm._v(" "),
+      _c("div", { staticClass: "col-4" }, [
+        _c("div", { staticClass: "card" }, [
+          _c("div", { staticClass: "card-header" }, [
+            _c(
+              "div",
+              { staticClass: "fas fa-2x fa-cat text-danger card-title" },
+              [_vm._v("：赤アイコン")]
+            )
+          ]),
+          _vm._v(" "),
+          _c("div", { staticClass: "card-body" }, [
+            _c("p", { staticClass: "card-text" }, [
+              _vm._v("病気中はゴールできません。病院に行ってください")
+            ])
+          ])
+        ])
+      ])
+    ])
+  },
   function() {
     var _vm = this
     var _h = _vm.$createElement
@@ -59366,7 +59472,7 @@ window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 window.Pusher = __webpack_require__(/*! pusher-js */ "./node_modules/pusher-js/dist/web/pusher.js");
 window.Echo = new laravel_echo__WEBPACK_IMPORTED_MODULE_0__["default"]({
   broadcaster: 'pusher',
-  key: "ff887ae07fb558e2739e",
+  key: "986695b1d31d9060cf71",
   cluster: "ap3",
   encrypted: true
 });
@@ -59790,8 +59896,8 @@ __webpack_require__.r(__webpack_exports__);
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! /var/www/html/sugoroku.commew.net/sugoroku/src/resources/js/app.js */"./resources/js/app.js");
-module.exports = __webpack_require__(/*! /var/www/html/sugoroku.commew.net/sugoroku/src/resources/sass/app.scss */"./resources/sass/app.scss");
+__webpack_require__(/*! C:\Users\private\work\sugoroku\sugoroku\src\resources\js\app.js */"./resources/js/app.js");
+module.exports = __webpack_require__(/*! C:\Users\private\work\sugoroku\sugoroku\src\resources\sass\app.scss */"./resources/sass/app.scss");
 
 
 /***/ })
