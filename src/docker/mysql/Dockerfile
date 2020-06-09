@@ -1,13 +1,8 @@
 FROM mysql:8.0
 
-RUN mkdir /var/log/mysql
-RUN chown mysql:mysql /var/log/mysql
-
 COPY ./docker/mysql/config/my.cnf /etc/mysql/conf.d/my.cnf
-COPY ./docker/mysql/logs/error.log /var/log/mysql/error.log
-COPY ./docker/mysql/logs/query.log /var/log/mysql/query.log
-COPY ./docker/mysql/logs/slow.log /var/log/mysql/slow.log
+COPY ./docker/mysql/logs/*.log /var/log/mysql/
 
-USER mysql
-
-CMD ["mysqld"]
+RUN chmod 777 /var/log/mysql/error.log && \
+  chmod 777 /var/log/mysql/query.log && \
+  chmod 777 /var/log/mysql/slow.log
