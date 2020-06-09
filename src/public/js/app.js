@@ -1934,6 +1934,11 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: {
     token: String
@@ -2154,7 +2159,7 @@ __webpack_require__.r(__webpack_exports__);
         return this.v_spaces[id].name;
       }
 
-      return ' ';
+      return '';
     },
     setNextGo: function setNextGo() {
       axios.defaults.headers.common['Authorization'] = "Bearer " + this.token;
@@ -45483,7 +45488,8 @@ var render = function() {
                 _c("p", [_vm._v("部屋名を入力してください")]),
                 _vm._v(" "),
                 _c("div", [
-                  _vm._v("名前"),
+                  _c("label", { attrs: { for: "name" } }, [_vm._v("名前")]),
+                  _vm._v(" "),
                   _c("input", {
                     directives: [
                       {
@@ -45493,6 +45499,8 @@ var render = function() {
                         expression: "name"
                       }
                     ],
+                    staticClass: "form-control",
+                    attrs: { id: "name" },
                     domProps: { value: _vm.name },
                     on: {
                       input: function($event) {
@@ -45505,7 +45513,16 @@ var render = function() {
                   })
                 ]),
                 _vm._v(" "),
-                _c("button", { on: { click: _vm.doSend } }, [_vm._v("送信")])
+                _c("div", { staticClass: "text-right mt-2" }, [
+                  _c(
+                    "button",
+                    {
+                      staticClass: "btn btn-primary",
+                      on: { click: _vm.doSend }
+                    },
+                    [_vm._v("作成")]
+                  )
+                ])
               ])
             ],
             2
@@ -45519,7 +45536,7 @@ var render = function() {
                 _c(
                   "button",
                   {
-                    staticClass: "modal-default-button",
+                    staticClass: "btn btn-outline-dark modal-default-button",
                     on: {
                       click: function($event) {
                         return _vm.$emit("close")
@@ -45561,172 +45578,20 @@ var render = function() {
   var _c = _vm._self._c || _h
   return _c("div", [
     _c("div", { staticClass: "row mb-5" }, [
-      _c(
-        "div",
-        {
-          staticClass: "col-9",
-          staticStyle: { "word-break": "break-all" },
-          attrs: { id: "sugoroku" }
-        },
-        [
+      _c("div", { staticClass: "col-9", attrs: { id: "sugoroku" } }, [
+        _c("table", { staticClass: "bg-white table table-borderless w-100" }, [
           _c(
-            "table",
-            { staticClass: "bg-white table table-borderless w-100 board" },
-            [
-              _c(
-                "tr",
-                { staticClass: "horizontal-line" },
-                _vm._l(_vm.col_count, function(n) {
-                  return _c("td", { attrs: { id: n } }, [
-                    n === 1
-                      ? _c(
-                          "div",
-                          [
-                            _vm._v("\n                            Start"),
-                            _c("br"),
-                            _vm._v(" "),
-                            _vm._l(_vm.setPiece(n), function(piece) {
-                              return _c("span", [
-                                _c("i", {
-                                  class:
-                                    "fas fa-2x fa-" +
-                                    piece.aicon +
-                                    " " +
-                                    _vm.piece_colors[piece.status]
-                                })
-                              ])
-                            })
-                          ],
-                          2
-                        )
-                      : _vm.getSpaceName(n)
-                      ? _c(
-                          "div",
-                          [
-                            _vm._v(
-                              "\n                            " +
-                                _vm._s(_vm.getSpaceName(n)) +
-                                "\n                            "
-                            ),
-                            _vm._l(_vm.setPiece(n), function(piece) {
-                              return _c("span", [
-                                _c("i", {
-                                  class:
-                                    "fas fa-2x fa-" +
-                                    piece.aicon +
-                                    " " +
-                                    _vm.piece_colors[piece.status]
-                                })
-                              ])
-                            })
-                          ],
-                          2
-                        )
-                      : _c(
-                          "div",
-                          _vm._l(_vm.setPiece(n), function(piece) {
-                            return _c("span", [
-                              _c("i", {
-                                class:
-                                  "fas fa-2x fa-" +
-                                  piece.aicon +
-                                  " " +
-                                  _vm.piece_colors[piece.status]
-                              })
-                            ])
-                          }),
-                          0
-                        )
-                  ])
-                }),
-                0
-              ),
-              _vm._v(" "),
-              _c(
-                "tr",
-                { staticClass: "horizontal-line" },
-                [
-                  _c(
-                    "td",
-                    { attrs: { id: _vm.board.goal_position } },
-                    [
-                      _vm._v("\n                        Goal"),
-                      _c("br"),
-                      _vm._v(" "),
-                      _vm._l(_vm.setPiece(_vm.board.goal_position), function(
-                        piece
-                      ) {
-                        return _c("span", [
-                          _c("i", {
-                            class:
-                              "fas fa-2x fa-" +
-                              piece.aicon +
-                              " " +
-                              _vm.piece_colors[piece.status]
-                          })
-                        ])
-                      })
-                    ],
-                    2
-                  ),
-                  _vm._v(" "),
-                  _vm._l(_vm.col_count - 2, function(n) {
-                    return _c(
-                      "td",
-                      { staticClass: "bg-light", attrs: { border: "0" } },
+            "tr",
+            _vm._l(_vm.col_count, function(n) {
+              return _c("td", { attrs: { id: n } }, [
+                n === 1
+                  ? _c(
+                      "div",
                       [
                         _vm._v(
-                          "\n                         \n                    "
-                        )
-                      ]
-                    )
-                  }),
-                  _vm._v(" "),
-                  _c(
-                    "td",
-                    { attrs: { id: _vm.col_count + 1 } },
-                    [
-                      _vm._v(
-                        "\n                        " +
-                          _vm._s(_vm.getSpaceName(_vm.col_count + 1)) +
-                          "\n                        "
-                      ),
-                      _vm._l(_vm.setPiece(_vm.col_count + 1), function(piece) {
-                        return _c("span", [
-                          _c("i", {
-                            class:
-                              "fas fa-2x fa-" +
-                              piece.aicon +
-                              " " +
-                              _vm.piece_colors[piece.status]
-                          })
-                        ])
-                      })
-                    ],
-                    2
-                  )
-                ],
-                2
-              ),
-              _vm._v(" "),
-              _c(
-                "tr",
-                { staticClass: "horizontal-line" },
-                _vm._l(_vm.col_count, function(n) {
-                  return _c(
-                    "td",
-                    { attrs: { id: _vm.board.goal_position - n } },
-                    [
-                      _vm._v(
-                        "\n                        " +
-                          _vm._s(
-                            _vm.getSpaceName(_vm.board.goal_position - n)
-                          ) +
-                          "\n                        "
-                      ),
-                      _vm._l(
-                        _vm.setPiece(_vm.board.goal_position - n),
-                        function(piece) {
+                          "\r\n                            Start\r\n                            "
+                        ),
+                        _vm._l(_vm.setPiece(n), function(piece) {
                           return _c("span", [
                             _c("i", {
                               class:
@@ -45736,21 +45601,155 @@ var render = function() {
                                 _vm.piece_colors[piece.status]
                             })
                           ])
-                        }
-                      ),
-                      _vm._v(
-                        "\n                         \n                    "
-                      )
-                    ],
-                    2
-                  )
-                }),
-                0
+                        })
+                      ],
+                      2
+                    )
+                  : _vm.getSpaceName(n)
+                  ? _c(
+                      "div",
+                      [
+                        _vm._v(
+                          "\r\n                            " +
+                            _vm._s(_vm.getSpaceName(n)) +
+                            "\r\n                            "
+                        ),
+                        _vm._l(_vm.setPiece(n), function(piece) {
+                          return _c("span", [
+                            _c("i", {
+                              class:
+                                "fas fa-2x fa-" +
+                                piece.aicon +
+                                " " +
+                                _vm.piece_colors[piece.status]
+                            })
+                          ])
+                        })
+                      ],
+                      2
+                    )
+                  : _c(
+                      "div",
+                      _vm._l(_vm.setPiece(n), function(piece) {
+                        return _c("span", [
+                          _c("i", {
+                            class:
+                              "fas fa-2x fa-" +
+                              piece.aicon +
+                              " " +
+                              _vm.piece_colors[piece.status]
+                          })
+                        ])
+                      }),
+                      0
+                    )
+              ])
+            }),
+            0
+          ),
+          _vm._v(" "),
+          _c(
+            "tr",
+            [
+              _c(
+                "td",
+                { attrs: { id: _vm.board.goal_position } },
+                [
+                  _vm._v(
+                    "\r\n                        Goal\r\n                        "
+                  ),
+                  _vm._l(_vm.setPiece(_vm.board.goal_position), function(
+                    piece
+                  ) {
+                    return _c("span", [
+                      _c("i", {
+                        class:
+                          "fas fa-2x fa-" +
+                          piece.aicon +
+                          " " +
+                          _vm.piece_colors[piece.status]
+                      })
+                    ])
+                  })
+                ],
+                2
+              ),
+              _vm._v(" "),
+              _vm._l(_vm.col_count - 2, function(n) {
+                return _c(
+                  "td",
+                  { staticClass: "bg-light", attrs: { border: "0" } },
+                  [
+                    _vm._v(
+                      "\r\n                         \r\n                    "
+                    )
+                  ]
+                )
+              }),
+              _vm._v(" "),
+              _c(
+                "td",
+                { attrs: { id: _vm.col_count + 1 } },
+                [
+                  _vm._v(
+                    "\r\n                        " +
+                      _vm._s(_vm.getSpaceName(_vm.col_count + 1)) +
+                      "\r\n                        "
+                  ),
+                  _vm._l(_vm.setPiece(_vm.col_count + 1), function(piece) {
+                    return _c("span", [
+                      _c("i", {
+                        class:
+                          "fas fa-2x fa-" +
+                          piece.aicon +
+                          " " +
+                          _vm.piece_colors[piece.status]
+                      })
+                    ])
+                  })
+                ],
+                2
               )
-            ]
+            ],
+            2
+          ),
+          _vm._v(" "),
+          _c(
+            "tr",
+            _vm._l(_vm.col_count, function(n) {
+              return _c(
+                "td",
+                { attrs: { id: _vm.board.goal_position - n } },
+                [
+                  _vm._v(
+                    "\r\n                        " +
+                      _vm._s(_vm.getSpaceName(_vm.board.goal_position - n)) +
+                      "\r\n                        "
+                  ),
+                  _vm._l(_vm.setPiece(_vm.board.goal_position - n), function(
+                    piece
+                  ) {
+                    return _c("span", [
+                      _c("i", {
+                        class:
+                          "fas fa-2x fa-" +
+                          piece.aicon +
+                          " " +
+                          _vm.piece_colors[piece.status]
+                      })
+                    ])
+                  }),
+                  _vm._v(
+                    "\r\n                         \r\n                    "
+                  )
+                ],
+                2
+              )
+            }),
+            0
           )
-        ]
-      ),
+        ])
+      ]),
       _vm._v(" "),
       _c("div", { staticClass: "col-2", attrs: { id: "members" } }, [
         _c(
@@ -45762,9 +45761,9 @@ var render = function() {
                 ? _c("i", { class: "fas fa-2x fa-" + member.aicon })
                 : _vm._e(),
               _vm._v(
-                "\n                    " +
+                "\r\n                    " +
                   _vm._s(member.name) +
-                  "\n                    "
+                  "\r\n                    "
               ),
               member.pivot.go
                 ? _c("span", [_vm._v("(" + _vm._s(member.pivot.go) + ")")])
@@ -59366,8 +59365,8 @@ window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 window.Pusher = __webpack_require__(/*! pusher-js */ "./node_modules/pusher-js/dist/web/pusher.js");
 window.Echo = new laravel_echo__WEBPACK_IMPORTED_MODULE_0__["default"]({
   broadcaster: 'pusher',
-  key: "ff887ae07fb558e2739e",
-  cluster: "ap3",
+  key: "",
+  cluster: "mt1",
   encrypted: true
 });
 
@@ -59790,8 +59789,8 @@ __webpack_require__.r(__webpack_exports__);
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! /var/www/html/sugoroku.commew.net/sugoroku/src/resources/js/app.js */"./resources/js/app.js");
-module.exports = __webpack_require__(/*! /var/www/html/sugoroku.commew.net/sugoroku/src/resources/sass/app.scss */"./resources/sass/app.scss");
+__webpack_require__(/*! C:\Users\private\work\sugoroku\sugoroku\src\resources\js\app.js */"./resources/js/app.js");
+module.exports = __webpack_require__(/*! C:\Users\private\work\sugoroku\sugoroku\src\resources\sass\app.scss */"./resources/sass/app.scss");
 
 
 /***/ })
