@@ -8,10 +8,10 @@ services:
     ports:
       - "8080:80"
     depends_on:
-      - php
+      - php-fpm
     volumes:
       - .:/var/www/html
-  php:
+  php-fpm:
     build:
       context: .
       dockerfile: docker/php/Dockerfile
