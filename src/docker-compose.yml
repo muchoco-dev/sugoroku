@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  nginx:
+    build:
+      context: .
+      dockerfile: docker/nginx/Dockerfile
+    ports:
+      - "8080:80"
+    depends_on:
+      - php-fpm
+    volumes:
+      - .:/var/www/html
+  php-fpm:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    env_file: .env
+    environment:
+      DATABASE_HOST: mysql
+    depends_on:
+      - mysql
+    volumes:
+      - .:/var/www/html
+  mysql:
+    build:
+      context: .
+      dockerfile: docker/mysql/Dockerfile
+    environment:
+      MYSQL_DATABASE: sugoroku
+      MYSQL_USER: sugoroku
+      MYSQL_PASSWORD: sugorokuPassword(888
+      MYSQL_ROOT_PASSWORD: sugorokuRootPassword(888
+      TZ: Asia/Tokyo
+    ports:
+      - "33060:3306"
+    volumes:
+      - sugoroku-data-store:/var/lib/mysql
+      - sugoroku-logs-store:/var/log/mysql
+      - ./docker/mysql:/docker-entrypoint-initdb.d
+volumes:
+  sugoroku-data-store:
+  sugoroku-logs-store:
